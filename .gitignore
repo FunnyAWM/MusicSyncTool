@@ -1,0 +1,8 @@
+cmake-build-debug-mingw_qt
+build
+.clang-format
+*.exe
+*.db
+*.mp3
+*.flac
+.idea
