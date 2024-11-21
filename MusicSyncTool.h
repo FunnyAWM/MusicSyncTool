@@ -15,9 +15,9 @@ class MusicSyncTool : public QMainWindow
     Q_OBJECT
 
 public:
+    enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
     ~MusicSyncTool();
-    enum class pathType { LOCAL, REMOTE };
     void openFolder(pathType);
     void getMusic(pathType);
     void copyMusic(QString, QStringList, QString);
