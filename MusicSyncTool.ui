@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>974</width>
-    <height>674</height>
+    <width>1290</width>
+    <height>841</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,18 +25,85 @@
     </property>
     <layout class="QGridLayout" name="gridLayout"/>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>250</y>
-      <width>451</width>
-      <height>131</height>
+      <x>20</x>
+      <y>20</y>
+      <width>601</width>
+      <height>641</height>
      </rect>
     </property>
-    <property name="text">
-     <string>TextLabel</string>
+    <column>
+     <property name="text">
+      <string>标题</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>艺术家</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>专辑</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>流派</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>年份</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>音轨号</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>20</y>
+      <width>601</width>
+      <height>641</height>
+     </rect>
     </property>
+    <column>
+     <property name="text">
+      <string>标题</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>艺术家</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>专辑</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>流派</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>年份</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>音轨号</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -44,7 +111,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>974</width>
+     <width>1290</width>
      <height>20</height>
     </rect>
    </property>

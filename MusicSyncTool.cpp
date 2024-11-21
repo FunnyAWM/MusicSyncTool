@@ -7,45 +7,52 @@
 #include <taglib/fileref.h>
 #include <iostream>
 
-MusicSyncTool::MusicSyncTool(QWidget *parent)
-    : QMainWindow(parent)
+MusicSyncTool::MusicSyncTool(QWidget* parent)
+	: QMainWindow(parent)
 {
-    ui.setupUi(this);
-	db = QSqlDatabase::addDatabase("QSQLITE","musicInfoLocal");
-}
-
-MusicSyncTool::~MusicSyncTool()
-{
-	db.close();
-}
-
-void MusicSyncTool::getMusic() {
-	if (db.isOpen()) {
-		db.close();
+	ui.setupUi(this);
+	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
+	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
+	if (!dbLocal.isOpen() || !dbRemote.isOpen()) {
+		std::cerr << "[FATAL] Can't open database.";
 	}
-	QDir dir(localPath);
+	queryLocal = QSqlQuery(dbLocal);
+	queryRemote = QSqlQuery(dbRemote);
+}
+
+MusicSyncTool::~MusicSyncTool() {
+	if (dbLocal.isOpen()) {
+		dbLocal.close();
+	}
+	if (dbRemote.isOpen()) {
+		dbRemote.close();
+	}
+}
+
+void MusicSyncTool::getMusic(pathType path) {
+	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT)";
+	QSqlQuery& query = path == pathType::LOCAL ? queryLocal : queryRemote;
 	query.exec(sql);
 	QStringList fileList = dir.entryList(QDir::Files);
+	QSqlQuery insertQuery("INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES (:title, :artist, :album, :genre, :year, :track)", path == pathType::LOCAL ? dbLocal : dbRemote);
 	for (int i = 0; i < fileList.size(); i++) {
 		QString file = localPath + "/" + fileList.at(i);
 		TagLib::FileRef f(file.toStdString().c_str());
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			QString title = QString::fromStdString(tag->title().to8Bit(true));
-			QString artist = QString::fromStdString(tag->artist().to8Bit(true));
-			QString album = QString::fromStdString(tag->album().to8Bit(true));
-			QString genre = QString::fromStdString(tag->genre().to8Bit(true));
-			int year = tag->year();
-			int track = tag->track();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES ('" + title + "', '" + artist + "', '" + album + "', '" + genre + "', " + QString::number(year) + ", " + QString::number(track) + ")";
-			query.exec(sql);
+			insertQuery.bindValue(":title", QString::fromStdString(tag->title().to8Bit(true)));
+			insertQuery.bindValue(":artist", QString::fromStdString(tag->artist().to8Bit(true)));
+			insertQuery.bindValue(":album", QString::fromStdString(tag->album().to8Bit(true)));
+			insertQuery.bindValue(":genre", QString::fromStdString(tag->genre().to8Bit(true)));
+			insertQuery.bindValue(":year", tag->year());
+			insertQuery.bindValue(":track", tag->track());
+			insertQuery.exec();
 		}
 		else {
 			std::cerr << "Error reading file" << std::endl;
 		}
 	}
-
 }
 
 void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString target) {
@@ -59,15 +66,28 @@ void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString targ
 		QFile::copy(sourceFile, targetFile);
 	}
 }
-void MusicSyncTool::on_actionOpen_Folder_triggered(bool triggered) {
+void MusicSyncTool::openFolder(pathType path) {
 	QFileDialog fileDialog;
 	fileDialog.setOption(QFileDialog::ShowDirsOnly, false);
 	fileDialog.setFileMode(QFileDialog::Directory);
 	QString dir = fileDialog.getExistingDirectory();
-	localPath = dir;
-	db.setDatabaseName(localPath + "/musicInfo.db");
-	if (!db.open()) {
-		std::cerr << "Error opening database" << std::endl;
+	path == pathType::LOCAL ? localPath : remotePath = dir;
+	if (path == pathType::LOCAL) {
+		dbLocal.setDatabaseName(localPath + "/musicInfo.db");
 	}
-	query = QSqlQuery(db);
+	else {
+		dbRemote.setDatabaseName(remotePath + "/musicInfo.db");
+	}
+	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
+	if (!db.open()) {
+		std::cerr << "Error opening database: " << db.lastError().text().toStdString() << std::endl;
+	}
+}
+void MusicSyncTool::on_actionRemote_triggered(bool) {
+	openFolder(pathType::REMOTE);
+	getMusic(pathType::REMOTE);
+}
+void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
+	openFolder(pathType::LOCAL);
+	getMusic(pathType::LOCAL);
 }

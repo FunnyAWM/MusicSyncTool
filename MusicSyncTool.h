@@ -17,17 +17,20 @@ class MusicSyncTool : public QMainWindow
 public:
     MusicSyncTool(QWidget *parent = nullptr);
     ~MusicSyncTool();
-    void getMusic();
-	void copyMusic(QString, QStringList, QString);
-
+    enum class pathType { LOCAL, REMOTE };
+    void openFolder(pathType);
+    void getMusic(pathType);
+    void copyMusic(QString, QStringList, QString);
 private:
     Ui::MusicSyncToolClass ui;
     QString localPath;
     QString remotePath;
-	QSqlDatabase db;
-	QSqlQuery query;
-	enum class pathType { LOCAL, REMOTE };
+	QSqlDatabase dbLocal;
+    QSqlDatabase dbRemote;
+	QSqlQuery queryLocal;
+    QSqlQuery queryRemote;
 public slots:
-    void on_actionOpen_Folder_triggered(bool);
+    void on_actionRemote_triggered(bool);
+    void on_actionLocal_triggered(bool);
 };
 // QT_END_NAMESPACE
