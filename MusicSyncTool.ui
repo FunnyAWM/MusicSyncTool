@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>495</height>
+    <width>974</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +25,26 @@
     </property>
     <layout class="QGridLayout" name="gridLayout"/>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>250</y>
+      <width>451</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>723</width>
+     <width>974</width>
      <height>20</height>
     </rect>
    </property>
@@ -39,7 +52,15 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="actionOpen_Folder"/>
+    <widget class="QMenu" name="menu_2">
+     <property name="title">
+      <string>打开文件夹</string>
+     </property>
+     <addaction name="actionLocal"/>
+     <addaction name="actionRemote"/>
+    </widget>
+    <addaction name="menu_2"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -52,9 +73,19 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionOpen_Folder">
+  <action name="actionExit">
    <property name="text">
-    <string>打开文件夹</string>
+    <string>退出</string>
+   </property>
+  </action>
+  <action name="actionLocal">
+   <property name="text">
+    <string>本地文件夹</string>
+   </property>
+  </action>
+  <action name="actionRemote">
+   <property name="text">
+    <string>设备文件夹</string>
    </property>
   </action>
  </widget>
@@ -62,5 +93,22 @@
  <resources>
   <include location="MusicSyncTool.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MusicSyncToolClass</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>486</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
