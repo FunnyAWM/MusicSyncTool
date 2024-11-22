@@ -1,9 +1,11 @@
+﻿#pragma execution_character_set("utf-8")    
 #include "MusicSyncTool.h"
 #include <QFile>
 #include <QFileDialog>
 #include <QDir>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
+#include <taglib/mpegfile.h>
 #include <taglib/fileref.h>
 #include <iostream>
 
@@ -27,24 +29,26 @@ MusicSyncTool::~MusicSyncTool() {
 }
 
 void MusicSyncTool::getMusic(pathType path) {
+	if (localPath == "" && remotePath == "") {
+		return;
+	}
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT)";
-	QSqlQuery& query = path == pathType::LOCAL ? queryLocal : queryRemote;
+	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	query.exec(sql);
 	QStringList fileList = dir.entryList(QDir::Files);
-	QSqlQuery insertQuery("INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES (:title, :artist, :album, :genre, :year, :track)", path == pathType::LOCAL ? dbLocal : dbRemote);
 	for (int i = 0; i < fileList.size(); i++) {
-		QString file = localPath + "/" + fileList.at(i);
-		TagLib::FileRef f(file.toStdString().c_str());
+		QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + fileList.at(i).toUtf8();
+		TagLib::FileRef f(file.toStdWString().c_str());
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			insertQuery.bindValue(":title", QString::fromStdString(tag->title().to8Bit(true)));
-			insertQuery.bindValue(":artist", QString::fromStdString(tag->artist().to8Bit(true)));
-			insertQuery.bindValue(":album", QString::fromStdString(tag->album().to8Bit(true)));
-			insertQuery.bindValue(":genre", QString::fromStdString(tag->genre().to8Bit(true)));
-			insertQuery.bindValue(":year", tag->year());
-			insertQuery.bindValue(":track", tag->track());
-			insertQuery.exec();
+			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES ('" + QString::fromStdString(tag->title().to8Bit(true))
+				+ "', '" + QString::fromStdString(tag->artist().to8Bit(true))
+				+ "', '" + QString::fromStdString(tag->album().to8Bit(true))
+				+ "', '" + QString::fromStdString(tag->genre().to8Bit(true))
+				+ "', " + QString::number(tag->year())
+				+ ", " + QString::number(tag->track()) + ")";
+			query.exec(sql);
 		}
 		else {
 			std::cerr << "Error reading file" << std::endl;
@@ -68,7 +72,10 @@ void MusicSyncTool::openFolder(pathType path) {
 	fileDialog.setOption(QFileDialog::ShowDirsOnly, false);
 	fileDialog.setFileMode(QFileDialog::Directory);
 	QString dir = fileDialog.getExistingDirectory();
-	path == pathType::LOCAL ? localPath : remotePath = dir;
+	if (dir == "") {
+		return;
+	}
+	(path == pathType::LOCAL ? localPath : remotePath) = dir;
 	if (path == pathType::LOCAL) {
 		dbLocal.setDatabaseName(localPath + "/musicInfo.db");
 	}

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QMainWindow>
 #include <QFile>
@@ -7,6 +7,7 @@
 #include <QtSql/QSqlRecord>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlDriver>
+#include <QtSql/QSqlresult>
 #include "ui_MusicSyncTool.h"
 
 
