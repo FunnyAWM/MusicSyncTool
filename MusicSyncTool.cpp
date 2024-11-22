@@ -13,9 +13,6 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	ui.setupUi(this);
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
 	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
-	if (!dbLocal.isOpen() || !dbRemote.isOpen()) {
-		std::cerr << "[FATAL] Can't open database.";
-	}
 	queryLocal = QSqlQuery(dbLocal);
 	queryRemote = QSqlQuery(dbRemote);
 }
@@ -80,10 +77,12 @@ void MusicSyncTool::openFolder(pathType path) {
 	}
 	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
 	if (!db.open()) {
+		std::string err = db.lastError().text().toStdString();
 		std::cerr << "Error opening database: " << db.lastError().text().toStdString() << std::endl;
+		exit(EXIT_FAILURE);
 	}
 }
-void MusicSyncTool::on_actionRemote_triggered(bool) {
+void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
 	getMusic(pathType::REMOTE);
 }
