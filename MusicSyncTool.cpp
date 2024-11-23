@@ -51,6 +51,7 @@ void MusicSyncTool::getMusic(pathType path) {
 				+ ", " + QString::number(tag->track()) 
 				+ ")";
 			query.exec(sql);
+			//TODO 添加非首次扫描的处理
 		} else {
 			continue;
 		}
