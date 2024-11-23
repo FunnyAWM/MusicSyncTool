@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AboutPageClass</class>
+ <widget class="QDialog" name="AboutPageClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>603</width>
+    <height>291</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>AboutPage</string>
+  </property>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>240</y>
+     <width>151</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>确定</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>60</y>
+     <width>211</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item alignment="">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>作者：FunnyAWM</string>
+      </property>
+     </widget>
+    </item>
+    <item alignment="">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>电子邮箱：funnyawm@qq.com</string>
+      </property>
+     </widget>
+    </item>
+    <item alignment="">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>GitHub:@FunnyAWM</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>AboutPageClass</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>301</x>
+     <y>145</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,4 +1,4 @@
-﻿#pragma execution_character_set("utf-8")    
+﻿#pragma execution_character_set("utf-8") 
 #include "MusicSyncTool.h"
 #include <QFile>
 #include <QFileDialog>
@@ -42,12 +42,14 @@ void MusicSyncTool::getMusic(pathType path) {
 		TagLib::FileRef f(file.toStdWString().c_str());
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES ('" + QString::fromStdString(tag->title().to8Bit(true))
+			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES ('" 
+				+ QString::fromStdString(tag->title().to8Bit(true))
 				+ "', '" + QString::fromStdString(tag->artist().to8Bit(true))
 				+ "', '" + QString::fromStdString(tag->album().to8Bit(true))
 				+ "', '" + QString::fromStdString(tag->genre().to8Bit(true))
 				+ "', " + QString::number(tag->year())
-				+ ", " + QString::number(tag->track()) + ")";
+				+ ", " + QString::number(tag->track()) 
+				+ ")";
 			query.exec(sql);
 		} else {
 			continue;
@@ -95,4 +97,11 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
 	getMusic(pathType::LOCAL);
+}
+void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
+	AboutPage about;
+	about.exec();
+}
+void MusicSyncTool::on_actionExit_triggered(bool triggered) {
+	exit(EXIT_SUCCESS);
 }

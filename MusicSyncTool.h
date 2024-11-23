@@ -9,6 +9,7 @@
 #include <QtSql/QSqlDriver>
 #include <QtSql/QSqlresult>
 #include "ui_MusicSyncTool.h"
+#include "AboutPage.h"
 
 
 class MusicSyncTool : public QMainWindow
@@ -33,5 +34,7 @@ private:
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
+	void on_actionAbout_triggered(bool);
+	void on_actionExit_triggered(bool);
 };
 // QT_END_NAMESPACE

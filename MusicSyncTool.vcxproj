@@ -94,12 +94,17 @@
   <ItemGroup>
     <None Include="packages.config" />
     <QtRcc Include="MusicSyncTool.qrc" />
+    <QtUic Include="AboutPage.ui" />
     <QtUic Include="MusicSyncTool.ui" />
     <QtMoc Include="MusicSyncTool.h" />
+    <ClCompile Include="AboutPage.cpp" />
     <ClCompile Include="MusicSyncTool.cpp" />
     <ClCompile Include="main.cpp" />
     <None Include="MusicSyncTool.ico" />
     <ResourceCompile Include="MusicSyncTool.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="AboutPage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
