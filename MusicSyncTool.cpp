@@ -49,9 +49,8 @@ void MusicSyncTool::getMusic(pathType path) {
 				+ "', " + QString::number(tag->year())
 				+ ", " + QString::number(tag->track()) + ")";
 			query.exec(sql);
-		}
-		else {
-			std::cerr << "Error reading file" << std::endl;
+		} else {
+			continue;
 		}
 	}
 }
