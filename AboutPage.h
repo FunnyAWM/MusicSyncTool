@@ -9,7 +9,7 @@ class AboutPage : public QDialog
 
 public:
 	AboutPage(QWidget *parent = nullptr);
-	~AboutPage();
+	~AboutPage() = default;
 
 private:
 	Ui::AboutPageClass ui;

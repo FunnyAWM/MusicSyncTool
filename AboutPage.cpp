@@ -5,6 +5,3 @@ AboutPage::AboutPage(QWidget *parent)
 {
 	ui.setupUi(this);
 }
-
-AboutPage::~AboutPage()
-{}
