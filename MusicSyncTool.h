@@ -11,7 +11,6 @@
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
 
-
 class MusicSyncTool : public QMainWindow
 {
     Q_OBJECT
