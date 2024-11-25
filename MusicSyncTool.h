@@ -10,6 +10,7 @@
 #include <QtSql/QSqlresult>
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
+#include "LoadingPage.h"
 
 class MusicSyncTool : public QMainWindow
 {

@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QDir>
+#include <QSet>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
@@ -32,30 +33,55 @@ void MusicSyncTool::getMusic(pathType path) {
 	if (localPath == "" && remotePath == "") {
 		return;
 	}
+	LoadingPage loading;
+	loading.show();
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
-	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT)";
+	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	query.exec(sql);
-	QStringList fileList = dir.entryList(QDir::Files);
-	for (int i = 0; i < fileList.size(); i++) {
-		QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + fileList.at(i).toUtf8();
+	QStringList newFileList = dir.entryList(QDir::Files);
+	sql = "SELECT fileName FROM musicInfo";
+	query.exec(sql);
+	QStringList oldFileList;
+	while (query.next()) {
+		oldFileList.append(query.value(0).toString());
+	}
+	newFileList.sort();
+	oldFileList.sort();
+	for (int i = 0; i < oldFileList.size(); i++) {
+		if (!newFileList.contains(oldFileList.at(i))) {
+			sql = "DELETE FROM musicInfo WHERE fileName = \"" + oldFileList.at(i) + "\"";
+			query.exec(sql);
+			oldFileList.removeAt(i);
+			i = -1;
+		}
+	}
+	for (int i = 0; i < newFileList.size(); i++) {
+		if (oldFileList.contains(newFileList.at(i))) {
+			newFileList.removeAt(i);
+			i = -1;
+		}
+	}
+	for (int i = 0; i < newFileList.size(); i++) {
+		QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
 		TagLib::FileRef f(file.toStdWString().c_str());
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track) VALUES ('" 
+			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (\"" 
 				+ QString::fromStdString(tag->title().to8Bit(true))
-				+ "', '" + QString::fromStdString(tag->artist().to8Bit(true))
-				+ "', '" + QString::fromStdString(tag->album().to8Bit(true))
-				+ "', '" + QString::fromStdString(tag->genre().to8Bit(true))
-				+ "', " + QString::number(tag->year())
+				+ "\", \"" + QString::fromStdString(tag->artist().to8Bit(true))
+				+ "\", \"" + QString::fromStdString(tag->album().to8Bit(true))
+				+ "\", \"" + QString::fromStdString(tag->genre().to8Bit(true))
+				+ "\", " + QString::number(tag->year())
 				+ ", " + QString::number(tag->track()) 
-				+ ")";
+				+ ", \"" + newFileList.at(i)
+				+ "\")";
 			query.exec(sql);
-			//TODO 添加非首次扫描的处理
 		} else {
 			continue;
 		}
 	}
+	loading.close();
 }
 
 void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString target) {
