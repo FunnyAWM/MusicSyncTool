@@ -53,7 +53,7 @@ void MusicSyncTool::getMusic(pathType path) {
 			sql = "DELETE FROM musicInfo WHERE fileName = \"" + oldFileList.at(i) + "\"";
 			query.exec(sql);
 			oldFileList.removeAt(i);
-			i -= 2;
+			i = -1;
 		}
 	}
 	for (int i = 0; i < newFileList.size(); i++) {
