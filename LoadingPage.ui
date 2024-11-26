@@ -13,24 +13,18 @@
   <property name="windowTitle">
    <string>LoadingPage</string>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>50</y>
-     <width>160</width>
-     <height>80</height>
+     <x>200</x>
+     <y>80</y>
+     <width>151</width>
+     <height>16</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" alignment="">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>正在加载，请等待...</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="text">
+    <string>正在加载，请等待...</string>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

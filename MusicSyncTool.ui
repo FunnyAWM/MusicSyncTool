@@ -14,18 +14,7 @@
    <string>MusicSyncTool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>2</width>
-      <height>2</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout"/>
-   </widget>
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="tableWidgetLocal">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -65,7 +54,7 @@
      </property>
     </column>
    </widget>
-   <widget class="QTableWidget" name="tableWidget_2">
+   <widget class="QTableWidget" name="tableWidgetRemote">
     <property name="geometry">
      <rect>
       <x>660</x>

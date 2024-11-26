@@ -81,6 +81,20 @@ void MusicSyncTool::getMusic(pathType path) {
 			continue;
 		}
 	}
+	sql = "SELECT COUNT(*) FROM musicInfo";
+	query.exec(sql);
+	query.next();
+	int tableSize = query.value(0).toInt();
+	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo";
+	query.exec(sql);
+	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
+	while (query.next()) {
+		for (int i = 0; i < 6; i++) {
+			if (query.value(i) != 0) {
+				(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
+			}
+		}
+	}
 	loading.close();
 }
 
@@ -93,6 +107,9 @@ void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString targ
 		QString sourceFile = source + "/" + fileList.at(i);
 		QString targetFile = target + "/" + fileList.at(i);
 		QFile::copy(sourceFile, targetFile);
+		if (QFile::exists(targetFile)) {
+			continue;
+		}
 	}
 }
 void MusicSyncTool::openFolder(pathType path) {
