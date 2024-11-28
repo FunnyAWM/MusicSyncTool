@@ -29,6 +29,7 @@ public:
     ~MusicSyncTool();
     void openFolder(pathType);
     void getMusic(pathType);
+    QStringList getSelectedMusic(pathType);
     void copyMusic(QString, QStringList, QString);
 public slots:
     void on_actionRemote_triggered(bool);
