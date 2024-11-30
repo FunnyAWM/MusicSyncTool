@@ -36,7 +36,7 @@ void MusicSyncTool::openFolder(pathType path) {
 	QString dir = fileDialog.getExistingDirectory();
 	if (dir == "") {
 		return;
-	}
+	}  
 	(path == pathType::LOCAL ? localPath : remotePath) = dir;
 	if (path == pathType::LOCAL) {
 		dbLocal.setDatabaseName(localPath + "/musicInfo.db");
