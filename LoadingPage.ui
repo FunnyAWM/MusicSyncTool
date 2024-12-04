@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>LoadingPageClass</class>
- <widget class="QDialog" name="LoadingPageClass">
+ <widget class="QWidget" name="LoadingPageClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
-    <height>196</height>
+    <width>591</width>
+    <height>185</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>LoadingPage</string>
   </property>
-  <widget class="QProgressBar" name="progressBar">
+  <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>90</y>
-     <width>321</width>
-     <height>23</height>
+     <x>220</x>
+     <y>80</y>
+     <width>111</width>
+     <height>16</height>
     </rect>
    </property>
-   <property name="value">
-    <number>24</number>
+   <property name="text">
+    <string>正在加载，请等待...</string>
    </property>
   </widget>
  </widget>

@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QSet>
+#include <QThread>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
@@ -53,13 +54,12 @@ void MusicSyncTool::openFolder(pathType path) {
 }
 
 void MusicSyncTool::getMusic(pathType path) {
+	loading.show();
 	qDebug() << "[INFO] Scanning started";
 	clock_t start = clock();
 	if (localPath == "" && remotePath == "") {
 		return;
 	}
-	LoadingPage loading;
-	loading.show();
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
@@ -106,7 +106,6 @@ void MusicSyncTool::getMusic(pathType path) {
 		} else {
 			continue;
 		}
-		loading.setProgress((i + 1) * 100 / newFileList.size());
 	}
 	sql = "SELECT COUNT(*) FROM musicInfo";
 	query.exec(sql);
@@ -122,9 +121,9 @@ void MusicSyncTool::getMusic(pathType path) {
 			}
 		}
 	}
-	loading.close();
 	clock_t end = clock();
 	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
+	loading.close();
 }
 
 QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
@@ -150,7 +149,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 		slowFileName = fastFileName;
 	}
 	for (int i = 0; i < dupeList.size(); i++) {
-		qDebug() << "[INFO] Found duplicated music named" << dupeList.at(i) << "at" << (path == pathType::LOCAL ? localPath : remotePath) << "\n";
+		qDebug() << "[INFO] Found duplicated music named" << dupeList.at(i) << "at" << (path == pathType::LOCAL ? localPath : remotePath);
 	}
 	return dupeList;
 }
@@ -222,11 +221,13 @@ void MusicSyncTool::on_copyToRemote_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
+	getDuplicatedMusic(pathType::REMOTE);
 }
 void MusicSyncTool::on_copyToLocal_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
+	getDuplicatedMusic(pathType::LOCAL);
 }
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
 	exit(EXIT_SUCCESS);

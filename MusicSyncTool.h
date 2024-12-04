@@ -23,6 +23,7 @@ class MusicSyncTool : public QMainWindow
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
+	LoadingPage loading;
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
@@ -39,5 +40,7 @@ public slots:
     void on_copyToRemote_clicked();
     void on_copyToLocal_clicked();
 	void on_actionExit_triggered(bool);
+signals:
+	void progress(int, int);
 };
 // QT_END_NAMESPACE

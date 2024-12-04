@@ -171,7 +171,14 @@
     <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>音乐</string>
+    </property>
+    <addaction name="actionScanDuplicate"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_3"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -200,6 +207,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>关于</string>
+   </property>
+  </action>
+  <action name="actionScanDuplicate">
+   <property name="text">
+    <string>扫描重复音乐</string>
    </property>
   </action>
  </widget>

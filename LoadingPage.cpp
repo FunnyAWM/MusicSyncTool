@@ -1,16 +1,8 @@
 #include "LoadingPage.h"
+#include "MusicSyncTool.h"
 
 LoadingPage::LoadingPage(QWidget *parent)
-	: QDialog(parent)
-	, ui(new Ui::LoadingPageClass())
+	: QWidget(parent)
 {
-	ui->setupUi(this);
-}
-
-LoadingPage::~LoadingPage()
-{
-	delete ui;
-}
-void LoadingPage::setProgress(int value) {
-	ui->progressBar->setValue(value);
+	ui.setupUi(this);
 }

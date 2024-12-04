@@ -108,10 +108,10 @@
     <QtMoc Include="AboutPage.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="LoadingPage.h" />
+    <Image Include="MusicSyncTool.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="MusicSyncTool.ico" />
+    <QtMoc Include="LoadingPage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
