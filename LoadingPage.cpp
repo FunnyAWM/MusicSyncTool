@@ -11,3 +11,6 @@ LoadingPage::~LoadingPage()
 {
 	delete ui;
 }
+void LoadingPage::setProgress(int value) {
+	ui->progressBar->setValue(value);
+}

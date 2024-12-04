@@ -47,12 +47,14 @@ void MusicSyncTool::openFolder(pathType path) {
 	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
 	if (!db.open()) {
 		std::string err = db.lastError().text().toStdString();
-		std::cerr << "Error opening database: " << db.lastError().text().toStdString() << std::endl;
+	    qDebug() << "[FATAL] Error opening database: " << db.lastError().text().toStdString();
 		exit(EXIT_FAILURE);
 	}
 }
 
 void MusicSyncTool::getMusic(pathType path) {
+	qDebug() << "[INFO] Scanning started";
+	clock_t start = clock();
 	if (localPath == "" && remotePath == "") {
 		return;
 	}
@@ -104,6 +106,7 @@ void MusicSyncTool::getMusic(pathType path) {
 		} else {
 			continue;
 		}
+		loading.setProgress((i + 1) * 100 / newFileList.size());
 	}
 	sql = "SELECT COUNT(*) FROM musicInfo";
 	query.exec(sql);
@@ -120,36 +123,72 @@ void MusicSyncTool::getMusic(pathType path) {
 		}
 	}
 	loading.close();
+	clock_t end = clock();
+	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
+}
+
+QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
+	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
+	QString sql = "SELECT * FROM musicInfo ORDER BY title";
+	query.exec(sql);
+	QString fast;
+	QString fastFileName;
+	QString slow;
+	QString slowFileName;
+	QStringList dupeList;
+	query.next();
+	slow = query.value(0).toString() + query.value(1).toString();
+	slowFileName = query.value(6).toString();
+	while (query.next()) {
+		fast = query.value(0).toString() + query.value(1).toString();
+		fastFileName = query.value(6).toString();
+		if (fast == slow) {
+			dupeList.append(fastFileName);
+			dupeList.append(slowFileName);
+		}
+		slow = fast;
+		slowFileName = fastFileName;
+	}
+	for (int i = 0; i < dupeList.size(); i++) {
+		qDebug() << "[INFO] Found duplicated music named" << dupeList.at(i) << "at" << (path == pathType::LOCAL ? localPath : remotePath) << "\n";
+	}
+	return dupeList;
 }
 
 QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	QSet<int> selectedRows;
-	QTableWidget* table = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	const QTableWidget* const table = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
 	for (int i = 0; i < table->rowCount(); i++) {
 		if (table->item(i, 0)->isSelected()) {
 			selectedRows.insert(i);
 		}
 	}
 	QStringList titleList;
+	QStringList artistList;
 	for (int i : selectedRows) {
 		titleList.append(table->item(i, 0)->text());
+		artistList.append(table->item(i, 1)->text());
 	}
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	QString titleListString;
+	QString artistListString;
 	for (int i = 0; i < selectedRows.size() - 1; i++) {
 		titleListString += "\"" + titleList.at(i) + "\", ";
+		artistListString += "\"" + artistList.at(i) + "\", ";
 	}
 	titleListString += "\"" + titleList.at(selectedRows.size() - 1) + "\"";
-	QString sql = "SELECT fileName FROM musicInfo WHERE title IN("+ titleListString + ")";
+	artistListString += "\"" + artistList.at(selectedRows.size() - 1) + "\"";
+	QString sql = "SELECT fileName FROM musicInfo WHERE title IN("+ titleListString + ") AND artist IN(" + artistListString + ")";
 	QStringList fileList;
 	query.exec(sql);
 	while (query.next()) {
 		fileList.append(query.value(0).toString());
 	}
+	qDebug() << fileList;
 	return fileList;
 }
 
-void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString target) {
+void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, const QString target) {
 	QDir dir(target);
 	if (dir.isEmpty()) {
 		dir.mkpath(target);
@@ -159,6 +198,7 @@ void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString targ
 		QString targetFile = target + "/" + fileList.at(i);
 		QFile::copy(sourceFile, targetFile);
 		if (QFile::exists(targetFile)) {
+			qDebug() << "[WARN] File existed, skipping" << targetFile;
 			continue;
 		}
 	}
@@ -167,14 +207,26 @@ void MusicSyncTool::copyMusic(QString source, QStringList fileList, QString targ
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
 	getMusic(pathType::REMOTE);
+	getDuplicatedMusic(pathType::REMOTE);
 }
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
 	getMusic(pathType::LOCAL);
+	getDuplicatedMusic(pathType::LOCAL);
 }
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 	AboutPage about;
 	about.exec();
+}
+void MusicSyncTool::on_copyToRemote_clicked() {
+	QStringList fileList = getSelectedMusic(pathType::LOCAL);
+	copyMusic(localPath, fileList, remotePath);
+	getMusic(pathType::REMOTE);
+}
+void MusicSyncTool::on_copyToLocal_clicked() {
+	QStringList fileList = getSelectedMusic(pathType::REMOTE);
+	copyMusic(remotePath, fileList, localPath);
+	getMusic(pathType::LOCAL);
 }
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
 	exit(EXIT_SUCCESS);

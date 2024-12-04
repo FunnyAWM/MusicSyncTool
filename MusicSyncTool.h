@@ -29,12 +29,15 @@ public:
     ~MusicSyncTool();
     void openFolder(pathType);
     void getMusic(pathType);
+    QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void copyMusic(QString, QStringList, QString);
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
 	void on_actionAbout_triggered(bool);
+    void on_copyToRemote_clicked();
+    void on_copyToLocal_clicked();
 	void on_actionExit_triggered(bool);
 };
 // QT_END_NAMESPACE

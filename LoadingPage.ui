@@ -13,17 +13,17 @@
   <property name="windowTitle">
    <string>LoadingPage</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QProgressBar" name="progressBar">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>80</y>
-     <width>151</width>
-     <height>16</height>
+     <x>100</x>
+     <y>90</y>
+     <width>321</width>
+     <height>23</height>
     </rect>
    </property>
-   <property name="text">
-    <string>正在加载，请等待...</string>
+   <property name="value">
+    <number>24</number>
    </property>
   </widget>
  </widget>

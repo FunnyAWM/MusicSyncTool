@@ -102,7 +102,6 @@
     <ClCompile Include="LoadingPage.cpp" />
     <ClCompile Include="MusicSyncTool.cpp" />
     <ClCompile Include="main.cpp" />
-    <None Include="MusicSyncTool.ico" />
     <ResourceCompile Include="MusicSyncTool.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +109,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="LoadingPage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="MusicSyncTool.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -120,6 +120,32 @@
      <string>设备文件夹：</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="copyToRemote">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>690</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>复制选中的音乐到设备</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="copyToLocal">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>690</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>复制选中的音乐到本地</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

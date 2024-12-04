@@ -14,6 +14,7 @@ class LoadingPage : public QDialog
 public:
 	LoadingPage(QWidget *parent = nullptr);
 	~LoadingPage();
+	void setProgress(int value);
 
 private:
 	Ui::LoadingPageClass *ui;
