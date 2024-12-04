@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QSet>
 #include <QThread>
+#include <QString>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
@@ -195,11 +196,30 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 	for (int i = 0; i < fileList.size(); i++) {
 		QString sourceFile = source + "/" + fileList.at(i);
 		QString targetFile = target + "/" + fileList.at(i);
-		QFile::copy(sourceFile, targetFile);
 		if (QFile::exists(targetFile)) {
 			qDebug() << "[WARN] File existed, skipping" << targetFile;
 			continue;
 		}
+		QFile::copy(sourceFile, targetFile);
+	}
+	QStringList lyricsList;
+	for (int i = 0; i < fileList.size(); i++) {
+		QString current = fileList.at(i);
+		if (current.contains(".mp3")) {
+			lyricsList.append(current.replace(".mp3", ".lrc"));
+		}
+		else if (current.contains(".flac")) {
+			lyricsList.append(current.replace(".flac", ".lrc"));
+		}
+	}
+	for (int i = 0; i < lyricsList.size(); i++) {
+		QString sourceFile = source + "/" + lyricsList.at(i);
+		QString targetFile = target + "/" + lyricsList.at(i);
+		if (QFile::exists(targetFile) || !QFile::exists(sourceFile)) {
+			qDebug() << "[WARN] Skipping" << targetFile;
+			continue;
+		}
+		QFile::copy(sourceFile, targetFile);
 	}
 }
 
@@ -208,27 +228,32 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	getMusic(pathType::REMOTE);
 	getDuplicatedMusic(pathType::REMOTE);
 }
+
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
 	getMusic(pathType::LOCAL);
 	getDuplicatedMusic(pathType::LOCAL);
 }
+
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 	AboutPage about;
 	about.exec();
 }
+
 void MusicSyncTool::on_copyToRemote_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
 	getDuplicatedMusic(pathType::REMOTE);
 }
+
 void MusicSyncTool::on_copyToLocal_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
 	getDuplicatedMusic(pathType::LOCAL);
 }
+
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
 	exit(EXIT_SUCCESS);
 }

@@ -23,7 +23,7 @@ class MusicSyncTool : public QMainWindow
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
-	LoadingPage loading;
+	LoadingPage loading = LoadingPage();
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
