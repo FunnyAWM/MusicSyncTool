@@ -11,6 +11,7 @@
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
 #include "LoadingPage.h"
+#include "ShowDupe.h"
 
 class MusicSyncTool : public QMainWindow
 {
@@ -39,6 +40,10 @@ public slots:
 	void on_actionAbout_triggered(bool);
     void on_copyToRemote_clicked();
     void on_copyToLocal_clicked();
+    void on_actionDupeLocal_triggered(bool);
+    void on_actionDupeRemote_triggered(bool);
+	void on_refreshLocal_clicked();
+	void on_refreshRemote_clicked();
 	void on_actionExit_triggered(bool);
 signals:
 	void progress(int, int);

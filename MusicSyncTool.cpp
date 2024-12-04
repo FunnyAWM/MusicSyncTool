@@ -49,18 +49,18 @@ void MusicSyncTool::openFolder(pathType path) {
 	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
 	if (!db.open()) {
 		std::string err = db.lastError().text().toStdString();
-	    qDebug() << "[FATAL] Error opening database: " << db.lastError().text().toStdString();
+		qDebug() << "[FATAL] Error opening database:" << db.lastError().text().toStdString();
 		exit(EXIT_FAILURE);
 	}
 }
 
 void MusicSyncTool::getMusic(pathType path) {
-	loading.show();
 	qDebug() << "[INFO] Scanning started";
 	clock_t start = clock();
 	if (localPath == "" && remotePath == "") {
 		return;
 	}
+	loading.show();
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
@@ -128,6 +128,7 @@ void MusicSyncTool::getMusic(pathType path) {
 }
 
 QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
+	ShowDupe dp;
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	QString sql = "SELECT * FROM musicInfo ORDER BY title";
 	query.exec(sql);
@@ -152,6 +153,10 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 	for (int i = 0; i < dupeList.size(); i++) {
 		qDebug() << "[INFO] Found duplicated music named" << dupeList.at(i) << "at" << (path == pathType::LOCAL ? localPath : remotePath);
 	}
+	for (int i = 0; i < dupeList.size(); i++) {
+		dp.add(dupeList.at(i));
+	}
+	dp.exec();
 	return dupeList;
 }
 
@@ -226,13 +231,11 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
 	getMusic(pathType::REMOTE);
-	getDuplicatedMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
 	getMusic(pathType::LOCAL);
-	getDuplicatedMusic(pathType::LOCAL);
 }
 
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
@@ -244,14 +247,28 @@ void MusicSyncTool::on_copyToRemote_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
-	getDuplicatedMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_copyToLocal_clicked() {
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
+}
+
+void MusicSyncTool::on_actionDupeLocal_triggered(bool triggered) {
 	getDuplicatedMusic(pathType::LOCAL);
+}
+
+void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) {
+	getDuplicatedMusic(pathType::REMOTE);
+}
+
+void MusicSyncTool::on_refreshLocal_clicked() {
+	getMusic(pathType::LOCAL);
+}
+
+void MusicSyncTool::on_refreshRemote_clicked() {
+	getMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
