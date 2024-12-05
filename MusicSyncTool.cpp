@@ -64,6 +64,7 @@ void MusicSyncTool::getMusic(pathType path) {
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
+	query.clear();
 	query.exec(sql);
 	QStringList newFileList = dir.entryList(QDir::Files);
 	sql = "SELECT fileName FROM musicInfo";
@@ -127,10 +128,37 @@ void MusicSyncTool::getMusic(pathType path) {
 	loading.close();
 }
 
+void MusicSyncTool::searchMusic(pathType path, QString text)
+{
+	if (text == "") {
+		getMusic(path);
+		return;
+	}
+	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
+	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->clearContents();
+	query.clear();
+	QString sql = "SELECT COUNT(*) FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text + "%\" OR album LIKE \"%" + text + "%\"";
+	query.exec(sql);
+	query.next();
+	int tableSize = query.value(0).toInt();
+	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
+	sql = "SELECT * FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text + "%\" OR album LIKE \"%" + text + "%\"";
+	query.clear();
+	query.exec(sql);
+	while (query.next()) {
+		for (int i = 0; i < 6; i++) {
+			if (query.value(i) != 0) {
+				(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
+			}
+		}
+	}
+}
+
 QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 	ShowDupe dp;
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	QString sql = "SELECT * FROM musicInfo ORDER BY title";
+	query.clear();
 	query.exec(sql);
 	QString fast;
 	QString fastFileName;
@@ -185,11 +213,11 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	artistListString += "\"" + artistList.at(selectedRows.size() - 1) + "\"";
 	QString sql = "SELECT fileName FROM musicInfo WHERE title IN("+ titleListString + ") AND artist IN(" + artistListString + ")";
 	QStringList fileList;
+	query.clear();
 	query.exec(sql);
 	while (query.next()) {
 		fileList.append(query.value(0).toString());
 	}
-	qDebug() << fileList;
 	return fileList;
 }
 
@@ -269,6 +297,16 @@ void MusicSyncTool::on_refreshLocal_clicked() {
 
 void MusicSyncTool::on_refreshRemote_clicked() {
 	getMusic(pathType::REMOTE);
+}
+
+void MusicSyncTool::on_searchLocal_returnPressed()
+{
+	searchMusic(pathType::LOCAL, ui.searchLocal->text());
+}
+
+void MusicSyncTool::on_searchRemote_returnPressed()
+{
+	searchMusic(pathType::REMOTE, ui.searchRemote->text());
 }
 
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {

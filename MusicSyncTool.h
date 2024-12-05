@@ -31,6 +31,7 @@ public:
     ~MusicSyncTool();
     void openFolder(pathType);
     void getMusic(pathType);
+	void searchMusic(pathType, QString);
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void copyMusic(QString, QStringList, QString);
@@ -44,6 +45,8 @@ public slots:
     void on_actionDupeRemote_triggered(bool);
 	void on_refreshLocal_clicked();
 	void on_refreshRemote_clicked();
+	void on_searchLocal_returnPressed();
+	void on_searchRemote_returnPressed();
 	void on_actionExit_triggered(bool);
 signals:
 	void progress(int, int);
