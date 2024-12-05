@@ -20,6 +20,8 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
 	queryLocal = QSqlQuery(dbLocal);
 	queryRemote = QSqlQuery(dbRemote);
+	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 MusicSyncTool::~MusicSyncTool() {

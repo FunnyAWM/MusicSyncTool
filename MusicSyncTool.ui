@@ -14,205 +14,246 @@
    <string>音乐同步工具</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTableWidget" name="tableWidgetLocal">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>40</y>
-      <width>641</width>
-      <height>641</height>
-     </rect>
-    </property>
-    <property name="sortingEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="cornerButtonEnabled">
-     <bool>false</bool>
-    </property>
-    <column>
-     <property name="text">
-      <string>标题</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>艺术家</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>专辑</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>流派</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>年份</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>音轨号</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QTableWidget" name="tableWidgetRemote">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>40</y>
-      <width>641</width>
-      <height>641</height>
-     </rect>
-    </property>
-    <column>
-     <property name="text">
-      <string>标题</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>艺术家</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>专辑</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>流派</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>年份</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>音轨号</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QLabel" name="localText">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>20</y>
-      <width>201</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>本地文件夹：</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="RemoteText">
-    <property name="geometry">
-     <rect>
-      <x>710</x>
-      <y>20</y>
-      <width>201</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>设备文件夹：</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="copyToRemote">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>690</y>
-      <width>151</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>复制选中的音乐到设备</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="copyToLocal">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>690</y>
-      <width>151</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>复制选中的音乐到本地</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="refreshLocal">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>690</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>刷新列表</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="refreshRemote">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>690</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>刷新列表</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="searchLocal">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>10</y>
-      <width>181</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string/>
-    </property>
-    <property name="inputMask">
-     <string/>
-    </property>
-    <property name="placeholderText">
-     <string>搜索</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="searchRemote">
-    <property name="geometry">
-     <rect>
-      <x>1140</x>
-      <y>10</y>
-      <width>201</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="inputMask">
-     <string/>
-    </property>
-    <property name="placeholderText">
-     <string>搜索</string>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>15</number>
+      </property>
+      <item row="6" column="0">
+       <layout class="QHBoxLayout" name="LocalControl">
+        <item>
+         <widget class="QPushButton" name="copyToRemote">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>复制选中的音乐到设备</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="refreshLocal">
+          <property name="text">
+           <string>刷新列表</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>30</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="localHead">
+        <item>
+         <widget class="QLabel" name="localText">
+          <property name="text">
+           <string>本地文件夹：</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="searchLocal">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>搜索</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="2">
+       <widget class="QTableWidget" name="tableWidgetRemote">
+        <column>
+         <property name="text">
+          <string>标题</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>艺术家</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>专辑</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>流派</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>年份</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>音轨号</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <layout class="QHBoxLayout" name="RemoteHead">
+        <item>
+         <widget class="QLabel" name="RemoteText">
+          <property name="text">
+           <string>设备文件夹：</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="searchRemote">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>搜索</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <widget class="QTableWidget" name="tableWidgetLocal">
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="cornerButtonEnabled">
+         <bool>false</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string>标题</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>艺术家</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>专辑</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>流派</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>年份</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>音轨号</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <layout class="QHBoxLayout" name="RemoteControl">
+        <item>
+         <widget class="QPushButton" name="copyToLocal">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>复制选中的音乐到本地</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="refreshRemote">
+          <property name="text">
+           <string>刷新列表</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
