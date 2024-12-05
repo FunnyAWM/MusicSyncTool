@@ -268,11 +268,17 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
+	if (remotePath == "") {
+		return;
+	}
 	getMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
+	if (localPath == "") {
+		return;
+	}
 	getMusic(pathType::LOCAL);
 }
 
@@ -282,12 +288,18 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 }
 
 void MusicSyncTool::on_copyToRemote_clicked() {
+	if (localPath == "") {
+		return;
+	}
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_copyToLocal_clicked() {
+	if (remotePath == "") {
+		return;
+	}
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
