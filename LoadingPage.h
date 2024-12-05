@@ -10,6 +10,8 @@ class LoadingPage : public QWidget
 public:
 	LoadingPage(QWidget *parent = nullptr);
 	~LoadingPage() = default;
+	void showPage();
+	void stopPage();
 private:
 	Ui::LoadingPageClass ui;
 };

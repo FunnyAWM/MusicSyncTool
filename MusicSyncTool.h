@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QFile>
+#include <QJsonDocument>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -24,6 +25,7 @@ class MusicSyncTool : public QMainWindow
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
+    QJsonDocument settings;
 	LoadingPage loading = LoadingPage();
 public:
     enum class pathType { LOCAL, REMOTE };
@@ -35,6 +37,8 @@ public:
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void copyMusic(QString, QStringList, QString);
+    void showLoading();
+	void stopLoading();
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
@@ -48,7 +52,5 @@ public slots:
 	void on_searchRemote_returnPressed();
     void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
-signals:
-	void progress(int, int);
 };
 // QT_END_NAMESPACE

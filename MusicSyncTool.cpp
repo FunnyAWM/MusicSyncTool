@@ -4,7 +4,6 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QSet>
-#include <QThread>
 #include <QString>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
@@ -22,6 +21,11 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	queryRemote = QSqlQuery(dbRemote);
 	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	QFile file("settings.json");
+	if (!file.open(QIODevice::ReadOnly)) {
+		qDebug() << "[WARN] No settings file found, creating new setting file named settings.json";
+		return;
+	}
 }
 
 MusicSyncTool::~MusicSyncTool() {
@@ -63,7 +67,7 @@ void MusicSyncTool::getMusic(pathType path) {
 		qDebug() << "[WARN] No path selected";
 		return;
 	}
-	loading.show();
+	emit showLoading();
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
@@ -129,7 +133,6 @@ void MusicSyncTool::getMusic(pathType path) {
 	}
 	clock_t end = clock();
 	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
-	loading.close();
 }
 
 void MusicSyncTool::searchMusic(pathType path, QString text)
@@ -266,13 +269,27 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 	}
 }
 
+void MusicSyncTool::showLoading() {
+	loading.show();
+}
+
+void MusicSyncTool::stopLoading() {
+	loading.close();
+}
+
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
+	if (remotePath == "") {
+		return;
+	}
 	getMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
+	if (localPath == "") {
+		return;
+	}
 	getMusic(pathType::LOCAL);
 }
 
@@ -282,12 +299,18 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 }
 
 void MusicSyncTool::on_copyToRemote_clicked() {
+	if (localPath == "") {
+		return;
+	}
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
 }
 
 void MusicSyncTool::on_copyToLocal_clicked() {
+	if (remotePath == "") {
+		return;
+	}
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
