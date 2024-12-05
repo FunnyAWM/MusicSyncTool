@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>LoadingPage</string>
+   <string>正在加载，请等待...</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">

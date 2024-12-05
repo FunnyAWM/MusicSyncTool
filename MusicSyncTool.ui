@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1290</width>
+    <width>1359</width>
     <height>841</height>
    </rect>
   </property>
@@ -19,9 +19,15 @@
      <rect>
       <x>20</x>
       <y>40</y>
-      <width>611</width>
+      <width>641</width>
       <height>641</height>
      </rect>
+    </property>
+    <property name="sortingEnabled">
+     <bool>false</bool>
+    </property>
+    <property name="cornerButtonEnabled">
+     <bool>false</bool>
     </property>
     <column>
      <property name="text">
@@ -57,9 +63,9 @@
    <widget class="QTableWidget" name="tableWidgetRemote">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>700</x>
       <y>40</y>
-      <width>611</width>
+      <width>641</width>
       <height>641</height>
      </rect>
     </property>
@@ -110,7 +116,7 @@
    <widget class="QLabel" name="RemoteText">
     <property name="geometry">
      <rect>
-      <x>670</x>
+      <x>710</x>
       <y>20</y>
       <width>201</width>
       <height>16</height>
@@ -136,7 +142,7 @@
    <widget class="QPushButton" name="copyToLocal">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>700</x>
       <y>690</y>
       <width>151</width>
       <height>23</height>
@@ -162,7 +168,7 @@
    <widget class="QPushButton" name="refreshRemote">
     <property name="geometry">
      <rect>
-      <x>830</x>
+      <x>870</x>
       <y>690</y>
       <width>80</width>
       <height>23</height>
@@ -175,7 +181,7 @@
    <widget class="QLineEdit" name="searchLocal">
     <property name="geometry">
      <rect>
-      <x>452</x>
+      <x>480</x>
       <y>10</y>
       <width>181</width>
       <height>22</height>
@@ -194,7 +200,7 @@
    <widget class="QLineEdit" name="searchRemote">
     <property name="geometry">
      <rect>
-      <x>1072</x>
+      <x>1140</x>
       <y>10</y>
       <width>201</width>
       <height>22</height>
@@ -213,7 +219,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1290</width>
+     <width>1359</width>
      <height>20</height>
     </rect>
    </property>

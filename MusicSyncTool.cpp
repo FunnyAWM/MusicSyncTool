@@ -58,13 +58,13 @@ void MusicSyncTool::getMusic(pathType path) {
 	qDebug() << "[INFO] Scanning started";
 	clock_t start = clock();
 	if (localPath == "" && remotePath == "") {
+		qDebug() << "[WARN] No path selected";
 		return;
 	}
 	loading.show();
 	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
-	query.clear();
 	query.exec(sql);
 	QStringList newFileList = dir.entryList(QDir::Files);
 	sql = "SELECT fileName FROM musicInfo";
@@ -115,11 +115,13 @@ void MusicSyncTool::getMusic(pathType path) {
 	int tableSize = query.value(0).toInt();
 	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo";
 	query.exec(sql);
-	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
+	QTableWidget* targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	targetTable->clearContents();
+	targetTable->setRowCount(tableSize);
 	while (query.next()) {
 		for (int i = 0; i < 6; i++) {
 			if (query.value(i) != 0) {
-				(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
+				targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
 			}
 		}
 	}
@@ -191,6 +193,9 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	QSet<int> selectedRows;
 	const QTableWidget* const table = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	if (table->rowCount() == 0) {
+		return QStringList();
+	}
 	for (int i = 0; i < table->rowCount(); i++) {
 		if (table->item(i, 0)->isSelected()) {
 			selectedRows.insert(i);
@@ -222,6 +227,9 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 }
 
 void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, const QString target) {
+	if (source == "" || fileList.isEmpty() || target == "") {
+		return;
+	}
 	QDir dir(target);
 	if (dir.isEmpty()) {
 		dir.mkpath(target);

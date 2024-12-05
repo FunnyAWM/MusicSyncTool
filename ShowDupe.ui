@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ShowDupe</string>
+   <string>重复文件扫描结果</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
