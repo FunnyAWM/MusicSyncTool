@@ -38,7 +38,6 @@ public:
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
-	void on_actionAbout_triggered(bool);
     void on_copyToRemote_clicked();
     void on_copyToLocal_clicked();
     void on_actionDupeLocal_triggered(bool);
@@ -47,6 +46,7 @@ public slots:
 	void on_refreshRemote_clicked();
 	void on_searchLocal_returnPressed();
 	void on_searchRemote_returnPressed();
+    void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
 signals:
 	void progress(int, int);
