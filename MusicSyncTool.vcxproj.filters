@@ -52,6 +52,9 @@
     <ClCompile Include="ShowDupe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -66,6 +69,9 @@
     <QtMoc Include="ShowDupe.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Settings.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AboutPage.ui">
@@ -75,6 +81,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ShowDupe.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Settings.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

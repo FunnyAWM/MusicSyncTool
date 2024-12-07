@@ -2,6 +2,7 @@
 #include "MusicSyncTool.h"
 #include <QFile>
 #include <QFileDialog>
+#include <QJsonObject>
 #include <QDir>
 #include <QSet>
 #include <QString>
@@ -12,7 +13,7 @@
 #include <iostream>
 
 MusicSyncTool::MusicSyncTool(QWidget* parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent), ignoreLyric(false)
 {
 	ui.setupUi(this);
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
@@ -22,10 +23,17 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	QFile file("settings.json");
-	if (!file.open(QIODevice::ReadOnly)) {
+	if (!file.open(QIODevice::ReadWrite)) {
 		qDebug() << "[WARN] No settings file found, creating new setting file named settings.json";
 		return;
 	}
+	settings = QJsonDocument::fromJson(file.readAll());
+	if (settings.isNull()) {
+		qDebug() << "[WARN] Invalid settings file, creating new setting file named settings.json";
+		return;
+	}
+	QJsonObject obj = settings.object();
+	ignoreLyric = obj["ignoreLyric"].toBool();
 }
 
 MusicSyncTool::~MusicSyncTool() {
@@ -231,6 +239,28 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	return fileList;
 }
 
+void MusicSyncTool::showSettings()
+{
+	Settings* page = new Settings();
+	connect(page, SIGNAL(confirmPressed(Settings::set)), this, SLOT(saveSettings(Settings::set)));
+	page->show();
+}
+
+void MusicSyncTool::saveSettings(Settings::set entity)
+{
+	QFile file("settings.json");
+	if (!file.open(QIODevice::WriteOnly)) {
+		qDebug() << "[FATAL] Error opening settings file";
+		exit(EXIT_FAILURE);
+	}
+	QJsonObject obj;
+	obj["ignoreLyric"] = entity.ignoreLyric;
+	ignoreLyric = entity.ignoreLyric;
+	qDebug() << "[INFO] IgnoreLyric:" << entity.ignoreLyric;
+	settings.setObject(obj);
+	file.write(settings.toJson());
+}
+
 void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, const QString target) {
 	if (source == "" || fileList.isEmpty() || target == "") {
 		return;
@@ -248,14 +278,16 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 		}
 		QFile::copy(sourceFile, targetFile);
 	}
+	QStringList supportedFormat = { ".mp3", ".flac", ".ape" };
 	QStringList lyricsList;
-	for (int i = 0; i < fileList.size(); i++) {
-		QString current = fileList.at(i);
-		if (current.contains(".mp3")) {
-			lyricsList.append(current.replace(".mp3", ".lrc"));
-		}
-		else if (current.contains(".flac")) {
-			lyricsList.append(current.replace(".flac", ".lrc"));
+	if (!ignoreLyric) {
+		for (QString current : fileList) {
+			for (QString format : supportedFormat) {
+				if (current.contains(format)) {
+					lyricsList.append(current.replace(format, ".lrc"));
+					break;
+				}
+			}
 		}
 	}
 	for (int i = 0; i < lyricsList.size(); i++) {
@@ -291,6 +323,11 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 		return;
 	}
 	getMusic(pathType::LOCAL);
+}
+
+void MusicSyncTool::on_actionSettings_triggered(bool)
+{
+	showSettings();
 }
 
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {

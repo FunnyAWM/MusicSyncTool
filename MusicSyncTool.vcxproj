@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="ShowDupe.cpp" />
     <None Include="packages.config" />
     <QtRcc Include="MusicSyncTool.qrc" />
@@ -121,6 +122,7 @@
     <ClCompile Include="LoadingPage.cpp" />
     <ClCompile Include="MusicSyncTool.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="Settings.ui" />
     <QtUic Include="ShowDupe.ui" />
     <ResourceCompile Include="MusicSyncTool.rc" />
   </ItemGroup>
@@ -135,6 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ShowDupe.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

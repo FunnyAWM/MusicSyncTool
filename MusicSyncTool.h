@@ -13,6 +13,7 @@
 #include "AboutPage.h"
 #include "LoadingPage.h"
 #include "ShowDupe.h"
+#include "Settings.h"
 
 class MusicSyncTool : public QMainWindow
 {
@@ -27,6 +28,7 @@ class MusicSyncTool : public QMainWindow
     QSqlQuery queryRemote;
     QJsonDocument settings;
 	LoadingPage loading = LoadingPage();
+    bool ignoreLyric;
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
@@ -36,12 +38,14 @@ public:
 	void searchMusic(pathType, QString);
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
+    void showSettings();
     void copyMusic(QString, QStringList, QString);
     void showLoading();
 	void stopLoading();
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
+	void on_actionSettings_triggered(bool);
     void on_copyToRemote_clicked();
     void on_copyToLocal_clicked();
     void on_actionDupeLocal_triggered(bool);
@@ -50,6 +54,7 @@ public slots:
 	void on_refreshRemote_clicked();
 	void on_searchLocal_returnPressed();
 	void on_searchRemote_returnPressed();
+    void saveSettings(Settings::set);
     void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
 };
