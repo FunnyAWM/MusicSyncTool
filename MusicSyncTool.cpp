@@ -127,7 +127,7 @@ void MusicSyncTool::getMusic(pathType path) {
 	query.exec(sql);
 	query.next();
 	int tableSize = query.value(0).toInt();
-	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo";
+	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY title";
 	query.exec(sql);
 	QTableWidget* targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
 	targetTable->clearContents();
@@ -140,6 +140,7 @@ void MusicSyncTool::getMusic(pathType path) {
 		}
 	}
 	clock_t end = clock();
+	emit stopLoading();
 	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
 }
 
@@ -151,14 +152,12 @@ void MusicSyncTool::searchMusic(pathType path, QString text)
 	}
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->clearContents();
-	query.clear();
 	QString sql = "SELECT COUNT(*) FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text + "%\" OR album LIKE \"%" + text + "%\"";
 	query.exec(sql);
 	query.next();
 	int tableSize = query.value(0).toInt();
 	(path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
 	sql = "SELECT * FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text + "%\" OR album LIKE \"%" + text + "%\"";
-	query.clear();
 	query.exec(sql);
 	while (query.next()) {
 		for (int i = 0; i < 6; i++) {
@@ -173,7 +172,6 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 	ShowDupe dp;
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	QString sql = "SELECT * FROM musicInfo ORDER BY title";
-	query.clear();
 	query.exec(sql);
 	QString fast;
 	QString fastFileName;
@@ -231,7 +229,6 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	artistListString += "\"" + artistList.at(selectedRows.size() - 1) + "\"";
 	QString sql = "SELECT fileName FROM musicInfo WHERE title IN("+ titleListString + ") AND artist IN(" + artistListString + ")";
 	QStringList fileList;
-	query.clear();
 	query.exec(sql);
 	while (query.next()) {
 		fileList.append(query.value(0).toString());

@@ -4,6 +4,7 @@ Settings::Settings(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
+	this->setWindowFlags(Qt::WindowCloseButtonHint);
 	QFile file = QFile("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug() << "[WARN] No settings file found, creating new setting file named settings.json";
