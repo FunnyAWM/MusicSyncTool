@@ -14,6 +14,7 @@
 #include "LoadingPage.h"
 #include "ShowDupe.h"
 #include "Settings.h"
+#include "CopyResult.h"
 
 class MusicSyncTool : public QMainWindow
 {
@@ -29,6 +30,7 @@ class MusicSyncTool : public QMainWindow
     QJsonDocument settings;
 	LoadingPage loading = LoadingPage();
     bool ignoreLyric;
+	int sortBy;
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
@@ -39,7 +41,7 @@ public:
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void showSettings();
-    void copyMusic(QString, QStringList, QString);
+    void copyMusic(QString, QStringList, QString) const;
     void showLoading();
 	void stopLoading();
 public slots:

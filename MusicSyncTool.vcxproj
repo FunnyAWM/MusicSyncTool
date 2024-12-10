@@ -110,11 +110,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CopyResult.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="ShowDupe.cpp" />
     <None Include="packages.config" />
     <QtRcc Include="MusicSyncTool.qrc" />
     <QtUic Include="AboutPage.ui" />
+    <QtUic Include="CopyResult.ui" />
     <QtUic Include="LoadingPage.ui" />
     <QtUic Include="MusicSyncTool.ui" />
     <QtMoc Include="MusicSyncTool.h" />
@@ -141,6 +143,9 @@
   <ItemGroup>
     <QtMoc Include="Settings.h" />
   </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="CopyResult.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />
@@ -148,7 +153,6 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets" Condition="Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets')" />
     <Import Project="packages\taglibcpp.1.11.1\build\native\taglibcpp.targets" Condition="Exists('packages\taglibcpp.1.11.1\build\native\taglibcpp.targets')" />
-    <Import Project="packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets" Condition="Exists('packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -157,6 +161,5 @@
     <Error Condition="!Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.props'))" />
     <Error Condition="!Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets'))" />
     <Error Condition="!Exists('packages\taglibcpp.1.11.1\build\native\taglibcpp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\taglibcpp.1.11.1\build\native\taglibcpp.targets'))" />
-    <Error Condition="!Exists('packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets'))" />
   </Target>
 </Project>

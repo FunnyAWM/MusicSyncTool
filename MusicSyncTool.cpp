@@ -6,14 +6,16 @@
 #include <QDir>
 #include <QSet>
 #include <QString>
+#include <QMessageBox>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
 #include <taglib/fileref.h>
+#include <taglib/tpropertymap.h>
 #include <iostream>
 
 MusicSyncTool::MusicSyncTool(QWidget* parent)
-	: QMainWindow(parent), ignoreLyric(false) {
+	: QMainWindow(parent), ignoreLyric(false), sortBy(Settings::TITLE) {
 	ui.setupUi(this);
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
 	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
@@ -22,7 +24,7 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	QFile file("settings.json");
-	if (!file.open(QIODevice::ReadWrite)) {
+	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug() << "[WARN] No settings file found, creating new setting file named settings.json";
 		return;
 	}
@@ -33,6 +35,7 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	}
 	QJsonObject obj = settings.object();
 	ignoreLyric = obj["ignoreLyric"].toBool();
+	sortBy = obj["sortBy"].toInt();
 }
 
 MusicSyncTool::~MusicSyncTool() {
@@ -43,7 +46,10 @@ MusicSyncTool::~MusicSyncTool() {
 		dbRemote.close();
 	}
 }
-
+/**
+* @brief 打开文件夹
+* @param path 路径类型（本地或远程）
+*/
 void MusicSyncTool::openFolder(pathType path) {
 	QFileDialog fileDialog;
 	fileDialog.setOption(QFileDialog::ShowDirsOnly, false);
@@ -66,7 +72,10 @@ void MusicSyncTool::openFolder(pathType path) {
 		exit(EXIT_FAILURE);
 	}
 }
-
+/**
+* @brief 获取音乐信息
+* @param path 路径类型（本地或远程）
+*/
 void MusicSyncTool::getMusic(pathType path) {
 	qDebug() << "[INFO] Scanning started";
 	clock_t start = clock();
@@ -103,18 +112,19 @@ void MusicSyncTool::getMusic(pathType path) {
 		}
 	}
 	newFileList.removeOne("musicInfo.db");
+	
 	for (int i = 0; i < newFileList.size(); i++) {
 		QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
 		TagLib::FileRef f(file.toStdWString().c_str());
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (\"" 
+			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (\""
 				+ QString::fromStdString(tag->title().to8Bit(true))
 				+ "\", \"" + QString::fromStdString(tag->artist().to8Bit(true))
 				+ "\", \"" + QString::fromStdString(tag->album().to8Bit(true))
 				+ "\", \"" + QString::fromStdString(tag->genre().to8Bit(true))
 				+ "\", " + QString::number(tag->year())
-				+ ", " + QString::number(tag->track()) 
+				+ ", " + QString::number(tag->track())
 				+ ", \"" + newFileList.at(i)
 				+ "\")";
 			query.exec(sql);
@@ -126,7 +136,21 @@ void MusicSyncTool::getMusic(pathType path) {
 	query.exec(sql);
 	query.next();
 	int tableSize = query.value(0).toInt();
-	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY title";
+	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
+	switch (sortBy) {
+	case Settings::TITLE:
+		sql += " title";
+		break;
+	case Settings::ARTIST:
+		sql += " artist";
+		break;
+	case Settings::ALBUM:
+		sql += " album";
+		break;
+	default:
+		sql += " title";
+		break;
+	}
 	query.exec(sql);
 	QTableWidget* targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
 	targetTable->clearContents();
@@ -142,7 +166,11 @@ void MusicSyncTool::getMusic(pathType path) {
 	emit stopLoading();
 	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
 }
-
+/**
+* @brief 搜索音乐
+* @param path 路径类型（本地或远程）
+* @param text 搜索文本
+*/
 void MusicSyncTool::searchMusic(pathType path, QString text)
 {
 	if (text == "") {
@@ -166,8 +194,19 @@ void MusicSyncTool::searchMusic(pathType path, QString text)
 		}
 	}
 }
+/**
+* @brief 获取重复音乐
+* @param path 路径类型（本地或远程）
+* @return 重复音乐列表
+*/
 
 QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
+	QString selectedPath = (path == pathType::LOCAL ? localPath : remotePath);
+	if (selectedPath == "") {
+		qDebug() << "[WARN] No path selected";
+		QMessageBox::critical(this, "错误", "请先选择路径！");
+		return QStringList();
+	}
 	ShowDupe dp;
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
 	QString sql = "SELECT * FROM musicInfo ORDER BY title";
@@ -199,6 +238,11 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
 	dp.exec();
 	return dupeList;
 }
+/**
+* @brief 获取表格中选中的音乐
+* @param path 路径类型（本地或远程）
+* @return 选中音乐列表
+*/
 
 QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	QSet<int> selectedRows;
@@ -234,14 +278,19 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 	}
 	return fileList;
 }
-
+/**
+* @brief 显示设置页面
+*/
 void MusicSyncTool::showSettings()
 {
 	Settings* page = new Settings();
 	connect(page, SIGNAL(confirmPressed(Settings::set)), this, SLOT(saveSettings(Settings::set)));
 	page->show();
 }
-
+/**
+* @brief 保存设置
+* @param entity 配置实体
+*/
 void MusicSyncTool::saveSettings(Settings::set entity)
 {
 	QFile file("settings.json");
@@ -251,13 +300,27 @@ void MusicSyncTool::saveSettings(Settings::set entity)
 	}
 	QJsonObject obj;
 	obj["ignoreLyric"] = entity.ignoreLyric;
+	obj["sortBy"] = entity.sortBy;
+	int temp = sortBy;
 	ignoreLyric = entity.ignoreLyric;
+	sortBy = entity.sortBy;
+	if (temp != sortBy) {
+		getMusic(pathType::LOCAL);
+		getMusic(pathType::REMOTE);
+	}
 	qDebug() << "[INFO] IgnoreLyric:" << entity.ignoreLyric;
+	qDebug() << "[INFO] SortBy:" << entity.sortBy;
 	settings.setObject(obj);
 	file.write(settings.toJson());
 }
-
-void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, const QString target) {
+/**
+* @brief 复制音乐
+* @param source 源路径
+* @param fileList 音乐列表
+* @param target 目标路径
+*/
+void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const QString target) const {
+	TagLib::String key = "LYRICS";
 	if (source == "" || fileList.isEmpty() || target == "") {
 		return;
 	}
@@ -265,46 +328,71 @@ void MusicSyncTool::copyMusic(const QString source, const QStringList fileList, 
 	if (dir.isEmpty()) {
 		dir.mkpath(target);
 	}
-	for (int i = 0; i < fileList.size(); i++) {
-		QString sourceFile = source + "/" + fileList.at(i);
-		QString targetFile = target + "/" + fileList.at(i);
-		if (QFile::exists(targetFile)) {
-			qDebug() << "[WARN] File existed, skipping" << targetFile;
-			continue;
-		}
-		QFile::copy(sourceFile, targetFile);
-	}
 	QStringList supportedFormat = { ".mp3", ".flac", ".ape" };
-	QStringList lyricsList;
-	if (!ignoreLyric) {
-		for (QString current : fileList) {
-			for (QString format : supportedFormat) {
-				if (current.contains(format)) {
-					lyricsList.append(current.replace(format, ".lrc"));
-					break;
-				}
+	QStringList errorList;
+	for (QString& file : fileList) {
+		QString sourceFile = source + "/" + file;
+		QString targetFile = target + "/" + file;
+		QString lyric;
+		QString lyricTarget;
+		for (QString& format : supportedFormat) {
+			if (sourceFile.contains(format)) {
+				QString temp = sourceFile;
+				QString tempTarget = targetFile;
+				lyric = temp.replace(format, ".lrc");
+				lyricTarget = tempTarget.replace(format, ".lrc");
+				break;
 			}
 		}
-	}
-	for (int i = 0; i < lyricsList.size(); i++) {
-		QString sourceFile = source + "/" + lyricsList.at(i);
-		QString targetFile = target + "/" + lyricsList.at(i);
-		if (QFile::exists(targetFile) || !QFile::exists(sourceFile)) {
-			qDebug() << "[WARN] Skipping" << targetFile;
+		if (QFile::exists(targetFile)) {
+			qDebug() << "[WARN] File existed, skipping" << targetFile;
+			errorList.append("复制" + file + "失败：文件已存在");
 			continue;
+		}
+		else if(!ignoreLyric) {
+			if (!QFile::exists(lyric)) {
+				TagLib::FileRef f(sourceFile.toStdWString().c_str());
+				if (!f.isNull() && f.tag()) {
+					TagLib::Tag* tag = f.tag();
+					if (!tag->properties().contains(key)) {
+						qDebug() << "[WARN] Lyric file not found, skipping" << lyric;
+						errorList.append("复制" + file + "失败：找不到歌词文件");
+						continue;
+					}
+				}
+			}
+			else {
+				QFile::copy(lyric, lyricTarget);
+			}
 		}
 		QFile::copy(sourceFile, targetFile);
 	}
+	if (!errorList.isEmpty()) {
+		CopyResult* result = new CopyResult();
+		QString errorString;
+		for (QString& error : errorList) {
+			errorString += error + "\n";
+		}
+		result->setText(errorString);
+		result->exec();
+	}
 }
-
+/**
+* @brief 显示加载页面
+*/
 void MusicSyncTool::showLoading() {
 	loading.show();
 }
-
+/**
+* @brief 关闭加载页面
+*/
 void MusicSyncTool::stopLoading() {
 	loading.close();
 }
-
+/**
+* @brief 本地音乐按钮触发
+* @param triggered 是否触发
+*/
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
 	if (remotePath == "") {
@@ -312,7 +400,10 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	}
 	getMusic(pathType::REMOTE);
 }
-
+/**
+* @brief 远程音乐按钮触发
+* @param triggered 是否触发
+*/
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
 	if (localPath == "") {
@@ -320,61 +411,88 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	}
 	getMusic(pathType::LOCAL);
 }
-
+/**
+* @brief 设置按钮触发
+* @param triggered 是否触发
+*/
 void MusicSyncTool::on_actionSettings_triggered(bool)
 {
 	showSettings();
 }
-
+/**
+* @brief 关于按钮触发
+* @param triggered 是否触发
+*/
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 	AboutPage about;
 	about.exec();
 }
-
+/**
+* @brief 本地复制到远程按钮触发
+*/
 void MusicSyncTool::on_copyToRemote_clicked() {
 	if (localPath == "") {
+		QMessageBox::critical(this, "错误", "请先选择路径！");
 		return;
 	}
 	QStringList fileList = getSelectedMusic(pathType::LOCAL);
 	copyMusic(localPath, fileList, remotePath);
 	getMusic(pathType::REMOTE);
 }
-
+/**
+* @brief 远程复制到本地按钮触发
+*/
 void MusicSyncTool::on_copyToLocal_clicked() {
 	if (remotePath == "") {
+		QMessageBox::critical(this, "错误", "请先选择路径！");
 		return;
 	}
 	QStringList fileList = getSelectedMusic(pathType::REMOTE);
 	copyMusic(remotePath, fileList, localPath);
 	getMusic(pathType::LOCAL);
 }
-
+/**
+* @brief 检测本地重复音乐
+*/
 void MusicSyncTool::on_actionDupeLocal_triggered(bool triggered) {
 	getDuplicatedMusic(pathType::LOCAL);
 }
-
+/**
+* @brief 检测远程重复音乐
+*/
 void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) {
 	getDuplicatedMusic(pathType::REMOTE);
 }
-
+/**
+* @brief 刷新本地音乐列表
+*/
 void MusicSyncTool::on_refreshLocal_clicked() {
 	getMusic(pathType::LOCAL);
 }
-
+/**
+* @brief 刷新远程音乐列表
+*/
 void MusicSyncTool::on_refreshRemote_clicked() {
 	getMusic(pathType::REMOTE);
 }
-
+/**
+* @brief 本地搜索框回车触发
+*/
 void MusicSyncTool::on_searchLocal_returnPressed()
 {
 	searchMusic(pathType::LOCAL, ui.searchLocal->text());
 }
-
+/**
+* @brief 远程搜索框回车触发
+*/
 void MusicSyncTool::on_searchRemote_returnPressed()
 {
 	searchMusic(pathType::REMOTE, ui.searchRemote->text());
 }
-
+/**
+* @brief 关于按钮触发
+* @param triggered 是否触发
+*/
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
 	exit(EXIT_SUCCESS);
 }

@@ -1,79 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AboutPageClass</class>
- <widget class="QDialog" name="AboutPageClass">
+ <class>CopyResultClass</class>
+ <widget class="QDialog" name="CopyResultClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>330</width>
-    <height>158</height>
+    <width>797</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>关于</string>
+   <string>复制结果</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>作者：FunnyAWM</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
+      <widget class="QTextEdit" name="textEdit">
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>电子邮箱：funnyawm@qq.com</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>GitHub:@FunnyAWM</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -119,32 +70,32 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>AboutPageClass</receiver>
+   <receiver>CopyResultClass</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>305</x>
-     <y>261</y>
+     <x>398</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel">
-     <x>301</x>
-     <y>145</y>
+     <x>398</x>
+     <y>290</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>AboutPageClass</receiver>
+   <receiver>CopyResultClass</receiver>
    <slot>deleteLater()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>135</y>
+     <x>398</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel">
-     <x>164</x>
-     <y>78</y>
+     <x>398</x>
+     <y>290</y>
     </hint>
    </hints>
   </connection>

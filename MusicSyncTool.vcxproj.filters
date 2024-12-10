@@ -55,6 +55,9 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CopyResult.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -72,6 +75,9 @@
     <QtMoc Include="Settings.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="CopyResult.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AboutPage.ui">
@@ -84,6 +90,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Settings.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CopyResult.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

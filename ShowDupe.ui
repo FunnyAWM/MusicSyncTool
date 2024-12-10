@@ -104,5 +104,21 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ShowDupeClass</receiver>
+   <slot>deleteLater()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>639</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>355</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
