@@ -7,6 +7,7 @@
 #include <QSet>
 #include <QString>
 #include <QMessageBox>
+#include <QTranslator>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
@@ -37,6 +38,15 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	ignoreLyric = obj["ignoreLyric"].toBool();
 	sortBy = obj["sortBy"].toInt();
 	language = obj["language"].toString();
+	QTranslator translator;
+	if (language == "Chinese") {
+		translator.load(":/MusicSyncTool_zh_CN.qm");
+	}
+	else {
+		translator.load(":/MusicSyncTool_en.qm");
+	}
+	qApp->installTranslator(&translator);
+	ui.retranslateUi(this);
 	file.close();
 }
 
@@ -392,10 +402,6 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
 QString MusicSyncTool::getLanguage()
 {
 	return language;
-}
-void MusicSyncTool::translate()
-{
-	ui.retranslateUi(this);
 }
 /**
 * @brief 显示加载页面

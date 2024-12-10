@@ -44,7 +44,6 @@ public:
     void showSettings();
     void copyMusic(QString, QStringList, QString) const;
     QString getLanguage();
-    void translate();
     void showLoading();
 	void stopLoading();
 public slots:
