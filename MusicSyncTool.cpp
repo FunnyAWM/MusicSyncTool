@@ -13,8 +13,7 @@
 #include <iostream>
 
 MusicSyncTool::MusicSyncTool(QWidget* parent)
-	: QMainWindow(parent), ignoreLyric(false)
-{
+	: QMainWindow(parent), ignoreLyric(false) {
 	ui.setupUi(this);
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
 	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");

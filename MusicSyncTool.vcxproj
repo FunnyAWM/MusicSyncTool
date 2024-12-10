@@ -148,6 +148,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets" Condition="Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets')" />
     <Import Project="packages\taglibcpp.1.11.1\build\native\taglibcpp.targets" Condition="Exists('packages\taglibcpp.1.11.1\build\native\taglibcpp.targets')" />
+    <Import Project="packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets" Condition="Exists('packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -156,5 +157,6 @@
     <Error Condition="!Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.props'))" />
     <Error Condition="!Exists('packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.E.vcpkg.1.0.0\build\native\vcpkg.E.vcpkg.targets'))" />
     <Error Condition="!Exists('packages\taglibcpp.1.11.1\build\native\taglibcpp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\taglibcpp.1.11.1\build\native\taglibcpp.targets'))" />
+    <Error Condition="!Exists('packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\FFmpeg.LGPL.20241207.1.0\build\native\FFmpeg.LGPL.targets'))" />
   </Target>
 </Project>
