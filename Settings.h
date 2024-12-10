@@ -14,6 +14,7 @@ public:
 	struct set {
 		bool ignoreLyric;
 		int sortBy;
+		QString language;
 	};
 	Settings(QWidget *parent = nullptr);
 	constexpr static int TITLE = 1;

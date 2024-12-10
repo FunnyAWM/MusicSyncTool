@@ -31,6 +31,15 @@ Settings::Settings(QWidget *parent)
 			ui.titleSelect->setChecked(true);
 			break;
 	}
+	if (obj["language"].toString() == "Chinese") {
+		ui.chineseButton->setChecked(true);
+	}
+	else if (obj["language"].toString() == "English") {
+		ui.englishButton->setChecked(true);
+	}
+	else {
+		ui.chineseButton->setChecked(true);
+	}
 	file.close();
 }
 
@@ -45,6 +54,13 @@ Settings::set Settings::getSettings() {
 	}
 	else if (ui.albumSelect->isChecked()) {
 		entity.sortBy = ALBUM;
+	}
+	if (ui.chineseButton->isChecked()) {
+		entity.language = "Chinese";
+	}
+	else if (ui.englishButton->isChecked()) {
+		entity.language = "English";
+		
 	}
 	return entity;
 }

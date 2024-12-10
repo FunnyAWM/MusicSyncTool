@@ -31,6 +31,7 @@ class MusicSyncTool : public QMainWindow
 	LoadingPage loading = LoadingPage();
     bool ignoreLyric;
 	int sortBy;
+    QString language;
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
@@ -42,6 +43,8 @@ public:
     QStringList getSelectedMusic(pathType);
     void showSettings();
     void copyMusic(QString, QStringList, QString) const;
+    QString getLanguage();
+    void translate();
     void showLoading();
 	void stopLoading();
 public slots:

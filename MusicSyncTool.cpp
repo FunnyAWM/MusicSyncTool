@@ -36,6 +36,8 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	QJsonObject obj = settings.object();
 	ignoreLyric = obj["ignoreLyric"].toBool();
 	sortBy = obj["sortBy"].toInt();
+	language = obj["language"].toString();
+	file.close();
 }
 
 MusicSyncTool::~MusicSyncTool() {
@@ -301,12 +303,18 @@ void MusicSyncTool::saveSettings(Settings::set entity)
 	QJsonObject obj;
 	obj["ignoreLyric"] = entity.ignoreLyric;
 	obj["sortBy"] = entity.sortBy;
+	obj["language"] = entity.language;
 	int temp = sortBy;
+	QString templang = entity.language;
 	ignoreLyric = entity.ignoreLyric;
 	sortBy = entity.sortBy;
 	if (temp != sortBy) {
 		getMusic(pathType::LOCAL);
 		getMusic(pathType::REMOTE);
+	}
+	if (templang != entity.language) {
+		qDebug() << "[INFO] Language changed to" << entity.language;
+		ui.retranslateUi(this);
 	}
 	qDebug() << "[INFO] IgnoreLyric:" << entity.ignoreLyric;
 	qDebug() << "[INFO] SortBy:" << entity.sortBy;
@@ -376,6 +384,18 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
 		result->setText(errorString);
 		result->exec();
 	}
+}
+/**
+* @brief 获取语言
+* @return 语言
+*/
+QString MusicSyncTool::getLanguage()
+{
+	return language;
+}
+void MusicSyncTool::translate()
+{
+	ui.retranslateUi(this);
 }
 /**
 * @brief 显示加载页面
