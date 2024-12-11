@@ -18,6 +18,7 @@
 MusicSyncTool::MusicSyncTool(QWidget* parent)
 	: QMainWindow(parent), ignoreLyric(false), sortBy(Settings::TITLE) {
 	ui.setupUi(this);
+	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
 	dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
 	queryLocal = QSqlQuery(dbLocal);

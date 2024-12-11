@@ -4,6 +4,7 @@ Settings::Settings(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
+	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
 	QFile file = QFile("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
