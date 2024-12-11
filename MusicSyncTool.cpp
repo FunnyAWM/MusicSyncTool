@@ -1,4 +1,4 @@
-﻿#pragma execution_character_set("utf-8") 
+﻿#pragma warning(disable:6031)
 #include "MusicSyncTool.h"
 #include <QFile>
 #include <QFileDialog>
@@ -40,16 +40,18 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	language = obj["language"].toString();
 	QTranslator translator;
 	if (language == "Chinese") {
-		translator.load(":/MusicSyncTool_zh_CN.qm");
+		qDebug() << translator.load(":/translations/Translation_zh_Hans.qm");
 	}
 	else {
-		translator.load(":/MusicSyncTool_en.qm");
+		qDebug() << translator.load(":/translations/Translation_en_US.qm");
 	}
 	qApp->installTranslator(&translator);
 	ui.retranslateUi(this);
 	file.close();
 }
-
+/**
+* @brief 析构函数
+*/
 MusicSyncTool::~MusicSyncTool() {
 	if (dbLocal.isOpen()) {
 		dbLocal.close();
@@ -79,7 +81,6 @@ void MusicSyncTool::openFolder(pathType path) {
 	}
 	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
 	if (!db.open()) {
-		std::string err = db.lastError().text().toStdString();
 		qDebug() << "[FATAL] Error opening database:" << db.lastError().text().toStdString();
 		exit(EXIT_FAILURE);
 	}

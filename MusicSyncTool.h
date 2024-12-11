@@ -8,7 +8,6 @@
 #include <QtSql/QSqlRecord>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlDriver>
-#include <QtSql/QSqlresult>
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
 #include "LoadingPage.h"
