@@ -42,8 +42,7 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	QTranslator translator;
 	if (language == "Chinese") {
 		qDebug() << translator.load(":/translations/Translation_zh_Hans.qm");
-	}
-	else {
+	} else {
 		qDebug() << translator.load(":/translations/Translation_en_US.qm");
 	}
 	qApp->installTranslator(&translator);
@@ -76,8 +75,7 @@ void MusicSyncTool::openFolder(pathType path) {
 	(path == pathType::LOCAL ? localPath : remotePath) = dir;
 	if (path == pathType::LOCAL) {
 		dbLocal.setDatabaseName(localPath + "/musicInfo.db");
-	}
-	else {
+	} else {
 		dbRemote.setDatabaseName(remotePath + "/musicInfo.db");
 	}
 	QSqlDatabase& db = path == pathType::LOCAL ? dbLocal : dbRemote;
@@ -310,6 +308,7 @@ void MusicSyncTool::saveSettings(Settings::set entity)
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
 		qDebug() << "[FATAL] Error opening settings file";
+		QMessageBox::critical(this, "错误", "无法打开设置文件！");
 		exit(EXIT_FAILURE);
 	}
 	QJsonObject obj;
