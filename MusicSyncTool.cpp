@@ -1,13 +1,5 @@
 ﻿#pragma warning(disable:6031)
 #include "MusicSyncTool.h"
-#include <QFile>
-#include <QFileDialog>
-#include <QJsonObject>
-#include <QDir>
-#include <QSet>
-#include <QString>
-#include <QMessageBox>
-#include <QTranslator>
 #include <taglib/tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/mpegfile.h>
@@ -16,7 +8,7 @@
 #include <iostream>
 
 MusicSyncTool::MusicSyncTool(QWidget* parent)
-	: QMainWindow(parent), ignoreLyric(false), sortBy(Settings::TITLE) {
+	: QMainWindow(parent), ignoreLyric(false), sortBy(Settings::TITLE), mediaPlayer(new QMediaPlayer(this)), audioOutput(new QAudioOutput(this)) {
 	ui.setupUi(this);
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
@@ -48,6 +40,11 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
 	qApp->installTranslator(&translator);
 	ui.retranslateUi(this);
 	file.close();
+    mediaPlayer->setAudioOutput(audioOutput);
+    audioOutput->setVolume(0.5);
+    ui.volumeSlider->setValue(50);
+    ui.volumeLabel->setText(tr("音量：") + "50%");
+    connect(mediaPlayer, SIGNAL(positionChanged(qint64)), this, SLOT(setSliderPosition(qint64)));
 }
 /**
 * @brief 析构函数
@@ -59,6 +56,8 @@ MusicSyncTool::~MusicSyncTool() {
 	if (dbRemote.isOpen()) {
 		dbRemote.close();
 	}
+    delete mediaPlayer;
+    delete audioOutput;
 }
 /**
 * @brief 打开文件夹
@@ -396,6 +395,7 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
 		result->exec();
 	}
 }
+void MusicSyncTool::setNowPlayingTitle(QString file) { ui.nowPlaying->setText(tr("正在播放：") + file); }
 /**
 * @brief 获取语言
 * @return 语言
@@ -514,12 +514,75 @@ void MusicSyncTool::on_searchLocal_returnPressed()
 */
 void MusicSyncTool::on_searchRemote_returnPressed()
 {
-	searchMusic(pathType::REMOTE, ui.searchRemote->text());
-}
+	searchMusic(pathType::REMOTE, ui.searchRemote->text()); }
+
+void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(int row, int column) { setTotalLength(pathType::LOCAL, row); }
+
 /**
 * @brief 关于按钮触发
 * @param triggered 是否触发
 */
-void MusicSyncTool::on_actionExit_triggered(bool triggered) {
-	exit(EXIT_SUCCESS);
+void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
+
+void MusicSyncTool::on_playControl_clicked() {
+    if (!mediaPlayer->hasAudio()) {
+        QMessageBox::critical(this, tr("错误"), tr("没有选定音频！"));
+        return;
+    } else {
+        if (mediaPlayer->isPlaying()) {
+            mediaPlayer->pause();
+            ui.playControl->setText(tr("播放"));
+        } else {
+            mediaPlayer->play();
+            ui.playControl->setText(tr("暂停"));
+        }
+    }
+}
+
+void MusicSyncTool::setSliderPosition(qint64 position) { 
+	ui.playSlider->setValue(position);
+    ui.playProgress->setText(QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000));
+}
+
+void MusicSyncTool::on_playSlider_sliderMoved(int position) { 
+	mediaPlayer->setPosition(position); 
+	ui.playProgress->setText(QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000));
+}
+
+void MusicSyncTool::on_playSlider_sliderPressed() { mediaPlayer->setPosition(ui.playSlider->value()); }
+
+void MusicSyncTool::on_volumeSlider_sliderPressed() { 
+	audioOutput->setVolume(ui.volumeSlider->value() / 100.0); 
+	ui.volumeLabel->setText(tr("音量：") + QString::number(ui.volumeSlider->value()) + "%");
+}
+
+void MusicSyncTool::on_volumeSlider_sliderMoved(int position) {
+    audioOutput->setVolume(position / 100.0);
+    ui.volumeLabel->setText(tr("音量：") + QString::number(position) + "%");
+}
+
+
+void MusicSyncTool::setTotalLength(pathType path, int row) {
+    const QTableWidget &widget = (path == pathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote);
+    QString sql = "SELECT fileName FROM musicInfo WHERE";
+    sql += " title = \"" + widget.item(row, 0)->text() + "\" AND artist = \"" + widget.item(row, 1)->text() +
+    "\" AND album = \"" + widget.item(row, 2)->text() + "\"";
+    QSqlQuery &query = (path == pathType::LOCAL ? queryLocal : queryRemote);
+    query.exec(sql);
+    query.next();
+    QString fileName = query.value(0).toString();
+    QString filePath = (path == pathType::LOCAL ? localPath : remotePath) + "/" + fileName;
+    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    TagLib::FileRef f(filePath.toStdWString().c_str());
+    if (!f.isNull() && f.audioProperties()) {
+        qint64 length = f.audioProperties()->lengthInMilliseconds();
+        setNowPlayingTitle(fileName);
+        mediaPlayer->setPlaybackRate(1.0);
+        mediaPlayer->setPosition(0);
+        mediaPlayer->play();
+        ui.playControl->setText(tr("暂停"));
+        ui.playSlider->setMaximum(length);
+        ui.playSlider->setValue(0);
+        ui.playProgress->setText("00:00");
+    }
 }

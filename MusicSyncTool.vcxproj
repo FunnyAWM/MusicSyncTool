@@ -38,13 +38,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.8.0_msvc2022_64</QtInstall>
-    <QtModules>core;gui;widgets;sql</QtModules>
+    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtModules>core;gui;widgets;multimedia;sql</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.8.0_msvc2022_64</QtInstall>
-    <QtModules>core;gui;widgets;sql</QtModules>
+    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtModules>core;gui;widgets;multimedia;sql</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
     <QtDeploy>true</QtDeploy>
   </PropertyGroup>
@@ -70,14 +70,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Qt\6.8.0\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Qt\6.8.1\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Qt\6.8.0\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Qt\6.8.1\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
@@ -117,17 +117,11 @@
     <ClCompile Include="ShowDupe.cpp" />
     <None Include="packages.config" />
     <QtRcc Include="MusicSyncTool.qrc" />
-    <QtUic Include="AboutPage.ui" />
-    <QtUic Include="CopyResult.ui" />
-    <QtUic Include="LoadingPage.ui" />
-    <QtUic Include="MusicSyncTool.ui" />
     <QtMoc Include="MusicSyncTool.h" />
     <ClCompile Include="AboutPage.cpp" />
     <ClCompile Include="LoadingPage.cpp" />
     <ClCompile Include="MusicSyncTool.cpp" />
     <ClCompile Include="main.cpp" />
-    <QtUic Include="Settings.ui" />
-    <QtUic Include="ShowDupe.ui" />
     <ResourceCompile Include="MusicSyncTool.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +145,13 @@
   <ItemGroup>
     <QtTranslation Include="Translation_en_US.ts" />
     <QtTranslation Include="Translation_zh_Hans.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="AboutPage.ui" />
+    <QtUic Include="CopyResult.ui" />
+    <QtUic Include="LoadingPage.ui" />
+    <QtUic Include="MusicSyncTool.ui" />
+    <QtUic Include="Settings.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

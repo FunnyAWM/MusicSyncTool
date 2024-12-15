@@ -26,9 +26,6 @@
     <QtRcc Include="MusicSyncTool.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
-    <QtUic Include="MusicSyncTool.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="MusicSyncTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -80,23 +77,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="AboutPage.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="LoadingPage.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="ShowDupe.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="Settings.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="CopyResult.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="MusicSyncTool.ico">
       <Filter>Resource Files</Filter>
     </Image>
@@ -108,5 +88,22 @@
     <QtTranslation Include="Translation_zh_Hans.ts">
       <Filter>Translation Files</Filter>
     </QtTranslation>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="AboutPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CopyResult.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="LoadingPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MusicSyncTool.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Settings.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

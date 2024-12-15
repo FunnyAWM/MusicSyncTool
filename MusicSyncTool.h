@@ -8,6 +8,16 @@
 #include <QtSql/QSqlRecord>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlDriver>
+#include <QtMultimedia/QMediaPlayer>
+#include <QtMultimedia/QAudioOutput>
+#include <QFile>
+#include <QFileDialog>
+#include <QJsonObject>
+#include <QDir>
+#include <QSet>
+#include <QString>
+#include <QMessageBox>
+#include <QTranslator>
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
 #include "LoadingPage.h"
@@ -31,6 +41,9 @@ class MusicSyncTool : public QMainWindow
     bool ignoreLyric;
 	int sortBy;
     QString language;
+    QMediaPlayer* mediaPlayer;
+    QAudioOutput* audioOutput;
+
 public:
     enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
@@ -42,7 +55,9 @@ public:
     QStringList getSelectedMusic(pathType);
     void showSettings();
     void copyMusic(QString, QStringList, QString) const;
+    void setNowPlayingTitle(QString);
     QString getLanguage();
+    void setTotalLength(pathType, int);
     void showLoading();
 	void stopLoading();
 public slots:
@@ -57,8 +72,15 @@ public slots:
 	void on_refreshRemote_clicked();
 	void on_searchLocal_returnPressed();
 	void on_searchRemote_returnPressed();
+    void on_tableWidgetLocal_cellDoubleClicked(int,int);
     void saveSettings(Settings::set);
     void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
+    void on_playControl_clicked();
+    void on_playSlider_sliderMoved(int);
+    void on_playSlider_sliderPressed();
+    void on_volumeSlider_sliderMoved(int);
+    void on_volumeSlider_sliderPressed();
+    void setSliderPosition(qint64);
 };
 // QT_END_NAMESPACE
