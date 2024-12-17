@@ -4,14 +4,13 @@
 #include <QMainWindow>
 #include <QFile>
 #include <QJsonDocument>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlRecord>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlDriver>
-#include <QtMultimedia/QMediaPlayer>
-#include <QtMultimedia/QAudioOutput>
-#include <QThread>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QSqlError>
+#include <QSqlDriver>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QFileDialog>
 #include <QJsonObject>
 #include <QDir>
@@ -19,6 +18,10 @@
 #include <QString>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QtConcurrent>
+#include <QFuture>
+#include <QThread>
+#include <QThreadPool>
 #include "ui_MusicSyncTool.h"
 #include "AboutPage.h"
 #include "LoadingPage.h"
@@ -41,7 +44,7 @@ class MusicSyncTool : public QMainWindow
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
-	LoadingPage loading = LoadingPage();
+	LoadingPage* loading = new LoadingPage();
     bool ignoreLyric;
 	int sortBy;
     QString language;
@@ -62,6 +65,7 @@ public:
     void setMediaWidget(playState);
     void openFolder(pathType);
     void getMusic(pathType);
+    void loadToDB(pathType);
     void searchMusic(pathType, QString);
     void addToErrorList(QString, fileErrorType);
     QStringList getDuplicatedMusic(pathType);
@@ -72,8 +76,7 @@ public:
     void setNowPlayingTitle(QString);
     QString getLanguage();
     void setTotalLength(pathType, int);
-    void showLoading();
-	void stopLoading();
+    void connectSlots();
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
@@ -98,6 +101,10 @@ public slots:
     void on_volumeSlider_sliderPressed();
     void endMedia(QMediaPlayer::PlaybackState);
     void setSliderPosition(qint64);
+signals:
+    void total(int total);
+    void current(int current);
+    void finished();
 };
 // QT_END_NAMESPACE
 #endif // MUSICSYNCTOOL_H

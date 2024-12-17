@@ -20,6 +20,7 @@ MusicSyncTool::MusicSyncTool(QWidget* parent)
     initUI();
     loadLanguage();
     initMediaPlayer();
+    connectSlots();
     setMediaWidget(playState::STOPPED);
 }
 /**
@@ -132,92 +133,101 @@ void MusicSyncTool::openFolder(pathType path) {
 */
 void MusicSyncTool::getMusic(pathType path) {
 	qDebug() << "[INFO] Scanning started";
-	clock_t start = clock();
 	if (localPath == "" && remotePath == "") {
 		qDebug() << "[WARN] No path selected";
 		return;
 	}
-	emit showLoading();
-	QDir dir(path == pathType::LOCAL ? localPath : remotePath);
-	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, track INT, fileName TEXT)";
-	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
-	query.exec(sql);
-	QStringList newFileList = dir.entryList(QDir::Files);
-	sql = "SELECT fileName FROM musicInfo";
-	query.exec(sql);
-	QStringList oldFileList;
-	while (query.next()) {
-		oldFileList.append(query.value(0).toString());
-	}
-	newFileList.sort();
-	oldFileList.sort();
-	for (int i = 0; i < oldFileList.size(); i++) {
-		if (!newFileList.contains(oldFileList.at(i))) {
-			sql = "DELETE FROM musicInfo WHERE fileName = \"" + oldFileList.at(i) + "\"";
-			query.exec(sql);
-			oldFileList.removeAt(i);
-			i = -1;
-		}
-	}
-	for (int i = 0; i < newFileList.size(); i++) {
-		if (oldFileList.contains(newFileList.at(i)) || newFileList.at(i).contains(".lrc")) {
-			newFileList.removeAt(i);
-			i = -1;
-		}
-	}
-	newFileList.removeOne("musicInfo.db");
-	for (int i = 0; i < newFileList.size(); i++) {
-		QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
-		TagLib::FileRef f(file.toStdWString().c_str());
-		if (!f.isNull() && f.tag()) {
-			TagLib::Tag* tag = f.tag();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (\""
-				+ QString::fromStdString(tag->title().to8Bit(true))
-				+ "\", \"" + QString::fromStdString(tag->artist().to8Bit(true))
-				+ "\", \"" + QString::fromStdString(tag->album().to8Bit(true))
-				+ "\", \"" + QString::fromStdString(tag->genre().to8Bit(true))
-				+ "\", " + QString::number(tag->year())
-				+ ", " + QString::number(tag->track())
-				+ ", \"" + newFileList.at(i)
-				+ "\")";
-			query.exec(sql);
-		} else {
-			continue;
-		}
-	}
-	sql = "SELECT COUNT(*) FROM musicInfo";
-	query.exec(sql);
-	query.next();
-	int tableSize = query.value(0).toInt();
-	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
-	switch (sortBy) {
+    connect(this, SIGNAL(total(int)), loading, SLOT(setTotal(int)));
+    connect(this, SIGNAL(current(int)), loading, SLOT(setProgress(int)));
+    connect(this, SIGNAL(finished()), loading, SLOT(stopPage()));
+    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::loadToDB, this, path);
+    loading->showPage();
+}
+void MusicSyncTool::loadToDB(pathType path) {
+    clock_t start = clock();
+    QDir dir(path == pathType::LOCAL ? localPath : remotePath);
+    QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
+                  "track INT, fileName TEXT)";
+    QSqlQuery &query = (path == pathType::LOCAL ? queryLocal : queryRemote);
+    query.exec(sql);
+    QStringList newFileList = dir.entryList(QDir::Files);
+    sql = "SELECT fileName FROM musicInfo";
+    query.exec(sql);
+    QStringList oldFileList;
+    while (query.next()) {
+        oldFileList.append(query.value(0).toString());
+    }
+    newFileList.sort();
+    oldFileList.sort();
+    for (int i = 0; i < oldFileList.size(); i++) {
+        if (!newFileList.contains(oldFileList.at(i))) {
+            sql = "DELETE FROM musicInfo WHERE fileName = \"" + oldFileList.at(i) + "\"";
+            query.exec(sql);
+            oldFileList.removeAt(i);
+            i = -1;
+        }
+    }
+    for (int i = 0; i < newFileList.size(); i++) {
+        if (oldFileList.contains(newFileList.at(i)) || newFileList.at(i).contains(".lrc")) {
+            newFileList.removeAt(i);
+            i = -1;
+        }
+    }
+    newFileList.removeOne("musicInfo.db");
+    emit total(newFileList.size());
+    emit current(0);
+    for (int i = 0; i < newFileList.size(); i++) {
+        QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
+        TagLib::FileRef f(file.toStdWString().c_str());
+        if (!f.isNull() && f.tag()) {
+            TagLib::Tag *tag = f.tag();
+            sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (\"" +
+                QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->genre().to8Bit(true)) + "\", " + QString::number(tag->year()) + ", " +
+                QString::number(tag->track()) + ", \"" + newFileList.at(i) + "\")";
+            query.exec(sql);
+            emit current(i);
+        } else {
+            continue;
+        }
+    }
+    sql = "SELECT COUNT(*) FROM musicInfo";
+    query.exec(sql);
+    query.next();
+    int tableSize = query.value(0).toInt();
+    emit total(tableSize);
+    sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
+    switch (sortBy) {
     case sortByEnum::TITLE:
-		sql += " title";
-		break;
+        sql += " title";
+        break;
     case sortByEnum::ARTIST:
-		sql += " artist";
-		break;
+        sql += " artist";
+        break;
     case sortByEnum::ALBUM:
-		sql += " album";
-		break;
-	default:
-		sql += " title";
-		break;
-	}
-	query.exec(sql);
-	QTableWidget* targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
-	targetTable->clearContents();
-	targetTable->setRowCount(tableSize);
-	while (query.next()) {
-		for (int i = 0; i < 6; i++) {
-			if (query.value(i) != 0) {
-				targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
-			}
-		}
-	}
-	clock_t end = clock();
-	emit stopLoading();
-	qDebug() << "[INFO] Scanning finished in" << double(end - start) / CLOCKS_PER_SEC << "seconds";
+        sql += " album";
+        break;
+    default:
+        sql += " title";
+        break;
+    }
+    query.exec(sql);
+    QTableWidget *targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+    targetTable->clearContents();
+    targetTable->setRowCount(tableSize);
+    for (int j = 0; query.next(); j++) {
+        emit current(j);
+        for (int i = 0; i < 6; i++) {
+            if (query.value(i) != 0) {
+                targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
+            }
+        }
+    }
+    clock_t end = clock();
+    qDebug() << "[INFO] Scanning finished in" << (double)(end - start) / CLOCKS_PER_SEC << "seconds";
+    emit finished();
 }
 /**
 * @brief 搜索音乐
@@ -367,6 +377,7 @@ void MusicSyncTool::saveSettings(set entity)
 	obj["ignoreLyric"] = entity.ignoreLyric;
 	obj["sortBy"] = entity.sortBy;
 	obj["language"] = entity.language;
+    obj["favoriteTag"] = entity.favoriteTag;
 	int temp = sortBy;
 	ignoreLyric = entity.ignoreLyric;
 	sortBy = entity.sortBy;
@@ -457,7 +468,7 @@ void MusicSyncTool::showCopyResult() {
     errorList = nullptr;
 }
 void MusicSyncTool::setNowPlayingTitle(QString file) { 
-        ui.nowPlaying->setText("正在播放：" + file);
+    ui.nowPlaying->setText("正在播放：" + file);
 }
 /**
 * @brief 获取语言
@@ -466,18 +477,6 @@ void MusicSyncTool::setNowPlayingTitle(QString file) {
 QString MusicSyncTool::getLanguage()
 {
 	return language;
-}
-/**
-* @brief 显示加载页面
-*/
-void MusicSyncTool::showLoading() {
-	loading.show();
-}
-/**
-* @brief 关闭加载页面
-*/
-void MusicSyncTool::stopLoading() {
-	loading.close();
 }
 /**
 * @brief 本地音乐按钮触发
@@ -626,15 +625,14 @@ void MusicSyncTool::on_playSlider_sliderPressed() { mediaPlayer->setPosition(ui.
 
 void MusicSyncTool::on_volumeSlider_sliderPressed() { 
 	audioOutput->setVolume(ui.volumeSlider->value() / 100.0); 
-	QString text;
-        text = "音量：" + QString::number(ui.volumeSlider->value()) + "%";
+	QString text = "音量：" + QString::number(ui.volumeSlider->value()) + "%";
     ui.volumeLabel->setText(text);
 }
 
 void MusicSyncTool::endMedia(QMediaPlayer::PlaybackState state) { 
 	if (state == QMediaPlayer::PlaybackState::StoppedState) {
-            ui.playControl->setText(tr("播放"));
-            ui.nowPlaying->setText(tr("播放已结束。"));
+        ui.playControl->setText(tr("播放"));
+        ui.nowPlaying->setText(tr("播放已结束。"));
         ui.playSlider->setValue(0);
         ui.playProgress->setText("00:00");
         
@@ -672,4 +670,7 @@ void MusicSyncTool::setTotalLength(pathType path, int row) {
         ui.playSlider->setValue(0);
         ui.playProgress->setText("00:00");
     }
+}
+
+void MusicSyncTool::connectSlots() { 
 }
