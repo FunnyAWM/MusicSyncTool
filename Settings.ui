@@ -22,50 +22,6 @@
      <property name="rightMargin">
       <number>5</number>
      </property>
-     <item row="2" column="1">
-      <layout class="QVBoxLayout" name="sortByBox">
-       <item>
-        <widget class="QLabel" name="sortByText">
-         <property name="text">
-          <string>排序依据：</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="titleSelect">
-         <property name="text">
-          <string>标题</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">sortByGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="artistSelect">
-         <property name="text">
-          <string>艺术家</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">sortByGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="albumSelect">
-         <property name="text">
-          <string>专辑</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">sortByGroup</string>
-         </attribute>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="4" column="1">
       <spacer name="verticalSpacer">
        <property name="orientation">
@@ -158,7 +114,7 @@
             <string>中文</string>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">buttonGroup</string>
+            <string notr="true">languageGroup</string>
            </attribute>
           </widget>
          </item>
@@ -168,7 +124,7 @@
             <string>English</string>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">buttonGroup</string>
+            <string notr="true">languageGroup</string>
            </attribute>
           </widget>
          </item>
@@ -190,7 +146,123 @@
       </spacer>
      </item>
      <item row="0" column="2">
-      <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>自定义“喜欢的音乐”标签：</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="favoriteTagEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用于指定由播放器定义的“我喜欢的音乐”的特殊音频标签。若无可不填写，但是会影响喜欢的音乐的筛选。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QVBoxLayout" name="sortByBox">
+         <item>
+          <widget class="QLabel" name="sortByText">
+           <property name="text">
+            <string>排序依据：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="titleSelect">
+           <property name="text">
+            <string>标题</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">sortByGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="artistSelect">
+           <property name="text">
+            <string>艺术家</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">sortByGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="albumSelect">
+           <property name="text">
+            <string>专辑</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">sortByGroup</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QLabel" name="orderLabel">
+           <property name="text">
+            <string>排序方式：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="ascButton">
+           <property name="text">
+            <string>升序</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">orderGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="descButton">
+           <property name="text">
+            <string>降序</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">orderGroup</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -217,7 +289,8 @@
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="languageGroup"/>
   <buttongroup name="sortByGroup"/>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="orderGroup"/>
  </buttongroups>
 </ui>

@@ -4,6 +4,7 @@ Settings::Settings(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
+    
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
 	QFile file = QFile("settings.json");
@@ -17,15 +18,15 @@ Settings::Settings(QWidget *parent)
 		return;
 	}
 	QJsonObject obj = settings.object();
-	ui.ignoreLyricBox->setChecked(obj["ignoreLyric"].toBool());
+    setIgnoreLyric(obj["ignoreLyric"].toBool());
 	switch (obj["sortBy"].toInt()) {
-		case TITLE:
+		case sortByEnum::TITLE:
 			ui.titleSelect->setChecked(true);
 			break;
-		case ARTIST:
+		case sortByEnum::ARTIST:
 			ui.artistSelect->setChecked(true);
 			break;
-		case ALBUM:
+        case sortByEnum::ALBUM:
 			ui.albumSelect->setChecked(true);
 			break;
 		default:
@@ -44,27 +45,63 @@ Settings::Settings(QWidget *parent)
 	file.close();
 }
 
-Settings::set Settings::getSettings() {
+set Settings::getSettings() {
 	set entity;
 	entity.ignoreLyric = ui.ignoreLyricBox->isChecked();
 	if (ui.titleSelect->isChecked()) {
-		entity.sortBy = TITLE;
+		entity.sortBy = sortByEnum::TITLE;
 	}
 	else if (ui.artistSelect->isChecked()) {
-		entity.sortBy = ARTIST;
+		entity.sortBy = sortByEnum::ARTIST;
 	}
 	else if (ui.albumSelect->isChecked()) {
-		entity.sortBy = ALBUM;
+		entity.sortBy = sortByEnum::ALBUM;
 	}
 	if (ui.chineseButton->isChecked()) {
 		entity.language = "Chinese";
 	}
 	else if (ui.englishButton->isChecked()) {
 		entity.language = "English";
-		
 	}
+    entity.favoriteTag = ui.favoriteTagEdit->text();
 	return entity;
 }
+
+void Settings::setIgnoreLyric(bool ignoreLyric) { 
+	entity.ignoreLyric = ignoreLyric;
+	ui.ignoreLyricBox->setChecked(ignoreLyric);
+}
+
+void Settings::setSortBy(int sortBy) {
+    entity.sortBy = sortBy;
+    switch (sortBy) {
+    case sortByEnum::TITLE:
+        ui.titleSelect->setChecked(true);
+        break;
+    case sortByEnum::ARTIST:
+        ui.artistSelect->setChecked(true);
+        break;
+    case sortByEnum::ALBUM:
+        ui.albumSelect->setChecked(true);
+        break;
+    default:
+        ui.titleSelect->setChecked(true);
+        break;
+    }
+}
+
+void Settings::setLanguage(QString language) {
+    entity.language = language;
+    if (language == "Chinese") {
+        ui.chineseButton->setChecked(true);
+    } else if (language == "English") {
+        ui.englishButton->setChecked(true);
+    } else {
+        ui.chineseButton->setChecked(true);
+    }
+}
+
+void Settings::setFavoriteTag(QString favorite) { entity.favoriteTag = favorite;}
 
 void Settings::on_confirmButton_clicked()
 {

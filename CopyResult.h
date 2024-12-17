@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COPYRESULT_H
+#define COPYRESULT_H
 
 #include <QDialog>
 #include "ui_CopyResult.h"
@@ -15,3 +16,5 @@ public:
 private:
 	Ui::CopyResultClass ui;
 };
+
+#endif // COPYRESULT_H

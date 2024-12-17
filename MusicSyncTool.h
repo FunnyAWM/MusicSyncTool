@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef MUSICSYNCTOOL_H
+#define MUSICSYNCTOOL_H
 
 #include <QMainWindow>
 #include <QFile>
@@ -10,7 +11,7 @@
 #include <QtSql/QSqlDriver>
 #include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QAudioOutput>
-#include <QFile>
+#include <QThread>
 #include <QFileDialog>
 #include <QJsonObject>
 #include <QDir>
@@ -24,37 +25,50 @@
 #include "ShowDupe.h"
 #include "Settings.h"
 #include "CopyResult.h"
+#include "MusicProperties.h"
+
+using namespace TOOLPROPERTIES;
 
 class MusicSyncTool : public QMainWindow
 {
     Q_OBJECT
 
     Ui::MusicSyncToolClass ui;
+    QTranslator *translator;
     QString localPath;
     QString remotePath;
     QSqlDatabase dbLocal;
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
-    QJsonDocument settings;
 	LoadingPage loading = LoadingPage();
     bool ignoreLyric;
 	int sortBy;
     QString language;
     QMediaPlayer* mediaPlayer;
     QAudioOutput* audioOutput;
-
+    QString nowPlaying;
+    QStringList *errorList;
+    QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
 public:
-    enum class pathType { LOCAL, REMOTE };
     MusicSyncTool(QWidget *parent = nullptr);
     ~MusicSyncTool();
+    void initDatabase();
+    void loadSettings();
+    void initMediaPlayer();
+    void loadLanguage();
+    void initUI();
+    void popError(PET);
+    void setMediaWidget(playState);
     void openFolder(pathType);
     void getMusic(pathType);
-	void searchMusic(pathType, QString);
+    void searchMusic(pathType, QString);
+    void addToErrorList(QString, fileErrorType);
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void showSettings();
-    void copyMusic(QString, QStringList, QString) const;
+    void copyMusic(QString, QStringList, QString);
+    void showCopyResult();
     void setNowPlayingTitle(QString);
     QString getLanguage();
     void setTotalLength(pathType, int);
@@ -73,7 +87,8 @@ public slots:
 	void on_searchLocal_returnPressed();
 	void on_searchRemote_returnPressed();
     void on_tableWidgetLocal_cellDoubleClicked(int,int);
-    void saveSettings(Settings::set);
+    void on_tableWidgetRemote_cellDoubleClicked(int, int);
+    void saveSettings(set);
     void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
     void on_playControl_clicked();
@@ -81,6 +96,8 @@ public slots:
     void on_playSlider_sliderPressed();
     void on_volumeSlider_sliderMoved(int);
     void on_volumeSlider_sliderPressed();
+    void endMedia(QMediaPlayer::PlaybackState);
     void setSliderPosition(qint64);
 };
 // QT_END_NAMESPACE
+#endif // MUSICSYNCTOOL_H

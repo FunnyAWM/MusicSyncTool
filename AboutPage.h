@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ABOUTPAGE_H
+#define ABOUTPAGE_H
 
 #include <QDialog>
 #include "ui_AboutPage.h"
@@ -14,3 +15,5 @@ public:
 private:
 	Ui::AboutPageClass ui;
 };
+
+#endif // ABOUTPAGE_H

@@ -259,6 +259,9 @@
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
+          <property name="tickInterval">
+           <number>1000</number>
+          </property>
          </widget>
         </item>
         <item>

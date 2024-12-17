@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOADINGPAGE_H
+#define LOADINGPAGE_H
 
 #include <QWidget>
 #include "ui_LoadingPage.h"
@@ -15,3 +16,5 @@ public:
 private:
 	Ui::LoadingPageClass ui;
 };
+
+#endif // LOADINGPAGE_H
