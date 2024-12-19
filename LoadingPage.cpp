@@ -4,6 +4,7 @@
 LoadingPage::LoadingPage(QWidget *parent)
 	: QWidget(parent) {
 	ui.setupUi(this);
+    this->setWindowFlags(Qt::FramelessWindowHint);
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 }
 

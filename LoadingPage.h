@@ -11,11 +11,12 @@ class LoadingPage : public QWidget
 public:
 	LoadingPage(QWidget *parent = nullptr);
 	~LoadingPage() = default;
-	void showPage();
+	
 private:
 	Ui::LoadingPageClass ui;
     int total;
 public slots:
+    void showPage();
     void setTotal(int total);
     void setProgress(int value);
     void stopPage();

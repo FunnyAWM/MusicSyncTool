@@ -59,13 +59,13 @@ public:
     void initMediaPlayer();
     void loadLanguage();
     void initUI();
-    void popError(PET);
     void setMediaWidget(playState);
     void openFolder(pathType);
     void getMusic(pathType);
     void getMusicConcurrent(pathType);
     void searchMusic(pathType, QString);
     void addToErrorList(QString, fileErrorType);
+    void popError(PET);
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void showSettings();
@@ -96,6 +96,7 @@ public slots:
     void on_playSlider_sliderMoved(int);
     void on_playSlider_sliderPressed();
     void on_volumeSlider_sliderMoved(int);
+    void on_volumeSlider_valueChanged(int);
     void on_volumeSlider_sliderPressed();
     void on_favoriteOnlyLocal_clicked();
     void on_favoriteOnlyRemote_clicked();
@@ -103,6 +104,7 @@ public slots:
     void setSliderPosition(qint64);
     void showCopyResult();
 signals:
+    void started();
     void total(int total);
     void current(int current);
     void finished();

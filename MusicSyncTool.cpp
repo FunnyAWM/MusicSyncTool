@@ -7,6 +7,9 @@
 #include <taglib/tpropertymap.h>
 #include <iostream>
 
+/**
+* @brief 构造函数
+*/
 MusicSyncTool::MusicSyncTool(QWidget* parent)
 	: QMainWindow(parent), 
 	translator(new QTranslator(this)), 
@@ -33,12 +36,18 @@ MusicSyncTool::~MusicSyncTool() {
     delete mediaPlayer;
     delete audioOutput;
 }
+/**
+* @brief 初始化数据库
+*/
 void MusicSyncTool::initDatabase() {
     dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
     dbRemote = QSqlDatabase::addDatabase("QSQLITE", "musicInfoRemote");
     queryLocal = QSqlQuery(dbLocal);
     queryRemote = QSqlQuery(dbRemote);
 }
+/**
+* @brief 加载设置
+*/
 void MusicSyncTool::loadSettings() {
     QFile file("settings.json");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -58,10 +67,16 @@ void MusicSyncTool::loadSettings() {
     entitySave.favoriteTag = obj["favoriteTag"].toString();
 	file.close();
 }
+/**
+* @brief 初始化媒体播放器
+*/
 void MusicSyncTool::initMediaPlayer() {
     mediaPlayer->setAudioOutput(audioOutput);
     audioOutput->setVolume(0.5);
 }
+/**
+* @brief 加载语言
+*/
 void MusicSyncTool::loadLanguage() {
     if (entitySave.language == "Chinese") {
         qDebug() << translator->load("translations/Translation_zh_Hans.qm");
@@ -71,6 +86,9 @@ void MusicSyncTool::loadLanguage() {
     qApp->installTranslator(translator);
     ui.retranslateUi(this);
 }
+/**
+* @brief 初始化UI组件
+*/
 void MusicSyncTool::initUI() {
     ui.setupUi(this);
     this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
@@ -80,6 +98,10 @@ void MusicSyncTool::initUI() {
     ui.volumeLabel->setText(tr("音量：") + "50%");
     ui.nowPlaying->setText(tr("播放已结束。"));
 }
+/**
+* @brief 弹出错误
+* @param type 错误类型
+*/
 void MusicSyncTool::popError(PET type) {
     if (type == PET::NOAUDIO) {
         QMessageBox::critical(this, tr("错误"), tr("没有选定音频！（提示：可以通过双击表格中的歌曲来预览）"));
@@ -91,6 +113,10 @@ void MusicSyncTool::popError(PET type) {
         QMessageBox::critical(this, tr("错误"), tr("没有选定文件！"));
     }
 }
+/**
+* @brief 设置媒体控件
+* @param state 播放状态
+*/
 void MusicSyncTool::setMediaWidget(playState state) {
         if (state == playState::PLAYING) {
             ui.playControl->setText(tr("暂停"));
@@ -138,10 +164,14 @@ void MusicSyncTool::getMusic(pathType path) {
 		return;
 	}
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path);
-    loading->showPage();
 }
+/**
+* @brief 获取音乐信息（并发）
+* @param path 路径类型（本地或远程）
+*/
 void MusicSyncTool::getMusicConcurrent(pathType path) {
     clock_t start = clock();
+    emit started();
     QDir dir(path == pathType::LOCAL ? localPath : remotePath);
     QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
                   "track INT, favorite BOOL, fileName TEXT)";
@@ -295,6 +325,11 @@ void MusicSyncTool::searchMusic(pathType path, QString text)
 		}
 	}
 }
+/**
+* @brief 添加到错误列表
+* @param file 文件名
+* @param error 错误类型
+*/
 void MusicSyncTool::addToErrorList(QString file, fileErrorType error) {
     if (error == fileErrorType::DUPLICATE) {
        errorList.append(tr("复制") + file + tr("失败：文件已存在"));
@@ -445,6 +480,7 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
 	if (source == "" || fileList.isEmpty() || target == "") {
 		return;
 	}
+    emit started();
     emit total(fileList.size());
 	QDir dir(target);
 	if (dir.isEmpty()) {
@@ -492,6 +528,9 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
     emit finished();
     emit copyFinished();
 }
+/**
+* @brief 显示复制结果
+*/
 void MusicSyncTool::showCopyResult() {
     CopyResult *result = new CopyResult();
     QString errorString;
@@ -510,6 +549,10 @@ void MusicSyncTool::showCopyResult() {
     getMusic(pathType::LOCAL);
     getMusic(pathType::REMOTE);
 }
+/**
+* @brief 设置当前播放音乐
+* @param file 文件名
+*/
 void MusicSyncTool::setNowPlayingTitle(QString file) { 
     ui.nowPlaying->setText("正在播放：" + file);
 }
@@ -573,7 +616,6 @@ void MusicSyncTool::on_copyToRemote_clicked() {
         return;
     }
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, localPath, fileList, remotePath);
-    loading->show();
 }
 /**
 * @brief 远程复制到本地按钮触发
@@ -589,7 +631,6 @@ void MusicSyncTool::on_copyToLocal_clicked() {
         return;
     }
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remotePath, fileList, localPath);
-    loading->show();
 }
 /**
 * @brief 检测本地重复音乐
@@ -628,13 +669,21 @@ void MusicSyncTool::on_searchLocal_returnPressed()
 void MusicSyncTool::on_searchRemote_returnPressed()
 {
 	searchMusic(pathType::REMOTE, ui.searchRemote->text()); }
-
+/**
+* @brief 本地表格双击触发
+* @param row 行
+* @param column 列
+*/
 void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(int row, int column) { setTotalLength(pathType::LOCAL, row); }
-
+/**
+* @brief 远程表格双击触发
+* @param row 行
+* @param column 列
+*/
 void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(int row, int column) { setTotalLength(pathType::REMOTE, row); }
 
 /**
-* @brief 关于按钮触发
+* @brief 退出按钮触发
 * @param triggered 是否触发
 */
 void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
@@ -701,6 +750,7 @@ void MusicSyncTool::on_volumeSlider_sliderMoved(int position) {
     ui.volumeLabel->setText(text);
 }
 
+void MusicSyncTool::on_volumeSlider_valueChanged(int position) { on_volumeSlider_sliderMoved(position); }
 
 void MusicSyncTool::setTotalLength(pathType path, int row) {
     const QTableWidget &widget = (path == pathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote);
@@ -739,7 +789,7 @@ void MusicSyncTool::getFavoriteMusic(pathType path) {
         popError(PET::NFT);
         return;
     }
-    loading->showPage();
+    emit started();
     QSqlQuery &query = (path == pathType::LOCAL ? queryLocal : queryRemote);
     int tableSize;
     QString sql = "SELECT COUNT(*) FROM musicInfo WHERE favorite = 1";
@@ -766,6 +816,7 @@ void MusicSyncTool::getFavoriteMusic(pathType path) {
 void MusicSyncTool::connectSlots() {
     connect(this, SIGNAL(total(int)), loading, SLOT(setTotal(int)));
     connect(this, SIGNAL(current(int)), loading, SLOT(setProgress(int)));
+    connect(this, SIGNAL(started()), loading, SLOT(showPage()));
     connect(this, SIGNAL(finished()), loading, SLOT(stopPage()));
     connect(this, SIGNAL(copyFinished()), this, SLOT(showCopyResult()));
     connect(mediaPlayer, SIGNAL(positionChanged(qint64)), this, SLOT(setSliderPosition(qint64)));
