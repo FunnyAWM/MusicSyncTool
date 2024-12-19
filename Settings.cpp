@@ -19,29 +19,10 @@ Settings::Settings(QWidget *parent)
 	}
 	QJsonObject obj = settings.object();
     setIgnoreLyric(obj["ignoreLyric"].toBool());
-	switch (obj["sortBy"].toInt()) {
-		case sortByEnum::TITLE:
-			ui.titleSelect->setChecked(true);
-			break;
-		case sortByEnum::ARTIST:
-			ui.artistSelect->setChecked(true);
-			break;
-        case sortByEnum::ALBUM:
-			ui.albumSelect->setChecked(true);
-			break;
-		default:
-			ui.titleSelect->setChecked(true);
-			break;
-	}
-	if (obj["language"].toString() == "Chinese") {
-		ui.chineseButton->setChecked(true);
-	}
-	else if (obj["language"].toString() == "English") {
-		ui.englishButton->setChecked(true);
-	}
-	else {
-		ui.chineseButton->setChecked(true);
-	}
+    setSortBy(obj["sortBy"].toInt());
+    setOrderBy(obj["orderBy"].toInt());
+    setLanguage(obj["language"].toString());
+    setFavoriteTag(obj["favoriteTag"].toString());
 	file.close();
 }
 
@@ -63,6 +44,11 @@ set Settings::getSettings() {
 	else if (ui.englishButton->isChecked()) {
 		entity.language = "English";
 	}
+    if (ui.ascButton->isChecked()) {
+        entity.orderBy = orderByEnum::ASC;
+    } else if (ui.descButton->isChecked()) {
+        entity.orderBy = orderByEnum::DESC;
+    }
     entity.favoriteTag = ui.favoriteTagEdit->text();
 	return entity;
 }
@@ -72,7 +58,7 @@ void Settings::setIgnoreLyric(bool ignoreLyric) {
 	ui.ignoreLyricBox->setChecked(ignoreLyric);
 }
 
-void Settings::setSortBy(int sortBy) {
+void Settings::setSortBy(short sortBy) {
     entity.sortBy = sortBy;
     switch (sortBy) {
     case sortByEnum::TITLE:
@@ -101,7 +87,25 @@ void Settings::setLanguage(QString language) {
     }
 }
 
-void Settings::setFavoriteTag(QString favorite) { entity.favoriteTag = favorite;}
+void Settings::setFavoriteTag(QString favorite) { 
+    entity.favoriteTag = favorite;
+    ui.favoriteTagEdit->setText(favorite);
+}
+
+void Settings::setOrderBy(short orderBy) {
+    entity.orderBy = orderBy;
+    switch (orderBy) {
+    case orderByEnum::ASC:
+        ui.ascButton->setChecked(true);
+        break;
+    case orderByEnum::DESC:
+        ui.descButton->setChecked(true);
+        break;
+    default:
+        ui.ascButton->setChecked(true);
+        break;
+    }
+}
 
 void Settings::on_confirmButton_clicked()
 {

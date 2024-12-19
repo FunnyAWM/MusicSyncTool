@@ -11,6 +11,7 @@
 #include <QJsonObject>
 
 using TOOLPROPERTIES::sortByEnum;
+using TOOLPROPERTIES::orderByEnum;
 
 class Settings : public QWidget
 {
@@ -20,9 +21,10 @@ public:
 	Settings(QWidget *parent = nullptr);
 	set getSettings();
     void setIgnoreLyric(bool);
-    void setSortBy(int);
+    void setSortBy(short);
     void setLanguage(QString);
     void setFavoriteTag(QString);
+    void setOrderBy(short);
 	~Settings();
 public slots:
 	void on_confirmButton_clicked();

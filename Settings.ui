@@ -245,6 +245,9 @@
            <property name="text">
             <string>升序</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">orderGroup</string>
            </attribute>
@@ -289,8 +292,8 @@
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="orderGroup"/>
   <buttongroup name="languageGroup"/>
   <buttongroup name="sortByGroup"/>
-  <buttongroup name="orderGroup"/>
  </buttongroups>
 </ui>

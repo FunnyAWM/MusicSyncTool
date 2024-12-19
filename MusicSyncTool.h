@@ -45,13 +45,11 @@ class MusicSyncTool : public QMainWindow
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
 	LoadingPage* loading = new LoadingPage();
-    bool ignoreLyric;
-	int sortBy;
-    QString language;
+    set entitySave;
     QMediaPlayer* mediaPlayer;
     QAudioOutput* audioOutput;
     QString nowPlaying;
-    QStringList *errorList;
+    QStringList errorList;
     QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
 public:
     MusicSyncTool(QWidget *parent = nullptr);
@@ -65,17 +63,17 @@ public:
     void setMediaWidget(playState);
     void openFolder(pathType);
     void getMusic(pathType);
-    void loadToDB(pathType);
+    void getMusicConcurrent(pathType);
     void searchMusic(pathType, QString);
     void addToErrorList(QString, fileErrorType);
     QStringList getDuplicatedMusic(pathType);
     QStringList getSelectedMusic(pathType);
     void showSettings();
     void copyMusic(QString, QStringList, QString);
-    void showCopyResult();
     void setNowPlayingTitle(QString);
     QString getLanguage();
     void setTotalLength(pathType, int);
+    void getFavoriteMusic(pathType);
     void connectSlots();
 public slots:
     void on_actionRemote_triggered(bool);
@@ -99,12 +97,16 @@ public slots:
     void on_playSlider_sliderPressed();
     void on_volumeSlider_sliderMoved(int);
     void on_volumeSlider_sliderPressed();
+    void on_favoriteOnlyLocal_clicked();
+    void on_favoriteOnlyRemote_clicked();
     void endMedia(QMediaPlayer::PlaybackState);
     void setSliderPosition(qint64);
+    void showCopyResult();
 signals:
     void total(int total);
     void current(int current);
     void finished();
+    void copyFinished();
 };
 // QT_END_NAMESPACE
 #endif // MUSICSYNCTOOL_H

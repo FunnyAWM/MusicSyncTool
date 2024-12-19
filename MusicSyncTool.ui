@@ -189,6 +189,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="favoriteOnlyLocal">
+        <property name="text">
+         <string>仅显示喜爱的音乐</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
@@ -222,6 +229,13 @@
        <widget class="QPushButton" name="refreshRemote">
         <property name="text">
          <string>刷新列表</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="favoriteOnlyRemote">
+        <property name="text">
+         <string>仅显示喜爱的音乐</string>
         </property>
        </widget>
       </item>
@@ -309,6 +323,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="maximum">
+           <number>100</number>
           </property>
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>

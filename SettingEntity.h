@@ -3,7 +3,8 @@
 #include <QString>
 struct set {
     bool ignoreLyric;
-    int sortBy;
+    short sortBy;
+    short orderBy;
     QString language;
     QString favoriteTag;
 };
