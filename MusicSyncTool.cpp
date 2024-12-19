@@ -118,16 +118,16 @@ void MusicSyncTool::popError(PET type) {
 * @param state 播放状态
 */
 void MusicSyncTool::setMediaWidget(playState state) {
-        if (state == playState::PLAYING) {
-            ui.playControl->setText(tr("暂停"));
-            setNowPlayingTitle(nowPlaying);
-		} else if (state == playState::PAUSED) {
-            ui.playControl->setText(tr("播放"));
-        } else if (state == playState::STOPPED) {
-            ui.playControl->setText(tr("播放"));
-            ui.nowPlaying->setText(tr("播放已结束。"));
-        }
-        ui.volumeLabel->setText(tr("音量：") + QString::number(ui.volumeSlider->value()) + "%");
+    if (state == playState::PLAYING) {
+        ui.playControl->setText(tr("暂停"));
+        setNowPlayingTitle(nowPlaying);
+	} else if (state == playState::PAUSED) {
+        ui.playControl->setText(tr("播放"));
+    } else if (state == playState::STOPPED) {
+        ui.playControl->setText(tr("播放"));
+        ui.nowPlaying->setText(tr("播放已结束。"));
+    }
+    ui.volumeLabel->setText(tr("音量：") + QString::number(ui.volumeSlider->value()) + "%");
 }
 /**
 * @brief 打开文件夹
@@ -209,28 +209,16 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
         TagLib::FileRef f(file.toStdWString().c_str());
         if (!f.isNull() && f.tag()) {
             TagLib::Tag *tag = f.tag();
-            if (key == "") {
-                sql =
-                    "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
-                    QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->genre().to8Bit(true)) + "\", " + QString::number(tag->year()) + ", " +
-                    "0, " + QString::number(tag->track()) + ", \"" + newFileList.at(i) + "\")";
-                query.exec(sql);
-                emit current(i);
-            } else {
-                sql =
-                    "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
-                    QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
-                    QString::fromStdString(tag->genre().to8Bit(true)) + "\", " + QString::number(tag->year()) + ", " +
-                    (tag->properties().contains(key) ? "1" : "0") + ", " + QString::number(tag->track()) + ", \"" +
-                    newFileList.at(i) + "\")";
-                query.exec(sql);
-                emit current(i);
-            }
+            sql =
+                "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
+                QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
+                QString::fromStdString(tag->genre().to8Bit(true)) + "\", " + QString::number(tag->year()) + ", " +
+                (tag->properties().contains(key) ? "1" : "0") + ", " + QString::number(tag->track()) + ", \"" +
+                newFileList.at(i) + "\")";
+            query.exec(sql);
+            emit current(i);
         } else {
             continue;
         }
@@ -302,8 +290,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
 * @param path 路径类型（本地或远程）
 * @param text 搜索文本
 */
-void MusicSyncTool::searchMusic(pathType path, QString text)
-{
+void MusicSyncTool::searchMusic(pathType path, QString text) {
 	if (text == "") {
 		getMusic(path);
 		return;
@@ -427,8 +414,7 @@ QStringList MusicSyncTool::getSelectedMusic(pathType path) {
 /**
 * @brief 显示设置页面
 */
-void MusicSyncTool::showSettings()
-{
+void MusicSyncTool::showSettings() {
 	Settings* page = new Settings();
 	connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
 	page->show();
@@ -437,8 +423,7 @@ void MusicSyncTool::showSettings()
 * @brief 保存设置
 * @param entity 配置实体
 */
-void MusicSyncTool::saveSettings(set entity)
-{
+void MusicSyncTool::saveSettings(set entity) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
 		qDebug() << "[FATAL] Error opening settings file";
@@ -560,8 +545,7 @@ void MusicSyncTool::setNowPlayingTitle(QString file) {
 * @brief 获取语言
 * @return 语言
 */
-QString MusicSyncTool::getLanguage()
-{
+QString MusicSyncTool::getLanguage() {
 	return entitySave.language;
 }
 /**
@@ -590,8 +574,7 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 * @brief 设置按钮触发
 * @param triggered 是否触发
 */
-void MusicSyncTool::on_actionSettings_triggered(bool)
-{
+void MusicSyncTool::on_actionSettings_triggered(bool) {
 	showSettings();
 }
 /**
@@ -659,16 +642,13 @@ void MusicSyncTool::on_refreshRemote_clicked() {
 /**
 * @brief 本地搜索框回车触发
 */
-void MusicSyncTool::on_searchLocal_returnPressed()
-{
+void MusicSyncTool::on_searchLocal_returnPressed() {
 	searchMusic(pathType::LOCAL, ui.searchLocal->text());
 }
 /**
 * @brief 远程搜索框回车触发
 */
-void MusicSyncTool::on_searchRemote_returnPressed()
-{
-	searchMusic(pathType::REMOTE, ui.searchRemote->text()); }
+void MusicSyncTool::on_searchRemote_returnPressed(){ searchMusic(pathType::REMOTE, ui.searchRemote->text()); }
 /**
 * @brief 本地表格双击触发
 * @param row 行
@@ -681,13 +661,14 @@ void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(int row, int column) {
 * @param column 列
 */
 void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(int row, int column) { setTotalLength(pathType::REMOTE, row); }
-
 /**
 * @brief 退出按钮触发
 * @param triggered 是否触发
 */
 void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
-
+/**
+ * @brief 播放控制按钮触发
+ */
 void MusicSyncTool::on_playControl_clicked() {
     if (!mediaPlayer->hasAudio()) {
         popError(PET::NOAUDIO);

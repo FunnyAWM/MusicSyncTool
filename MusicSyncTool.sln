@@ -9,17 +9,37 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MusicSyncToolSetup", "..\Mu
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|Win32.Build.0 = Debug|Win32
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|x64.ActiveCfg = Debug|x64
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|x64.Build.0 = Debug|x64
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|x86.ActiveCfg = Debug|Win32
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Debug|x86.Build.0 = Debug|Win32
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|Win32.ActiveCfg = Release|Win32
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|Win32.Build.0 = Release|Win32
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x64.ActiveCfg = Release|x64
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x64.Build.0 = Release|x64
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x86.ActiveCfg = Release|Win32
+		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x86.Build.0 = Release|Win32
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Debug|Win32.ActiveCfg = Debug
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Debug|Win32.Build.0 = Debug
 		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Debug|x64.ActiveCfg = Debug
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Debug|x86.ActiveCfg = Debug
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Debug|x86.Build.0 = Debug
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|Win32.ActiveCfg = Release
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|Win32.Build.0 = Release
 		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|x64.ActiveCfg = Release
 		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|x64.Build.0 = Release
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|x86.ActiveCfg = Release
+		{55C25DBD-F7E2-4C43-B0D5-AB1FCCECC4F0}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
