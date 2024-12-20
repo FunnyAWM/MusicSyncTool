@@ -1,39 +1,38 @@
 ﻿#ifndef MUSICSYNCTOOL_H
 #define MUSICSYNCTOOL_H
 
-#include <QMainWindow>
+#include <QAudioOutput>
+#include <QDir>
 #include <QFile>
+#include <QFileDialog>
+#include <QFuture>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QMainWindow>
+#include <QMediaPlayer>
+#include <QMessageBox>
+#include <QSet>
 #include <QSqlDatabase>
+#include <QSqlDriver>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <QSqlError>
-#include <QSqlDriver>
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QFileDialog>
-#include <QJsonObject>
-#include <QDir>
-#include <QSet>
 #include <QString>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QtConcurrent>
-#include <QFuture>
 #include <QThread>
 #include <QThreadPool>
-#include "ui_MusicSyncTool.h"
+#include <QTranslator>
+#include <QtConcurrent>
 #include "AboutPage.h"
-#include "LoadingPage.h"
-#include "ShowDupe.h"
-#include "Settings.h"
 #include "CopyResult.h"
+#include "LoadingPage.h"
 #include "MusicProperties.h"
+#include "Settings.h"
+#include "ShowDupe.h"
+#include "ui_MusicSyncTool.h"
 
 using namespace TOOLPROPERTIES;
 
-class MusicSyncTool : public QMainWindow
-{
+class MusicSyncTool : public QMainWindow {
     Q_OBJECT
 
     Ui::MusicSyncToolClass ui;
@@ -44,18 +43,19 @@ class MusicSyncTool : public QMainWindow
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
-	LoadingPage* loading = new LoadingPage();
+    LoadingPage *loading = new LoadingPage();
     // 0: local, 1: remote
     short currentPage[2] = {1, 1};
     short totalPage[2];
     const short PAGESIZE = 200;
     bool favoriteOnly[2] = {false, false};
     set entity;
-    QMediaPlayer* mediaPlayer;
-    QAudioOutput* audioOutput;
+    QMediaPlayer *mediaPlayer;
+    QAudioOutput *audioOutput;
     QString nowPlaying;
     QStringList errorList;
     QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
+
 public:
     MusicSyncTool(QWidget *parent = nullptr);
     ~MusicSyncTool();
@@ -83,20 +83,20 @@ public:
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
-	void on_actionSettings_triggered(bool);
+    void on_actionSettings_triggered(bool);
     void on_copyToRemote_clicked();
     void on_copyToLocal_clicked();
     void on_actionDupeLocal_triggered(bool);
     void on_actionDupeRemote_triggered(bool);
-	void on_refreshLocal_clicked();
-	void on_refreshRemote_clicked();
-	void on_searchLocal_returnPressed();
-	void on_searchRemote_returnPressed();
-    void on_tableWidgetLocal_cellDoubleClicked(int,int);
+    void on_refreshLocal_clicked();
+    void on_refreshRemote_clicked();
+    void on_searchLocal_returnPressed();
+    void on_searchRemote_returnPressed();
+    void on_tableWidgetLocal_cellDoubleClicked(int, int);
     void on_tableWidgetRemote_cellDoubleClicked(int, int);
     void saveSettings(set);
     void on_actionAbout_triggered(bool);
-	void on_actionExit_triggered(bool);
+    void on_actionExit_triggered(bool);
     void on_actionClean_log_files_triggered(bool);
     void on_playControl_clicked();
     void on_playSlider_sliderMoved(int);

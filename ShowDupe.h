@@ -4,18 +4,17 @@
 #include <QDialog>
 #include "ui_ShowDupe.h"
 
-class ShowDupe : public QDialog
-{
-	Q_OBJECT
+class ShowDupe : public QDialog {
+    Q_OBJECT
 
 public:
-	ShowDupe(QWidget *parent = nullptr);
-	void add(QString);
+    ShowDupe(QWidget *parent = nullptr);
+    void add(QString);
     void loadLanguage();
-	~ShowDupe();
+    ~ShowDupe();
 
 private:
-	Ui::ShowDupeClass ui;
+    Ui::ShowDupeClass ui;
 };
 
 #endif // SHOWDUPE_H
