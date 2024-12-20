@@ -60,11 +60,11 @@ void MusicSyncTool::loadSettings() {
         return;
     }
     QJsonObject obj = settings.object();
-    entitySave.ignoreLyric = obj["ignoreLyric"].toBool();
-    entitySave.sortBy = obj["sortBy"].toInt();
-    entitySave.orderBy = obj["orderBy"].toInt();
-    entitySave.language = obj["language"].toString();
-    entitySave.favoriteTag = obj["favoriteTag"].toString();
+    entity.ignoreLyric = obj["ignoreLyric"].toBool();
+    entity.sortBy = obj["sortBy"].toInt();
+    entity.orderBy = obj["orderBy"].toInt();
+    entity.language = obj["language"].toString();
+    entity.favoriteTag = obj["favoriteTag"].toString();
 	file.close();
 }
 /**
@@ -78,9 +78,9 @@ void MusicSyncTool::initMediaPlayer() {
 * @brief 加载语言
 */
 void MusicSyncTool::loadLanguage() {
-    if (entitySave.language == "Chinese") {
+    if (entity.language == "Chinese") {
         qDebug() << translator->load("translations/Translation_zh_Hans.qm");
-    } else if(entitySave.language == "English") {
+    } else if(entity.language == "English") {
         qDebug() << translator->load("translations/Translation_en_US.qm");
     }
     qApp->installTranslator(translator);
@@ -103,14 +103,25 @@ void MusicSyncTool::initUI() {
 * @param type 错误类型
 */
 void MusicSyncTool::popError(PET type) {
-    if (type == PET::NOAUDIO) {
+    switch (type) {
+    case PET::NOAUDIO:
         QMessageBox::critical(this, tr("错误"), tr("没有选定音频！（提示：可以通过双击表格中的歌曲来预览）"));
-    } else if (type == PET::NPS) {
+        break;
+    case PET::NPS:
         QMessageBox::critical(this, tr("错误"), tr("没有选定路径！"));
-    } else if (type == PET::NFT) {
+        break;
+    case PET::NFT:
         QMessageBox::critical(this, tr("错误"), tr("没有设置喜爱标签！请在设置中指定！"));
-    } else if (type == PET::NFS) {
+        break;
+    case PET::NFS:
         QMessageBox::critical(this, tr("错误"), tr("没有选定文件！"));
+        break;
+    case PET::FIRST:
+        QMessageBox::information(this, tr("提示"), tr("已经是第一页了！"));
+        break;
+    case PET::LAST:
+        QMessageBox::information(this, tr("提示"), tr("已经是最后一页了！"));
+        break;
     }
 }
 /**
@@ -157,21 +168,37 @@ void MusicSyncTool::openFolder(pathType path) {
 * @brief 获取音乐信息
 * @param path 路径类型（本地或远程）
 */
-void MusicSyncTool::getMusic(pathType path) {
+void MusicSyncTool::getMusic(pathType path, short page) {
 	qDebug() << "[INFO] Scanning started";
 	if (localPath == "" && remotePath == "") {
 		qDebug() << "[WARN] No path selected";
 		return;
 	}
-    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path);
+    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path, page);
 }
 /**
 * @brief 获取音乐信息（并发）
 * @param path 路径类型（本地或远程）
 */
-void MusicSyncTool::getMusicConcurrent(pathType path) {
+void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     clock_t start = clock();
     emit started();
+    QStringList temp = (path == pathType::LOCAL ? localPath : remotePath).split("/");
+    QString logFile = "lastScan";
+    temp[0].remove(":");
+    for (QString tempStr : temp) {
+        logFile += " - " + tempStr;
+    }
+    logFile += ".log";
+    QFile file("log/" + logFile);
+    QDateTime dateTime;
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream in(&file);
+        dateTime = QDateTime::fromString(in.readLine());
+    } else {
+        qDebug() << "[WARN] No last scan log found, scanning all files";
+        dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
+    }
     QDir dir(path == pathType::LOCAL ? localPath : remotePath);
     QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
                   "track INT, favorite BOOL, fileName TEXT)";
@@ -203,14 +230,13 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
     newFileList.removeOne("musicInfo.db");
     emit total(newFileList.size() + oldFileList.size());
     emit current(0);
-    TagLib::String key(entitySave.favoriteTag.toStdString());
+    TagLib::String key(entity.favoriteTag.toStdString());
     for (int i = 0; i < newFileList.size(); i++) {
         QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
         TagLib::FileRef f(file.toStdWString().c_str());
         if (!f.isNull() && f.tag()) {
             TagLib::Tag *tag = f.tag();
-            sql =
-                "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
+            sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
                 QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
                 QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
                 QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
@@ -223,9 +249,12 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
             continue;
         }
     }
-    if (entitySave.favoriteTag != "") {
+    if (entity.favoriteTag != "") {
         for (int i = 0; i < oldFileList.size(); i++) {
             QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
+            if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
+                continue;
+            }
             TagLib::FileRef f(file.toStdWString().c_str());
             if (!f.isNull() && f.tag()) {
                 TagLib::Tag *tag = f.tag();
@@ -241,10 +270,10 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
     sql = "SELECT COUNT(*) FROM musicInfo";
     query.exec(sql);
     query.next();
-    int tableSize = query.value(0).toInt();
-    emit total(tableSize);
+    totalPage[path == pathType::LOCAL ? 0 : 1] = query.value(0).toInt() / PAGESIZE + 1;
+    emit total(PAGESIZE);
     sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
-    switch (entitySave.sortBy) {
+    switch (entity.sortBy) {
     case sortByEnum::TITLE:
         sql += " title";
         break;
@@ -258,7 +287,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
         sql += " title";
         break;
     }
-    switch (entitySave.orderBy) {
+    switch (entity.orderBy) {
     case orderByEnum::ASC:
         sql += " ASC";
         break;
@@ -269,10 +298,11 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
         sql += " ASC";
         break;
     }
+    sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " + QString::number((currentPage[(path == pathType::LOCAL ? 0 : 1)] - 1) * PAGESIZE);
     query.exec(sql);
     QTableWidget *targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
     targetTable->clearContents();
-    targetTable->setRowCount(tableSize);
+    targetTable->setRowCount(PAGESIZE);
     for (int j = 0; query.next(); j++) {
         emit current(j);
         for (int i = 0; i < 6; i++) {
@@ -283,6 +313,21 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
     }
     clock_t end = clock();
     qDebug() << "[INFO] Scanning finished in" << (double)(end - start) / CLOCKS_PER_SEC << "seconds";
+    QDir logDir("log");
+    if (!logDir.exists()) {
+        logDir.mkpath(".");
+    }
+    QFile timeFile("log/" + logFile);
+    if (!timeFile.open(QIODevice::WriteOnly)) {
+        qDebug() << "[WARN] Cannot write to lastScan.log";
+        return;
+    }
+    (path == pathType::LOCAL ? ui.pageLocal : ui.pageRemote)
+        ->setText(QString::number(currentPage[(path == pathType::LOCAL ? 0 : 1)]) + "/" +
+                  QString::number(totalPage[(path == pathType::LOCAL ? 0 : 1)]));
+    QTextStream out(&timeFile);
+    out << QDateTime::currentDateTime().toString() << "\n";
+    timeFile.close();
     emit finished();
 }
 /**
@@ -292,7 +337,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path) {
 */
 void MusicSyncTool::searchMusic(pathType path, QString text) {
 	if (text == "") {
-		getMusic(path);
+		getMusic(path, 1);
 		return;
 	}
 	QSqlQuery& query = (path == pathType::LOCAL ? queryLocal : queryRemote);
@@ -436,19 +481,23 @@ void MusicSyncTool::saveSettings(set entity) {
     obj["orderBy"] = entity.orderBy;
 	obj["language"] = entity.language;
     obj["favoriteTag"] = entity.favoriteTag;
-	int tempSort = entitySave.sortBy;
-    int tempOrder = entitySave.orderBy;
-    entitySave = entity;
-	if (tempSort != entitySave.sortBy || tempOrder != entitySave.orderBy) {
-		getMusic(pathType::LOCAL);
-		getMusic(pathType::REMOTE);
+	int tempSort = this->entity.sortBy;
+    int tempOrder = this->entity.orderBy;
+    this->entity = entity;
+	if (tempSort != entity.sortBy || tempOrder != entity.orderBy) {
+        if (localPath != "") {
+            getMusic(pathType::LOCAL, 1);
+        }
+        if (remotePath != "") {
+            getMusic(pathType::REMOTE, 1);
+        }
 	}
     loadLanguage();
-	qDebug() << "[INFO] IgnoreLyric:" << entity.ignoreLyric;
-	qDebug() << "[INFO] SortBy:" << entity.sortBy;
-    qDebug() << "[INFO] OrderBy:" << entity.orderBy;
-    qDebug() << "[INFO] Language:" << entity.language;
-    qDebug() << "[INFO] FavoriteTag:" << entity.favoriteTag;
+	qDebug() << "[INFO] IgnoreLyric:" << this->entity.ignoreLyric;
+	qDebug() << "[INFO] SortBy:" << this->entity.sortBy;
+    qDebug() << "[INFO] OrderBy:" << this->entity.orderBy;
+    qDebug() << "[INFO] Language:" << this->entity.language;
+    qDebug() << "[INFO] FavoriteTag:" << this->entity.favoriteTag;
     QJsonDocument settings;
 	settings.setObject(obj);
 	file.write(settings.toJson());
@@ -465,6 +514,7 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
 	if (source == "" || fileList.isEmpty() || target == "") {
 		return;
 	}
+    loading->setTitle(tr("正在复制"));
     emit started();
     emit total(fileList.size());
 	QDir dir(target);
@@ -491,7 +541,7 @@ void MusicSyncTool::copyMusic(const QString source, QStringList fileList, const 
             addToErrorList(file, fileErrorType::DUPLICATE);
 			continue;
 		}
-		else if(!entitySave.ignoreLyric) {
+		else if(!entity.ignoreLyric) {
 			if (!QFile::exists(lyric)) {
 				TagLib::FileRef f(sourceFile.toStdWString().c_str());
 				if (!f.isNull() && f.tag()) {
@@ -521,8 +571,8 @@ void MusicSyncTool::showCopyResult() {
     QString errorString;
     if (errorList.isEmpty()) {
         delete result;
-        getMusic(pathType::LOCAL);
-        getMusic(pathType::REMOTE);
+        getMusic(pathType::LOCAL, 1);
+        getMusic(pathType::REMOTE, 1);
         return;
     }
     for (QString &error : errorList) {
@@ -531,8 +581,8 @@ void MusicSyncTool::showCopyResult() {
     result->setText(errorString);
     result->exec();
     errorList.clear();
-    getMusic(pathType::LOCAL);
-    getMusic(pathType::REMOTE);
+    getMusic(pathType::LOCAL, 1);
+    getMusic(pathType::REMOTE, 1);
 }
 /**
 * @brief 设置当前播放音乐
@@ -546,7 +596,7 @@ void MusicSyncTool::setNowPlayingTitle(QString file) {
 * @return 语言
 */
 QString MusicSyncTool::getLanguage() {
-	return entitySave.language;
+	return entity.language;
 }
 /**
 * @brief 本地音乐按钮触发
@@ -557,7 +607,7 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	if (remotePath == "") {
 		return;
 	}
-	getMusic(pathType::REMOTE);
+	getMusic(pathType::REMOTE, 1);
 }
 /**
 * @brief 远程音乐按钮触发
@@ -568,7 +618,7 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	if (localPath == "") {
 		return;
 	}
-	getMusic(pathType::LOCAL);
+	getMusic(pathType::LOCAL, 1);
 }
 /**
 * @brief 设置按钮触发
@@ -631,13 +681,13 @@ void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) {
 * @brief 刷新本地音乐列表
 */
 void MusicSyncTool::on_refreshLocal_clicked() {
-	getMusic(pathType::LOCAL);
+	getMusic(pathType::LOCAL, 1);
 }
 /**
 * @brief 刷新远程音乐列表
 */
 void MusicSyncTool::on_refreshRemote_clicked() {
-	getMusic(pathType::REMOTE);
+	getMusic(pathType::REMOTE, 1);
 }
 /**
 * @brief 本地搜索框回车触发
@@ -666,6 +716,23 @@ void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(int row, int column) 
 * @param triggered 是否触发
 */
 void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
+void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
+    QMessageBox::StandardButton reply =
+        QMessageBox::warning(this, tr("提示"), tr("确定要清除所有日志文件吗？"), QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::No) {
+        return;
+    }
+    QDir logDir("log");
+    if (!logDir.exists()) {
+        return;
+    }
+    QStringList logFiles = logDir.entryList(QDir::Files);
+    for (QString &logFile : logFiles) {
+        QFile file("log/" + logFile);
+        file.remove();
+    }
+    QMessageBox::information(this, tr("提示"), tr("日志文件已清除"));
+}
 /**
  * @brief 播放控制按钮触发
  */
@@ -710,9 +777,52 @@ void MusicSyncTool::on_volumeSlider_sliderPressed() {
     ui.volumeLabel->setText(text);
 }
 
-void MusicSyncTool::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(pathType::LOCAL); }
+void MusicSyncTool::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(pathType::LOCAL, 1); }
 
-void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(pathType::REMOTE); }
+void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(pathType::REMOTE, 1); }
+
+void MusicSyncTool::on_lastPageLocal_clicked() {
+    if (localPath == "") {
+        popError(PET::NPS);
+        return;
+    } else if (currentPage[0] == 1) {
+        popError(PET::FIRST);
+        return;
+    }
+    getMusic(pathType::LOCAL, --currentPage[0]);
+}
+void MusicSyncTool::on_nextPageLocal_clicked() { 
+    if (localPath == "") {
+        popError(PET::NPS);
+        return;
+    } else if (currentPage[0] == totalPage[0]) {
+        popError(PET::LAST);
+        return;
+    }
+    getMusic(pathType::LOCAL, ++currentPage[0]); 
+}
+
+void MusicSyncTool::on_lastPageRemote_clicked() {
+    if (remotePath == "") {
+        popError(PET::NPS);
+        return;
+    } else if (currentPage[1] == 1) {
+        popError(PET::FIRST);
+        return;
+    }
+    getMusic(pathType::REMOTE, --currentPage[1]);
+}
+
+void MusicSyncTool::on_nextPageRemote_clicked() {
+    if (remotePath == "") {
+        popError(PET::NPS);
+        return;
+    } else if (currentPage[1] == totalPage[1]) {
+        popError(PET::LAST);
+        return;
+    }
+    getMusic(pathType::REMOTE, ++currentPage[1]);
+}
 
 void MusicSyncTool::endMedia(QMediaPlayer::PlaybackState state) { 
 	if (state == QMediaPlayer::PlaybackState::StoppedState) {
@@ -758,7 +868,7 @@ void MusicSyncTool::setTotalLength(pathType path, int row) {
     }
 }
 
-void MusicSyncTool::getFavoriteMusic(pathType path) {
+void MusicSyncTool::getFavoriteMusic(pathType path, short page) {
     if (path == pathType::LOCAL && localPath == "") {
         popError(PET::NPS);
         return;
@@ -766,23 +876,23 @@ void MusicSyncTool::getFavoriteMusic(pathType path) {
         popError(PET::NPS);
         return;
     }
-    if (entitySave.favoriteTag == "") {
+    if (entity.favoriteTag == "") {
         popError(PET::NFT);
         return;
     }
     emit started();
     QSqlQuery &query = (path == pathType::LOCAL ? queryLocal : queryRemote);
-    int tableSize;
     QString sql = "SELECT COUNT(*) FROM musicInfo WHERE favorite = 1";
     query.exec(sql);
     query.next();
-    tableSize = query.value(0).toInt();
-    sql = "SELECT * FROM musicInfo WHERE favorite = 1";
+    int totalSize = query.value(0).toInt();
+    sql = "SELECT * FROM musicInfo WHERE favorite = 1 LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
+        QString::number((currentPage[(path == pathType::LOCAL ? 0 : 1)] - 1) * PAGESIZE);
     query.exec(sql);
     QTableWidget *targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
     targetTable->clearContents();
-    targetTable->setRowCount(tableSize);
-    emit total(tableSize);
+    targetTable->setRowCount(PAGESIZE);
+    emit total(totalSize);
     for (int i = 0; query.next(); i++) {
         for (int j = 0; j < 6; j++) {
             if (query.value(j) != 0) {

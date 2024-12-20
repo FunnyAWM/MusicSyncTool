@@ -1,4 +1,4 @@
-#ifndef LOADINGPAGE_H
+﻿#ifndef LOADINGPAGE_H
 #define LOADINGPAGE_H
 
 #include <QWidget>
@@ -9,7 +9,8 @@ class LoadingPage : public QWidget
 	Q_OBJECT
 
 public:
-	LoadingPage(QWidget *parent = nullptr);
+    LoadingPage(QWidget *parent = nullptr);
+    void setTitle(QString);
 	~LoadingPage() = default;
 	
 private:

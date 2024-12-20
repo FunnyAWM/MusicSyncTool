@@ -45,7 +45,11 @@ class MusicSyncTool : public QMainWindow
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
 	LoadingPage* loading = new LoadingPage();
-    set entitySave;
+    // 0: local, 1: remote
+    short currentPage[2] = {1, 1};
+    short totalPage[2];
+    const short PAGESIZE = 200;
+    set entity;
     QMediaPlayer* mediaPlayer;
     QAudioOutput* audioOutput;
     QString nowPlaying;
@@ -61,8 +65,8 @@ public:
     void initUI();
     void setMediaWidget(playState);
     void openFolder(pathType);
-    void getMusic(pathType);
-    void getMusicConcurrent(pathType);
+    void getMusic(pathType, short);
+    void getMusicConcurrent(pathType, short);
     void searchMusic(pathType, QString);
     void addToErrorList(QString, fileErrorType);
     void popError(PET);
@@ -73,7 +77,7 @@ public:
     void setNowPlayingTitle(QString);
     QString getLanguage();
     void setTotalLength(pathType, int);
-    void getFavoriteMusic(pathType);
+    void getFavoriteMusic(pathType, short);
     void connectSlots();
 public slots:
     void on_actionRemote_triggered(bool);
@@ -92,6 +96,7 @@ public slots:
     void saveSettings(set);
     void on_actionAbout_triggered(bool);
 	void on_actionExit_triggered(bool);
+    void on_actionClean_log_files_triggered(bool);
     void on_playControl_clicked();
     void on_playSlider_sliderMoved(int);
     void on_playSlider_sliderPressed();
@@ -100,6 +105,10 @@ public slots:
     void on_volumeSlider_sliderPressed();
     void on_favoriteOnlyLocal_clicked();
     void on_favoriteOnlyRemote_clicked();
+    void on_lastPageLocal_clicked();
+    void on_nextPageLocal_clicked();
+    void on_lastPageRemote_clicked();
+    void on_nextPageRemote_clicked();
     void endMedia(QMediaPlayer::PlaybackState);
     void setSliderPosition(qint64);
     void showCopyResult();
