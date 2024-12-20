@@ -183,6 +183,7 @@ void MusicSyncTool::getMusic(pathType path, short page) {
 void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     clock_t start = clock();
     emit started();
+    favoriteOnly[path == pathType::LOCAL ? 0 : 1] = false;
     QStringList temp = (path == pathType::LOCAL ? localPath : remotePath).split("/");
     QString logFile = "lastScan";
     temp[0].remove(":");
@@ -789,7 +790,11 @@ void MusicSyncTool::on_lastPageLocal_clicked() {
         popError(PET::FIRST);
         return;
     }
-    getMusic(pathType::LOCAL, --currentPage[0]);
+    if (favoriteOnly[0]) {
+        getFavoriteMusic(pathType::LOCAL, --currentPage[0]);
+    } else {
+        getMusic(pathType::LOCAL, --currentPage[0]);
+    }
 }
 void MusicSyncTool::on_nextPageLocal_clicked() { 
     if (localPath == "") {
@@ -799,7 +804,11 @@ void MusicSyncTool::on_nextPageLocal_clicked() {
         popError(PET::LAST);
         return;
     }
-    getMusic(pathType::LOCAL, ++currentPage[0]); 
+    if (favoriteOnly[0]) {
+        getFavoriteMusic(pathType::LOCAL, ++currentPage[0]);
+    } else {
+        getMusic(pathType::LOCAL, ++currentPage[0]);
+    }
 }
 
 void MusicSyncTool::on_lastPageRemote_clicked() {
@@ -810,7 +819,11 @@ void MusicSyncTool::on_lastPageRemote_clicked() {
         popError(PET::FIRST);
         return;
     }
-    getMusic(pathType::REMOTE, --currentPage[1]);
+    if (favoriteOnly[1]) {
+        getFavoriteMusic(pathType::REMOTE, --currentPage[1]);
+    } else {
+        getMusic(pathType::REMOTE, --currentPage[1]);
+    }
 }
 
 void MusicSyncTool::on_nextPageRemote_clicked() {
@@ -821,7 +834,11 @@ void MusicSyncTool::on_nextPageRemote_clicked() {
         popError(PET::LAST);
         return;
     }
-    getMusic(pathType::REMOTE, ++currentPage[1]);
+    if (favoriteOnly[1]) {
+        getFavoriteMusic(pathType::REMOTE, ++currentPage[1]);
+    } else {
+        getMusic(pathType::REMOTE, ++currentPage[1]);
+    }
 }
 
 void MusicSyncTool::endMedia(QMediaPlayer::PlaybackState state) { 
@@ -886,12 +903,42 @@ void MusicSyncTool::getFavoriteMusic(pathType path, short page) {
     query.exec(sql);
     query.next();
     int totalSize = query.value(0).toInt();
-    sql = "SELECT * FROM musicInfo WHERE favorite = 1 LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
+    totalPage[(path == pathType::LOCAL ? 0 : 1)] = totalSize / PAGESIZE + 1;
+    sql = "SELECT * FROM musicInfo WHERE favorite = 1";
+    switch (entity.sortBy) {
+    case sortByEnum::TITLE:
+        sql += " ORDER BY title";
+        break;
+    case sortByEnum::ARTIST:
+        sql += " ORDER BY artist";
+        break;
+    case sortByEnum::ALBUM:
+        sql += " ORDER BY album";
+        break;
+    default:
+        sql += " ORDER BY title";
+        break;
+    }
+    switch (entity.orderBy) {
+    case orderByEnum::ASC:
+        sql += " ASC";
+        break;
+    case orderByEnum::DESC:
+        sql += " DESC";
+        break;
+    default:
+        sql += " ASC";
+        break;
+    }
+    sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
         QString::number((currentPage[(path == pathType::LOCAL ? 0 : 1)] - 1) * PAGESIZE);
     query.exec(sql);
     QTableWidget *targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+    (path == pathType::LOCAL ? ui.pageLocal : ui.pageRemote)
+        ->setText(QString::number(currentPage[0]) + "/" + QString::number(totalPage[0]));
     targetTable->clearContents();
     targetTable->setRowCount(PAGESIZE);
+    favoriteOnly[(path == pathType::LOCAL ? 0 : 1)] = true;
     emit total(totalSize);
     for (int i = 0; query.next(); i++) {
         for (int j = 0; j < 6; j++) {

@@ -49,6 +49,7 @@ class MusicSyncTool : public QMainWindow
     short currentPage[2] = {1, 1};
     short totalPage[2];
     const short PAGESIZE = 200;
+    bool favoriteOnly[2] = {false, false};
     set entity;
     QMediaPlayer* mediaPlayer;
     QAudioOutput* audioOutput;
