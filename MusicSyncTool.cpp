@@ -270,6 +270,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     query.exec(sql);
     query.next();
     totalPage[path == pathType::LOCAL ? 0 : 1] = query.value(0).toInt() / PAGESIZE + 1;
+    short lastPageSize = query.value(0).toInt() % PAGESIZE;
     emit total(PAGESIZE);
     sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
     switch (entity.sortBy) {
@@ -302,7 +303,11 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     query.exec(sql);
     QTableWidget *targetTable = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
     targetTable->clearContents();
-    targetTable->setRowCount(PAGESIZE);
+    if (currentPage[(path == pathType::LOCAL ? 0 : 1)] == totalPage[(path == pathType::LOCAL ? 0 : 1)]) {
+        targetTable->setRowCount(lastPageSize);
+    } else {
+        targetTable->setRowCount(PAGESIZE);
+    }
     for (int j = 0; query.next(); j++) {
         emit current(j);
         for (int i = 0; i < 6; i++) {
@@ -591,7 +596,7 @@ void MusicSyncTool::showCopyResult() {
  * @brief 设置当前播放音乐
  * @param file 文件名
  */
-void MusicSyncTool::setNowPlayingTitle(QString file) { ui.nowPlaying->setText("正在播放：" + file); }
+void MusicSyncTool::setNowPlayingTitle(QString file) { ui.nowPlaying->setText(tr("正在播放：") + file); }
 /**
  * @brief 获取语言
  * @return 语言
@@ -762,7 +767,7 @@ void MusicSyncTool::on_playSlider_sliderPressed() { mediaPlayer->setPosition(ui.
 
 void MusicSyncTool::on_volumeSlider_sliderPressed() {
     audioOutput->setVolume(ui.volumeSlider->value() / 100.0);
-    QString text = "音量：" + QString::number(ui.volumeSlider->value()) + "%";
+    QString text = tr("音量：") + QString::number(ui.volumeSlider->value()) + "%";
     ui.volumeLabel->setText(text);
 }
 
@@ -840,8 +845,7 @@ void MusicSyncTool::endMedia(QMediaPlayer::PlaybackState state) {
 
 void MusicSyncTool::on_volumeSlider_sliderMoved(int position) {
     audioOutput->setVolume(position / 100.0);
-    QString text;
-    text = "音量：" + QString::number(position) + "%";
+    QString text = tr("音量：") + QString::number(position) + "%";
     ui.volumeLabel->setText(text);
 }
 

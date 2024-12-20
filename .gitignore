@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 .claudiaideconfig
 *.qm
+settings.json

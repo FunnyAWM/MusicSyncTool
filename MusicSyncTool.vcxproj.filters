@@ -107,13 +107,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <QtTranslation Include="Translation_Wenyan.ts">
+      <Filter>Translation Files</Filter>
+    </QtTranslation>
     <QtTranslation Include="Translation_en_US.ts">
       <Filter>Translation Files</Filter>
     </QtTranslation>
     <QtTranslation Include="Translation_zh_Hans.ts">
-      <Filter>Translation Files</Filter>
-    </QtTranslation>
-    <QtTranslation Include="Translation_Wenyan.ts">
       <Filter>Translation Files</Filter>
     </QtTranslation>
   </ItemGroup>
