@@ -21,5 +21,5 @@ vcpkg install taglib utfcpp
 1. 安装Qt Linguist。
 2. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)翻译模板并在Qt Linguist中打开。
 3. 完成自定义语言文件翻译后，在Qt Linguist中生成qm文件，并移至程序的translations目录下。
-4. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z)语言配置生成工具重新生成语言配置文件语言配置生成工具会智能检测当前配置并补全已有配置信息。
+4. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z)语言配置生成工具重新生成语言配置文件语言。配置生成工具会智能检测当前配置并补全已有配置信息。
 5. 启动音乐同步工具并检查语言设置。
