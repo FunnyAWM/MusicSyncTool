@@ -215,6 +215,13 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="pageLocal">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="lastPageLocal">
         <property name="text">
          <string>上一页</string>
@@ -225,13 +232,6 @@
        <widget class="QPushButton" name="nextPageLocal">
         <property name="text">
          <string>下一页</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="pageLocal">
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>
@@ -280,6 +280,13 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="pageRemote">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="lastPageRemote">
         <property name="text">
          <string>上一页</string>
@@ -290,13 +297,6 @@
        <widget class="QPushButton" name="nextPageRemote">
         <property name="text">
          <string>下一页</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="pageRemote">
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>

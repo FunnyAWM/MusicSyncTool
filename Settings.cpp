@@ -5,6 +5,7 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 
     this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
     this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
+    this->setWindowModality(Qt::ApplicationModal);
     QFile file = QFile("settings.json");
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "[WARN] No settings file found, creating new setting file named settings.json";
@@ -16,11 +17,11 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
         return;
     }
     QJsonObject obj = settings.object();
-    setIgnoreLyric(obj["ignoreLyric"].toBool());
-    setSortBy(obj["sortBy"].toInt());
-    setOrderBy(obj["orderBy"].toInt());
-    setLanguage(obj["language"].toString());
-    setFavoriteTag(obj["favoriteTag"].toString());
+    setIgnoreLyricToUI(obj["ignoreLyric"].toBool());
+    setSortByToUI(obj["sortBy"].toInt());
+    setOrderByToUI(obj["orderBy"].toInt());
+    setLanguageToUI(obj["language"].toString());
+    setFavoriteTagToUI(obj["favoriteTag"].toString());
     file.close();
 }
 
@@ -34,26 +35,25 @@ set Settings::getSettings() {
     } else if (ui.albumSelect->isChecked()) {
         entity.sortBy = sortByEnum::ALBUM;
     }
-    if (ui.chineseButton->isChecked()) {
-        entity.language = "Chinese";
-    } else if (ui.englishButton->isChecked()) {
-        entity.language = "English";
-    }
     if (ui.ascButton->isChecked()) {
         entity.orderBy = orderByEnum::ASC;
     } else if (ui.descButton->isChecked()) {
         entity.orderBy = orderByEnum::DESC;
     }
+    entity.language = ui.languageComboBox->currentText();
     entity.favoriteTag = ui.favoriteTagEdit->text();
     return entity;
 }
 
-void Settings::setIgnoreLyric(bool ignoreLyric) {
+void Settings::setIgnoreLyricToUI(bool ignoreLyric) {
     entity.ignoreLyric = ignoreLyric;
     ui.ignoreLyricBox->setChecked(ignoreLyric);
 }
 
-void Settings::setSortBy(short sortBy) {
+void Settings::setSortByToUI(short sortBy) {
+    if (sortBy < 0 || sortBy > 2) {
+        sortBy = sortByEnum::TITLE;
+    }
     entity.sortBy = sortBy;
     switch (sortBy) {
     case sortByEnum::TITLE:
@@ -71,23 +71,39 @@ void Settings::setSortBy(short sortBy) {
     }
 }
 
-void Settings::setLanguage(QString language) {
-    entity.language = language;
-    if (language == "Chinese") {
-        ui.chineseButton->setChecked(true);
-    } else if (language == "English") {
-        ui.englishButton->setChecked(true);
-    } else {
-        ui.chineseButton->setChecked(true);
+void Settings::setLanguageToUI(QString language) {
+    QFile file = QFile(QCoreApplication::applicationDirPath() + "/translations/langinfo.json");
+    assert(file.open(QIODevice::ReadOnly));
+    if (!file.isOpen()) {
+        file.open(QIODevice::ReadOnly);
     }
+    QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
+    QJsonArray langArray = langinfo.array();
+    for (QJsonValue lang : langArray) {
+        QJsonObject langObj = lang.toObject();
+        ui.languageComboBox->addItem(langObj["lang"].toString());
+    }
+    if (language.isEmpty()) {
+        if (ui.languageComboBox->findText(QString::fromUtf8("中文")) != -1) {
+            language = QString::fromUtf8("中文");
+        } else {
+            language = ui.languageComboBox->itemText(0);
+            ui.languageComboBox->setCurrentText(language);
+        }
+    }
+    ui.languageComboBox->setCurrentText(language);
+    entity.language = language;
 }
 
-void Settings::setFavoriteTag(QString favorite) {
+void Settings::setFavoriteTagToUI(QString favorite) {
     entity.favoriteTag = favorite;
     ui.favoriteTagEdit->setText(favorite);
 }
 
-void Settings::setOrderBy(short orderBy) {
+void Settings::setOrderByToUI(short orderBy) {
+    if (orderBy < 0 || orderBy > 1) {
+        orderBy = orderByEnum::ASC;
+    }
     entity.orderBy = orderBy;
     switch (orderBy) {
     case orderByEnum::ASC:

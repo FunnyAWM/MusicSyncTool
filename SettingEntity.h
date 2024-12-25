@@ -8,4 +8,4 @@ struct set {
     QString language;
     QString favoriteTag;
 };
-#endif // !SETTINGENTITY_H
+#endif // SETTINGENTITY_H

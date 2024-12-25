@@ -30,19 +30,6 @@
     </message>
 </context>
 <context>
-    <name>CopyResultClass</name>
-    <message>
-        <location filename="CopyResult.ui" line="14"/>
-        <source>复制结果</source>
-        <translation>Copy Result</translation>
-    </message>
-    <message>
-        <location filename="CopyResult.ui" line="44"/>
-        <source>确定</source>
-        <translation>OK</translation>
-    </message>
-</context>
-<context>
     <name>LoadingPageClass</name>
     <message>
         <location filename="LoadingPage.ui" line="14"/>
@@ -54,117 +41,148 @@
 <context>
     <name>MusicSyncTool</name>
     <message>
-        <location filename="MusicSyncTool.cpp" line="96"/>
-        <location filename="MusicSyncTool.cpp" line="139"/>
-        <location filename="MusicSyncTool.cpp" line="770"/>
-        <location filename="MusicSyncTool.cpp" line="849"/>
+        <location filename="MusicSyncTool.cpp" line="111"/>
+        <location filename="MusicSyncTool.cpp" line="154"/>
+        <location filename="MusicSyncTool.cpp" line="840"/>
+        <location filename="MusicSyncTool.cpp" line="918"/>
         <source>音量：</source>
         <translation>Volume:</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="97"/>
-        <location filename="MusicSyncTool.cpp" line="137"/>
-        <location filename="MusicSyncTool.cpp" line="840"/>
+        <location filename="MusicSyncTool.cpp" line="112"/>
+        <location filename="MusicSyncTool.cpp" line="152"/>
+        <location filename="MusicSyncTool.cpp" line="910"/>
         <source>播放已结束。</source>
         <translation>Playback ended.</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="106"/>
-        <location filename="MusicSyncTool.cpp" line="109"/>
-        <location filename="MusicSyncTool.cpp" line="112"/>
-        <location filename="MusicSyncTool.cpp" line="115"/>
-        <location filename="MusicSyncTool.cpp" line="485"/>
+        <location filename="MusicSyncTool.cpp" line="121"/>
+        <location filename="MusicSyncTool.cpp" line="124"/>
+        <location filename="MusicSyncTool.cpp" line="127"/>
+        <location filename="MusicSyncTool.cpp" line="130"/>
+        <location filename="MusicSyncTool.cpp" line="535"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="106"/>
+        <location filename="MusicSyncTool.cpp" line="121"/>
         <source>没有选定音频！（提示：可以通过双击表格中的歌曲来预览）</source>
         <translation>No audio selected! (Hint: You can preview music by double clicking songs in the table.)</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="109"/>
+        <location filename="MusicSyncTool.cpp" line="124"/>
         <source>没有选定路径！</source>
         <translation>No path selected!</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="112"/>
+        <location filename="MusicSyncTool.cpp" line="127"/>
         <source>没有设置喜爱标签！请在设置中指定！</source>
         <translation>No favorite tag selected! Please edit it in settings!</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="115"/>
+        <location filename="MusicSyncTool.cpp" line="130"/>
         <source>没有选定文件！</source>
         <translation>No file selected!</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="118"/>
-        <location filename="MusicSyncTool.cpp" line="121"/>
-        <location filename="MusicSyncTool.cpp" line="715"/>
-        <location filename="MusicSyncTool.cpp" line="728"/>
+        <location filename="MusicSyncTool.cpp" line="133"/>
+        <location filename="MusicSyncTool.cpp" line="136"/>
+        <location filename="MusicSyncTool.cpp" line="785"/>
+        <location filename="MusicSyncTool.cpp" line="798"/>
         <source>提示</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="118"/>
+        <location filename="MusicSyncTool.cpp" line="133"/>
         <source>已经是第一页了！</source>
         <translation>It&apos;s first page already!</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="121"/>
+        <location filename="MusicSyncTool.cpp" line="136"/>
         <source>已经是最后一页了！</source>
         <translation>It&apos;s last page already!</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="131"/>
+        <location filename="MusicSyncTool.cpp" line="146"/>
         <source>暂停</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="134"/>
-        <location filename="MusicSyncTool.cpp" line="136"/>
-        <location filename="MusicSyncTool.cpp" line="839"/>
+        <location filename="MusicSyncTool.cpp" line="149"/>
+        <location filename="MusicSyncTool.cpp" line="151"/>
+        <location filename="MusicSyncTool.cpp" line="909"/>
         <source>播放</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="375"/>
-        <location filename="MusicSyncTool.cpp" line="377"/>
+        <location filename="MusicSyncTool.cpp" line="392"/>
+        <location filename="MusicSyncTool.cpp" line="395"/>
+        <location filename="MusicSyncTool.cpp" line="398"/>
         <source>复制</source>
         <translation>Copying </translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="375"/>
+        <location filename="MusicSyncTool.cpp" line="392"/>
         <source>失败：文件已存在</source>
         <translation>failed: file existed</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="377"/>
+        <location filename="MusicSyncTool.cpp" line="395"/>
         <source>失败：找不到歌词文件</source>
         <translation>failed: No lyric file found</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="485"/>
+        <location filename="MusicSyncTool.cpp" line="398"/>
+        <source>失败：磁盘已满</source>
+        <translation>failed: Target disk is full</translation>
+    </message>
+    <message>
+        <location filename="MusicSyncTool.cpp" line="408"/>
+        <location filename="MusicSyncTool.cpp" line="411"/>
+        <source>加载</source>
+        <translation>Loading </translation>
+    </message>
+    <message>
+        <location filename="MusicSyncTool.cpp" line="408"/>
+        <source>失败：文件不可扫描</source>
+        <translation> failed: File unscannable</translation>
+    </message>
+    <message>
+        <location filename="MusicSyncTool.cpp" line="411"/>
+        <source>失败：标签错误</source>
+        <translation> failed: Tag error</translation>
+    </message>
+    <message>
+        <location filename="MusicSyncTool.cpp" line="535"/>
         <source>无法打开设置文件</source>
         <translation>Can not open setting files</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="527"/>
-        <source>正在复制</source>
-        <translation>Copying</translation>
+        <location filename="MusicSyncTool.cpp" line="635"/>
+        <source>复制结果</source>
+        <translation>Copy Result</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="715"/>
+        <location filename="MusicSyncTool.cpp" line="638"/>
+        <source>加载结果</source>
+        <translation>Loading result</translation>
+    </message>
+    <message>
+        <source>正在复制</source>
+        <translation type="vanished">Copying</translation>
+    </message>
+    <message>
+        <location filename="MusicSyncTool.cpp" line="785"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation>Are you sure you will clean up all the log files?</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="728"/>
+        <location filename="MusicSyncTool.cpp" line="798"/>
         <source>日志文件已清除</source>
         <translation>Log file cleaned.</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.cpp" line="599"/>
+        <location filename="MusicSyncTool.cpp" line="667"/>
         <source>正在播放：</source>
         <translation>Now playing:</translation>
     </message>
@@ -246,14 +264,14 @@
         <translation>Show favorite music only</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.ui" line="220"/>
-        <location filename="MusicSyncTool.ui" line="285"/>
+        <location filename="MusicSyncTool.ui" line="227"/>
+        <location filename="MusicSyncTool.ui" line="292"/>
         <source>上一页</source>
         <translation>Last page</translation>
     </message>
     <message>
-        <location filename="MusicSyncTool.ui" line="227"/>
-        <location filename="MusicSyncTool.ui" line="292"/>
+        <location filename="MusicSyncTool.ui" line="234"/>
+        <location filename="MusicSyncTool.ui" line="299"/>
         <source>下一页</source>
         <translation>Next page</translation>
     </message>
@@ -339,6 +357,19 @@
     </message>
 </context>
 <context>
+    <name>OperationResultClass</name>
+    <message>
+        <location filename="OperationResult.ui" line="14"/>
+        <source>复制结果</source>
+        <translation>Copy Result</translation>
+    </message>
+    <message>
+        <location filename="OperationResult.ui" line="44"/>
+        <source>确定</source>
+        <translation>OK</translation>
+    </message>
+</context>
+<context>
     <name>SettingsClass</name>
     <message>
         <location filename="Settings.ui" line="14"/>
@@ -346,84 +377,74 @@
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="153"/>
+        <location filename="Settings.ui" line="22"/>
         <source>自定义“喜欢的音乐”标签：</source>
         <translation>Customized &quot;favorite&quot; tag:</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="166"/>
+        <location filename="Settings.ui" line="35"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用于指定由播放器定义的“我喜欢的音乐”的特殊音频标签。若无可不填写，但是会影响喜欢的音乐的筛选。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>It is used to specify &quot;My favorite&quot; tag defined by your music player. Keep it empty if you don&apos;t have one, but you can&apos;t use favorite music selection if you left it empty.</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="198"/>
+        <location filename="Settings.ui" line="96"/>
         <source>排序依据：</source>
         <translation>Sort By:</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="205"/>
+        <location filename="Settings.ui" line="103"/>
         <source>标题</source>
         <translation>Title</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="218"/>
+        <location filename="Settings.ui" line="116"/>
         <source>艺术家</source>
         <translation>Artist</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="228"/>
+        <location filename="Settings.ui" line="126"/>
         <source>专辑</source>
         <translation>Album</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="242"/>
+        <location filename="Settings.ui" line="143"/>
         <source>排序方式：</source>
         <translation>Order by:</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="249"/>
+        <location filename="Settings.ui" line="150"/>
         <source>升序</source>
         <translation>Ascending</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="262"/>
+        <location filename="Settings.ui" line="163"/>
         <source>降序</source>
         <translation>Descending</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="56"/>
+        <location filename="Settings.ui" line="244"/>
         <source>确定</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="63"/>
+        <location filename="Settings.ui" line="251"/>
         <source>取消</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="89"/>
+        <location filename="Settings.ui" line="182"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;打开此选项将禁止程序检查外部lrc文件和歌词标签。如果您不需要程序复制歌词，请打开此选项。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turning this option on to disable program to check external lrc files and lyrics tag. If you don&apos;t need to copy lyrics, please turn this on.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="92"/>
+        <location filename="Settings.ui" line="185"/>
         <source>忽略歌词</source>
         <translation>Ignore lyrics</translation>
     </message>
     <message>
-        <location filename="Settings.ui" line="107"/>
+        <location filename="Settings.ui" line="198"/>
         <source>语言：</source>
         <translation>Language:</translation>
-    </message>
-    <message>
-        <location filename="Settings.ui" line="114"/>
-        <source>中文</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="Settings.ui" line="124"/>
-        <source>English</source>
-        <translation></translation>
     </message>
 </context>
 <context>
@@ -439,9 +460,14 @@
         <translation>Duplicated file list:</translation>
     </message>
     <message>
-        <location filename="ShowDupe.ui" line="62"/>
+        <location filename="ShowDupe.ui" line="65"/>
         <source>确定</source>
         <translation>OK</translation>
+    </message>
+    <message>
+        <location filename="ShowDupe.ui" line="87"/>
+        <source>注意：可能存在误报，该结果仅供参考</source>
+        <translation>Attention: There may be misreport, and this result is for reference only</translation>
     </message>
 </context>
 </TS>

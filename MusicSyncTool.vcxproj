@@ -62,7 +62,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.8.1_msvc2022_64</QtInstall>
-    <QtModules>core;gui;widgets;concurrent;multimedia;sql</QtModules>
+    <QtModules>core;gui;testlib;widgets;concurrent;multimedia;sql</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="QtSettings">
@@ -118,7 +118,7 @@
       <AdditionalIncludeDirectories>D:\Qt\6.8.1\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
@@ -200,7 +200,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CopyResult.cpp" />
+    <ClCompile Include="OperationResult.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="ShowDupe.cpp" />
     <QtRcc Include="MusicSyncTool.qrc" />
@@ -227,11 +227,11 @@
     <QtMoc Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="CopyResult.h" />
+    <QtMoc Include="OperationResult.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AboutPage.ui" />
-    <QtUic Include="CopyResult.ui" />
+    <QtUic Include="OperationResult.ui" />
     <QtUic Include="LoadingPage.ui" />
     <QtUic Include="MusicSyncTool.ui" />
     <QtUic Include="Settings.ui" />

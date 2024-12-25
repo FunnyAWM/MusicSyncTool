@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QTranslator>
 #include <QWidget>
 #include "MusicProperties.h"
@@ -19,11 +20,11 @@ class Settings : public QWidget {
 public:
     Settings(QWidget *parent = nullptr);
     set getSettings();
-    void setIgnoreLyric(bool);
-    void setSortBy(short);
-    void setLanguage(QString);
-    void setFavoriteTag(QString);
-    void setOrderBy(short);
+    void setIgnoreLyricToUI(bool);
+    void setSortByToUI(short);
+    void setLanguageToUI(QString);
+    void setFavoriteTagToUI(QString);
+    void setOrderByToUI(short);
     ~Settings();
 public slots:
     void on_confirmButton_clicked();

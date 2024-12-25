@@ -23,7 +23,7 @@
 #include <QTranslator>
 #include <QtConcurrent>
 #include "AboutPage.h"
-#include "CopyResult.h"
+#include "OperationResult.h"
 #include "LoadingPage.h"
 #include "MusicProperties.h"
 #include "Settings.h"
@@ -49,18 +49,20 @@ class MusicSyncTool : public QMainWindow {
     short totalPage[2];
     const short PAGESIZE = 200;
     bool favoriteOnly[2] = {false, false};
+    qint64 availableSpace[2];
     set entity;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
     QString nowPlaying;
     QStringList errorList;
-    QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
+    const QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
 
 public:
     MusicSyncTool(QWidget *parent = nullptr);
     ~MusicSyncTool();
     void initDatabase();
     void loadSettings();
+    void loadDefaultSettings();
     void initMediaPlayer();
     void loadLanguage();
     void initUI();
@@ -76,10 +78,11 @@ public:
     void showSettings();
     void copyMusic(QString, QStringList, QString);
     void setNowPlayingTitle(QString);
-    QString getLanguage();
+    QString getLanguage() const;
     void setTotalLength(pathType, int);
     void getFavoriteMusic(pathType, short);
-    void connectSlots();
+    void connectSlots() const;
+    bool isFull(QString, QString);
 public slots:
     void on_actionRemote_triggered(bool);
     void on_actionLocal_triggered(bool);
@@ -112,13 +115,18 @@ public slots:
     void on_nextPageRemote_clicked();
     void endMedia(QMediaPlayer::PlaybackState);
     void setSliderPosition(qint64);
-    void showCopyResult();
+    void showOperationResult(operationType);
+    void addToErrorList(QString, loadErrorType);
 signals:
     void started();
     void total(int total);
     void current(int current);
     void finished();
-    void copyFinished();
+    void loadFinished(operationType);
+    void copyFinished(operationType);
+    void addToErrorListConcurrent(QString, loadErrorType);
+private slots:
+
 };
 // QT_END_NAMESPACE
 #endif // MUSICSYNCTOOL_H

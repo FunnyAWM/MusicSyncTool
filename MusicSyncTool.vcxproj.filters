@@ -52,7 +52,7 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CopyResult.cpp">
+    <ClCompile Include="OperationResult.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,7 +69,7 @@
     <QtMoc Include="Settings.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="CopyResult.h">
+    <QtMoc Include="OperationResult.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -82,7 +82,7 @@
     <QtUic Include="AboutPage.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="CopyResult.ui">
+    <QtUic Include="OperationResult.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="LoadingPage.ui">
