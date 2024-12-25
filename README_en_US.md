@@ -27,7 +27,7 @@ vcpkg install taglib utfcpp
 
 1. Install Qt Linguist。
 
-2. [Download translation template here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)and open it in Qt Linguist.
+2. [Download translation template here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts) and open it in Qt Linguist.
 
 3. Generate qm files with Qt Linguist and move it to translations folder of the program after translation finished.
 
