@@ -1,5 +1,6 @@
 # Music Sync Tool
 [中文版本](README.md)
+
 It can automatically detect music files and lyric files and copy them if needed, and also filter favorite music(settings required).
 ## 1. Installation
 This software includes msi package and unpack-and-run version, you can freely choose what you like.
