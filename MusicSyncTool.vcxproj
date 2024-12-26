@@ -239,6 +239,11 @@
     <QtUic Include="forms\Settings.ui" />
     <QtUic Include="forms\ShowDupe.ui" />
   </ItemGroup>
+  <ItemGroup>
+    <QtTranslation Include="translations\Translation_en_US.ts" />
+    <QtTranslation Include="translations\Translation_Wenyan.ts" />
+    <QtTranslation Include="translations\Translation_zh_Hans.ts" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

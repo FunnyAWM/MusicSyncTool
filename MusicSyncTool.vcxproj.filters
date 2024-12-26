@@ -108,4 +108,15 @@
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
+  <ItemGroup>
+    <QtTranslation Include="translations\Translation_en_US.ts">
+      <Filter>Translation Files</Filter>
+    </QtTranslation>
+    <QtTranslation Include="translations\Translation_Wenyan.ts">
+      <Filter>Translation Files</Filter>
+    </QtTranslation>
+    <QtTranslation Include="translations\Translation_zh_Hans.ts">
+      <Filter>Translation Files</Filter>
+    </QtTranslation>
+  </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 # 音乐同步工具
 [English Version](README_en_US.md)
 可以实现对音乐和歌词文件的识别和拷贝，可以识别歌词标签并处理，可以筛选喜欢的音乐（需要设置）。
+使用[Qt](https://img.shields.io/badge/-Qt-41CD52?style=flat-square&logo=qt&logoColor=FFFFFF)构建
 ## 1. 安装
 本软件包含msi安装包和绿色版，绿色版可直接解压使用，msi安装包可以安装到指定位置并在桌面生成快捷方式，推荐使用绿色版。
 ## 2. 从源码构建
