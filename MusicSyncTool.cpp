@@ -107,7 +107,7 @@ void MusicSyncTool::loadLanguage() {
         }
         QJsonObject langObj = lang.toObject();
         if (langObj["lang"].toString() == entity.language) {
-            translator->load("translations/" + (langObj["fileName"]).toString());
+            bool b = translator->load("translations/" + (langObj["fileName"]).toString());
             break;
         }
     }

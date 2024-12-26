@@ -123,5 +123,3 @@ void Settings::on_confirmButton_clicked() {
     emit confirmPressed(getSettings());
     this->deleteLater();
 }
-
-Settings::~Settings() {}

@@ -25,7 +25,7 @@ public:
     void setLanguageToUI(QString);
     void setFavoriteTagToUI(QString);
     void setOrderByToUI(short);
-    ~Settings();
+    ~Settings() = default;
 public slots:
     void on_confirmButton_clicked();
 
