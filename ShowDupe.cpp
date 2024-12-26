@@ -11,5 +11,3 @@ ShowDupe::ShowDupe(QWidget *parent) : QDialog(parent) {
 }
 
 void ShowDupe::add(QString data) { ui.listWidget->addItem(data); }
-
-ShowDupe::~ShowDupe() {}

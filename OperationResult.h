@@ -10,7 +10,7 @@ class OperationResult : public QDialog {
 public:
     OperationResult(QWidget *parent = nullptr);
     void setText(QString text);
-    ~OperationResult();
+    ~OperationResult() = default;
 
 private:
     Ui::OperationResultClass ui;

@@ -2,9 +2,9 @@
 #define SETTINGS_H
 
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QTranslator>
 #include <QWidget>
 #include "MusicProperties.h"

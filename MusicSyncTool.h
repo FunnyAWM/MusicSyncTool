@@ -23,9 +23,9 @@
 #include <QTranslator>
 #include <QtConcurrent>
 #include "AboutPage.h"
-#include "OperationResult.h"
 #include "LoadingPage.h"
 #include "MusicProperties.h"
+#include "OperationResult.h"
 #include "Settings.h"
 #include "ShowDupe.h"
 #include "ui_MusicSyncTool.h"
@@ -126,7 +126,6 @@ signals:
     void copyFinished(operationType);
     void addToErrorListConcurrent(QString, loadErrorType);
 private slots:
-
 };
 // QT_END_NAMESPACE
 #endif // MUSICSYNCTOOL_H

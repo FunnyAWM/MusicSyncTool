@@ -10,13 +10,13 @@ LoadingPage::LoadingPage(QWidget *parent) : QWidget(parent), total(0) {
 
 void LoadingPage::setTitle(QString title) { this->setWindowTitle(title); }
 
-void LoadingPage::showPage() { 
+void LoadingPage::showPage() {
     ui.progressBar->setValue(0);
     show();
 }
 
 void LoadingPage::stopPage() { close(); }
 
-void LoadingPage::setProgress(int value) { ui.progressBar->setValue((double(value) / total) * 100); }
+void LoadingPage::setProgress(int value) { ui.progressBar->setValue((static_cast<double>(value) / total) * 100); }
 
 void LoadingPage::setTotal(int total) { this->total = total; }

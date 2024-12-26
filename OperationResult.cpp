@@ -7,5 +7,3 @@ OperationResult::OperationResult(QWidget *parent) : QDialog(parent) {
 }
 
 void OperationResult::setText(QString text) { ui.textEdit->setText(text); }
-
-OperationResult::~OperationResult() {}

@@ -11,7 +11,7 @@ public:
     ShowDupe(QWidget *parent = nullptr);
     void add(QString);
     void loadLanguage();
-    ~ShowDupe();
+    ~ShowDupe() = default;
 
 private:
     Ui::ShowDupeClass ui;

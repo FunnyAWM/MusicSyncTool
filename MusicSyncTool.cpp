@@ -417,7 +417,7 @@ void MusicSyncTool::addToErrorList(QString file, fileErrorType error) {
     }
 }
 
-void MusicSyncTool::addToErrorList(QString file, loadErrorType error) { 
+void MusicSyncTool::addToErrorList(QString file, loadErrorType error) {
     switch (error) {
     case loadErrorType::FNS:
         errorList.append(tr("加载") + file + tr("失败：文件不可扫描"));
@@ -429,7 +429,7 @@ void MusicSyncTool::addToErrorList(QString file, loadErrorType error) {
         break;
     }
 }
- /**
+/**
  * @brief 获取重复音乐
  * @param path 路径类型（本地或远程）
  * @return 重复音乐列表
@@ -452,16 +452,12 @@ QStringList MusicSyncTool::getDuplicatedMusic(pathType path) {
     QString slowFileName;
     QStringList dupeList;
     query.next();
-    slow = query.value(0).toString() + 
-        ":" + query.value(1).toString() +
-        ":" + query.value(2).toString() + 
-        ":" + query.value(3).toString();
+    slow = query.value(0).toString() + ":" + query.value(1).toString() + ":" + query.value(2).toString() + ":" +
+        query.value(3).toString();
     slowFileName = query.value(4).toString();
     while (query.next()) {
-        fast = query.value(0).toString() +
-            ":" + query.value(1).toString() +
-            ":" + query.value(2).toString() + 
-            ":" + query.value(3).toString();
+        fast = query.value(0).toString() + ":" + query.value(1).toString() + ":" + query.value(2).toString() + ":" +
+            query.value(3).toString();
         fastFileName = query.value(4).toString();
         auto slowList = slow.split(":");
         auto fastList = fast.split(":");
