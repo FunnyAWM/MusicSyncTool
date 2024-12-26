@@ -1,5 +1,6 @@
 # Music Sync Tool
 [中文版本](README.md)
+
 It can automatically detect music files and lyric files and copy them if needed, and also filter favorite music(settings required).
 Build with [Qt](https://img.shields.io/badge/-Qt-41CD52?style=flat-square&logo=qt&logoColor=FFFFFF)
 ## 1. Installation
