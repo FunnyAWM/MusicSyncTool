@@ -23,98 +23,89 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="MusicSyncTool.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
-    <QtMoc Include="MusicSyncTool.h">
+    <QtMoc Include="src\AboutPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClCompile Include="MusicSyncTool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ResourceCompile Include="MusicSyncTool.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AboutPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoadingPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShowDupe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OperationResult.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="AboutPage.h">
+    <QtMoc Include="src\LoadingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="LoadingPage.h">
+    <QtMoc Include="src\MusicSyncTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="ShowDupe.h">
+    <QtMoc Include="src\OperationResult.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Settings.h">
+    <QtMoc Include="src\Settings.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="OperationResult.h">
+    <QtMoc Include="src\ShowDupe.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="MusicSyncTool.ico">
+    <ClInclude Include="src\MusicProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SettingEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AboutPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LoadingPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MusicSyncTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OperationResult.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShowDupe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\MusicSyncTool.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="AboutPage.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="OperationResult.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="LoadingPage.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="MusicSyncTool.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="Settings.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="ShowDupe.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
+    <QtRcc Include="resources\MusicSyncTool.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MusicProperties.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SettingEntity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ResourceCompile Include="resources\MusicSyncTool.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtTranslation Include="Translation_Wenyan.ts">
-      <Filter>Translation Files</Filter>
-    </QtTranslation>
-    <QtTranslation Include="Translation_en_US.ts">
-      <Filter>Translation Files</Filter>
-    </QtTranslation>
-    <QtTranslation Include="Translation_zh_Hans.ts">
-      <Filter>Translation Files</Filter>
-    </QtTranslation>
+    <QtUic Include="forms\AboutPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\LoadingPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\MusicSyncTool.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\OperationResult.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\Settings.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\ShowDupe.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

@@ -200,51 +200,44 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="OperationResult.cpp" />
-    <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="ShowDupe.cpp" />
-    <QtRcc Include="MusicSyncTool.qrc" />
-    <QtMoc Include="MusicSyncTool.h" />
-    <ClCompile Include="AboutPage.cpp" />
-    <ClCompile Include="LoadingPage.cpp" />
-    <ClCompile Include="MusicSyncTool.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ResourceCompile Include="MusicSyncTool.rc" />
+    <QtMoc Include="src\AboutPage.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="AboutPage.h" />
+    <QtMoc Include="src\LoadingPage.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="MusicSyncTool.ico" />
+    <ClInclude Include="src\MusicProperties.h" />
+    <ClInclude Include="src\SettingEntity.h" />
+    <QtMoc Include="src\ShowDupe.h" />
+    <QtMoc Include="src\Settings.h" />
+    <QtMoc Include="src\OperationResult.h" />
+    <QtMoc Include="src\MusicSyncTool.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="LoadingPage.h" />
+    <ClCompile Include="src\AboutPage.cpp" />
+    <ClCompile Include="src\LoadingPage.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MusicSyncTool.cpp" />
+    <ClCompile Include="src\OperationResult.cpp" />
+    <ClCompile Include="src\Settings.cpp" />
+    <ClCompile Include="src\ShowDupe.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="ShowDupe.h" />
+    <Image Include="resources\MusicSyncTool.ico" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Settings.h" />
+    <QtRcc Include="resources\MusicSyncTool.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="OperationResult.h" />
+    <ResourceCompile Include="resources\MusicSyncTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="AboutPage.ui" />
-    <QtUic Include="OperationResult.ui" />
-    <QtUic Include="LoadingPage.ui" />
-    <QtUic Include="MusicSyncTool.ui" />
-    <QtUic Include="Settings.ui" />
-    <QtUic Include="ShowDupe.ui" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="MusicProperties.h" />
-    <ClInclude Include="SettingEntity.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtTranslation Include="Translation_en_US.ts" />
-    <QtTranslation Include="Translation_Wenyan.ts" />
-    <QtTranslation Include="Translation_zh_Hans.ts" />
+    <QtUic Include="forms\AboutPage.ui" />
+    <QtUic Include="forms\LoadingPage.ui" />
+    <QtUic Include="forms\MusicSyncTool.ui" />
+    <QtUic Include="forms\OperationResult.ui" />
+    <QtUic Include="forms\Settings.ui" />
+    <QtUic Include="forms\ShowDupe.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

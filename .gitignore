@@ -365,3 +365,5 @@ FodyWeavers.xsd
 *.qm
 settings.json
 /docs/vx.json
+.idea
+.clang-format
