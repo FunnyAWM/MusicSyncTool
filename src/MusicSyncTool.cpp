@@ -282,7 +282,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     if (entity.favoriteTag != "") {
         for (int i = 0; i < oldFileList.size(); i++) {
             QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
-            if (QFile(file).fileTime(QFileDevice::FileBirthTime) <= dateTime) {
+            if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
                 continue;
             }
             TagLib::FileRef f(file.toStdWString().c_str());
