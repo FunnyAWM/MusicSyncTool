@@ -5,9 +5,8 @@
 #include <taglib/flacfile.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
-
-/**
- * @brief 构造函数
+/*
+ * @brief Default constructor
  */
 MusicSyncTool::MusicSyncTool(QWidget* parent) :
 	QMainWindow(parent), translator(new QTranslator(this)), mediaPlayer(new QMediaPlayer(this)),
@@ -20,9 +19,8 @@ MusicSyncTool::MusicSyncTool(QWidget* parent) :
 	connectSlots();
 	setMediaWidget(playState::STOPPED);
 }
-
-/**
- * @brief 析构函数
+/*
+ * @brief Destructor
  */
 MusicSyncTool::~MusicSyncTool() {
 	if (dbLocal.isOpen()) {
@@ -35,9 +33,8 @@ MusicSyncTool::~MusicSyncTool() {
 	delete audioOutput;
 	delete loading;
 }
-
-/**
- * @brief 初始化数据库
+/*
+ * @brief Initialize database
  */
 void MusicSyncTool::initDatabase() {
 	dbLocal = QSqlDatabase::addDatabase("QSQLITE", "musicInfoLocal");
@@ -45,9 +42,8 @@ void MusicSyncTool::initDatabase() {
 	queryLocal = QSqlQuery(dbLocal);
 	queryRemote = QSqlQuery(dbRemote);
 }
-
-/**
- * @brief 加载设置
+/*
+ * @brief Load settings from settings file
  */
 void MusicSyncTool::loadSettings() {
 	QFile file("settings.json");
@@ -72,7 +68,9 @@ void MusicSyncTool::loadSettings() {
 	entity.favoriteTag = obj["favoriteTag"].toString();
 	file.close();
 }
-
+/*
+ * @brief Load default settings(if settings.json don't exists)
+ */
 void MusicSyncTool::loadDefaultSettings() {
 	QFile file("settings.json");
 	file.open(QIODevice::WriteOnly);
@@ -85,17 +83,15 @@ void MusicSyncTool::loadDefaultSettings() {
 	file.write(QJsonDocument(obj).toJson());
 	file.close();
 }
-
-/**
- * @brief 初始化媒体播放器
+/*
+ * @brief Initialize media player module
  */
 void MusicSyncTool::initMediaPlayer() const {
 	mediaPlayer->setAudioOutput(audioOutput);
 	audioOutput->setVolume(0.5);
 }
-
-/**
- * @brief 加载语言
+/*
+ * @brief Load language file by settings
  */
 void MusicSyncTool::loadLanguage() {
 	QFile file("translations/langinfo.json");
@@ -119,9 +115,8 @@ void MusicSyncTool::loadLanguage() {
 	qApp->installTranslator(translator);
 	ui.retranslateUi(this);
 }
-
-/**
- * @brief 初始化UI组件
+/*
+ * @brief Initialize UI components
  */
 void MusicSyncTool::initUI() {
 	ui.setupUi(this);
@@ -132,10 +127,8 @@ void MusicSyncTool::initUI() {
 	ui.volumeLabel->setText(tr("音量：") + "50%");
 	ui.nowPlaying->setText(tr("播放已结束。"));
 }
-
-/**
- * @brief 弹出错误
- * @param type 错误类型
+/*
+ * @brief Pop up error windows according to error type
  */
 void MusicSyncTool::popError(const PET type) {
 	switch (type) {
@@ -159,10 +152,10 @@ void MusicSyncTool::popError(const PET type) {
 		break;
 	}
 }
-
-/**
- * @brief 设置媒体控件
- * @param state 播放状态
+/*
+ * @brief Get duplicated music files
+ * @param Path of scanning target
+ * @return Duplicated music files
  */
 void MusicSyncTool::setMediaWidget(const playState state) const {
 	if (state == playState::PLAYING) {
@@ -178,10 +171,9 @@ void MusicSyncTool::setMediaWidget(const playState state) const {
 	}
 	ui.volumeLabel->setText(tr("音量：") + QString::number(ui.volumeSlider->value()) + "%");
 }
-
-/**
- * @brief 打开文件夹
- * @param path 路径类型（本地或远程）
+/*
+ * @brief Pop up open folder dialog and load path to database
+ * @param Path type
  */
 void MusicSyncTool::openFolder(const pathType path) {
 	const QString dir = QFileDialog::getExistingDirectory();
@@ -200,11 +192,10 @@ void MusicSyncTool::openFolder(const pathType path) {
 		exit(EXIT_FAILURE);
 	}
 }
-
-/**
- * @brief 获取音乐信息
- * @param path 路径类型（本地或远程）
- * @param page 页数
+/*
+ * @brief Get music files from selected path(multi-thread caller)
+ * @param Path type
+ * @param Page number
  */
 void MusicSyncTool::getMusic(pathType path, short page) {
 	qDebug() << "[INFO] Scanning started";
@@ -214,11 +205,10 @@ void MusicSyncTool::getMusic(pathType path, short page) {
 	}
 	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path, page);
 }
-
-/**
- * @brief 获取音乐信息（并发）
- * @param path 路径类型（本地或远程）
- * @param page 页数
+/*
+ * @brief Get music files from selected path and load it to tables(main operation, concurrent)
+ * @param Path type
+ * @param Page number
  */
 void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
 	clock_t start = clock();
@@ -381,11 +371,10 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
 	timeFile.close();
 	emit finished();
 }
-
-/**
- * @brief 搜索音乐
- * @param path 路径类型（本地或远程）
- * @param text 搜索文本
+/*
+ * @brief Search music files by text
+ * @param Path type
+ * @param Search text
  */
 void MusicSyncTool::searchMusic(const pathType path, const QString& text) {
 	if (text == "") {
@@ -412,11 +401,10 @@ void MusicSyncTool::searchMusic(const pathType path, const QString& text) {
 		}
 	}
 }
-
-/**
- * @brief 添加到错误列表
- * @param file 文件名
- * @param error 错误类型
+/*
+ * @brief Add file to error list
+ * @param File name
+ * @param Error type
  */
 void MusicSyncTool::addToErrorList(const QString& file, const fileErrorType error) {
 	switch (error) {
@@ -431,7 +419,11 @@ void MusicSyncTool::addToErrorList(const QString& file, const fileErrorType erro
 		break;
 	}
 }
-
+/*
+ * @brief Add file to error list
+ * @param File name
+ * @param Error type
+ */
 void MusicSyncTool::addToErrorList(const QString& file, const loadErrorType error) {
 	switch (error) {
 	case loadErrorType::FNS:
@@ -442,13 +434,10 @@ void MusicSyncTool::addToErrorList(const QString& file, const loadErrorType erro
 		break;
 	}
 }
-
-/**
- * @brief 获取重复音乐
- * @param path 路径类型（本地或远程）
- * @return 重复音乐列表
+/*
+ * @brief Get duplicated music and show it
+ * @param Path type(local or remote)
  */
-
 QStringList MusicSyncTool::getDuplicatedMusic(const pathType path) {
 	if (const QString selectedPath = (path == pathType::LOCAL ? localPath : remotePath); selectedPath == "") {
 		qWarning() << "[WARN] No path selected";
@@ -493,13 +482,11 @@ QStringList MusicSyncTool::getDuplicatedMusic(const pathType path) {
 	dp.exec();
 	return dupeList;
 }
-
-/**
- * @brief 获取表格中选中的音乐
- * @param path 路径类型（本地或远程）
- * @return 选中音乐列表
+/*
+ * @brief Get selected music files
+ * @param Path type
+ * @return Selected music files
  */
-
 QStringList MusicSyncTool::getSelectedMusic(const pathType path) {
 	QSet<int> selectedRows;
 	const QTableWidget* const table = (path == pathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
@@ -538,19 +525,17 @@ QStringList MusicSyncTool::getSelectedMusic(const pathType path) {
 	}
 	return fileList;
 }
-
-/**
- * @brief 显示设置页面
+/*
+ * @brief Show settings dialog
  */
 void MusicSyncTool::showSettings() const {
 	const auto page = new Settings();
 	connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
 	page->show();
 }
-
-/**
- * @brief 保存设置
- * @param entityParam 配置实体
+/*
+ * @brief Save settings to settings file
+ * @param Entity
  */
 void MusicSyncTool::saveSettings(const set& entityParam) {
 	QFile file("settings.json");
@@ -587,12 +572,11 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 	file.write(settings.toJson());
 	file.close();
 }
-
-/**
- * @brief 复制音乐
- * @param source 源路径
- * @param fileList 音乐列表
- * @param target 目标路径
+/*
+ * @brief Copy music files from source to target
+ * @param Source path
+ * @param File list
+ * @param Target path
  */
 void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList, const QString& target) {
 	const TagLib::String key = "LYRICS";
@@ -600,7 +584,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 	emit total(fileList.size());
 	if (const QDir dir(target); dir.isEmpty()) {
 		if (!dir.mkpath(target)) {
-			qDebug() << "[FATAL] Error creating directory:" << target;
+			qFatal() << "[FATAL] Error creating directory:" << target;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -627,7 +611,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 			if (!QFile::exists(lyric)) {
 				if (TagLib::FileRef f(sourceFile.toStdWString().c_str()); !f.isNull() && f.tag()) {
 					if (const TagLib::Tag* tag = f.tag(); !tag->properties().contains(key)) {
-						qDebug() << "[WARN] Lyric file not found, skipping" << lyric;
+						qWarning() << "[WARN] Lyric file not found, skipping" << lyric;
 						addToErrorList(file, fileErrorType::LNF);
 						continue;
 					}
@@ -652,9 +636,9 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 	emit finished();
 	emit copyFinished(operationType::COPY);
 }
-
-/**
- * @brief 显示复制结果
+/*
+ * @brief Show operation result
+ * @param Operation type
  */
 void MusicSyncTool::showOperationResult(const operationType type) {
 	const auto result = new OperationResult();
@@ -686,20 +670,19 @@ void MusicSyncTool::showOperationResult(const operationType type) {
 		getMusic(pathType::REMOTE, 1);
 	}
 }
-
-/**
- * @brief 设置当前播放音乐
- * @param file 文件名
+/*
+ * @brief Set now playing title
+ * @param File name
  */
 void MusicSyncTool::setNowPlayingTitle(const QString& file) const { ui.nowPlaying->setText(tr("正在播放：") + file); }
-/**
- * @brief 获取语言
- * @return 语言
+/*
+ * @brief Get language
+ * @return Language
  */
+[[nodiscard]]
 QString MusicSyncTool::getLanguage() const { return entity.language; }
-/**
- * @brief 本地音乐按钮触发
- * @param triggered 是否触发
+/*
+ * @brief Slots for remote open action
  */
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	openFolder(pathType::REMOTE);
@@ -710,10 +693,8 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
 	setAvailableSpace(pathType::REMOTE);
 	showOperationResult(operationType::LOAD);
 }
-
-/**
- * @brief 远程音乐按钮触发
- * @param triggered 是否触发
+/*
+ * @brief Slots for local open action
  */
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	openFolder(pathType::LOCAL);
@@ -724,23 +705,19 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
 	setAvailableSpace(pathType::LOCAL);
 	showOperationResult(operationType::LOAD);
 }
-
-/**
- * @brief 设置按钮触发
- * @param triggered 是否触发
+/*
+ * @brief Slots for settings action
  */
 void MusicSyncTool::on_actionSettings_triggered(bool triggered) const { showSettings(); }
-/**
- * @brief 关于按钮触发
- * @param triggered 是否触发
+/*
+ * @brief Slots for about action
  */
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 	AboutPage about;
 	about.exec();
 }
-
-/**
- * @brief 本地复制到远程按钮触发
+/*
+ * @brief Slots for copy to remote action
  */
 void MusicSyncTool::on_copyToRemote_clicked() {
 	if (localPath == "") {
@@ -754,9 +731,8 @@ void MusicSyncTool::on_copyToRemote_clicked() {
 	}
 	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, localPath, fileList, remotePath);
 }
-
-/**
- * @brief 远程复制到本地按钮触发
+/*
+ * @brief Slots for copy to local action
  */
 void MusicSyncTool::on_copyToLocal_clicked() {
 	if (remotePath == "") {
@@ -770,55 +746,49 @@ void MusicSyncTool::on_copyToLocal_clicked() {
 	}
 	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remotePath, fileList, localPath);
 }
-
-/**
- * @brief 检测本地重复音乐
+/*
+ * @brief Slots for duplicated music scanning(local)
  */
 void MusicSyncTool::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(pathType::LOCAL); }
-/**
- * @brief 检测远程重复音乐
+/*
+ * @brief Slots for duplicated music scanning(remote)
  */
 void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) { getDuplicatedMusic(pathType::REMOTE); }
-/**
- * @brief 刷新本地音乐列表
+/*
+ * @brief Slots for refresh local action
  */
 void MusicSyncTool::on_refreshLocal_clicked() { getMusic(pathType::LOCAL, 1); }
-/**
- * @brief 刷新远程音乐列表
+/*
+ * @brief Slots for refresh remote action
  */
 void MusicSyncTool::on_refreshRemote_clicked() { getMusic(pathType::REMOTE, 1); }
-/**
- * @brief 本地搜索框回车触发
+/*
+ * @brief Slots for search local action
  */
 void MusicSyncTool::on_searchLocal_returnPressed() { searchMusic(pathType::LOCAL, ui.searchLocal->text()); }
-/**
- * @brief 远程搜索框回车触发
+/*
+ * @brief Slots for search remote action
  */
 void MusicSyncTool::on_searchRemote_returnPressed() { searchMusic(pathType::REMOTE, ui.searchRemote->text()); }
-/**
- * @brief 本地表格双击触发
- * @param row 行
- * @param column 列
+/*
+ * @brief Slots for preview(local)
  */
 void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) {
 	setTotalLength(pathType::LOCAL, row);
 }
-
-/**
- * @brief 远程表格双击触发
- * @param row 行
- * @param column 列
+/*
+ * @brief Slots for preview(remote)
  */
 void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) {
 	setTotalLength(pathType::REMOTE, row);
 }
-
-/**
- * @brief 退出按钮触发
- * @param triggered 是否触发
+/*
+ * @brief Slots for exiting the program
  */
 void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
-
+/*
+ * @brief Pop up window to ask if user want to delete all the log files
+ */
 void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
 	const QMessageBox::StandardButton reply =
 		QMessageBox::warning(this, tr("提示"), tr("确定要清除所有日志文件吗？"), QMessageBox::Yes | QMessageBox::No);
@@ -836,9 +806,8 @@ void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
 	}
 	QMessageBox::information(this, tr("提示"), tr("日志文件已清除"));
 }
-
-/**
- * @brief 播放控制按钮触发
+/*
+ * @brief Play or pause the music
  */
 void MusicSyncTool::on_playControl_clicked() {
 	if (!mediaPlayer->hasAudio()) {
@@ -854,7 +823,9 @@ void MusicSyncTool::on_playControl_clicked() {
 		setMediaWidget(playState::PLAYING);
 	}
 }
-
+/*
+ * @brief Set slider position
+ */
 void MusicSyncTool::setSliderPosition(const qint64 position) const {
 	ui.playSlider->setValue(static_cast<int>(position));
 	if (position % 60000 / 1000 < 10) {
@@ -864,7 +835,9 @@ void MusicSyncTool::setSliderPosition(const qint64 position) const {
 		ui.playProgress->setText(QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000));
 	}
 }
-
+/*
+ * @brief Slots for play slider
+ */
 void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
 	mediaPlayer->setPosition(position);
 	if (position % 60000 / 1000 < 10) {
@@ -874,19 +847,29 @@ void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
 		ui.playProgress->setText(QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000));
 	}
 }
-
+/*
+ * @brief Slots for play slider
+ */
 void MusicSyncTool::on_playSlider_sliderPressed() const { mediaPlayer->setPosition(ui.playSlider->value()); }
-
+/*
+ * @brief Slots for volume slider
+ */
 void MusicSyncTool::on_volumeSlider_sliderPressed() const {
 	audioOutput->setVolume(static_cast<float>(ui.volumeSlider->value() / 100.0));
 	const QString text = tr("音量：") + QString::number(ui.volumeSlider->value()) + "%";
 	ui.volumeLabel->setText(text);
 }
-
+/*
+ * @brief Slots for favorite button(local)
+ */
 void MusicSyncTool::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(pathType::LOCAL, 1); }
-
+/*
+ * @brief Slots for favorite button(remote)
+ */
 void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(pathType::REMOTE, 1); }
-
+/*
+ * @brief Slots for last page switch(local)
+ */
 void MusicSyncTool::on_lastPageLocal_clicked() {
 	if (localPath == "") {
 		popError(PET::NPS);
@@ -903,7 +886,9 @@ void MusicSyncTool::on_lastPageLocal_clicked() {
 		getMusic(pathType::LOCAL, --currentPage[0]);
 	}
 }
-
+/*
+ * @brief Slots for next page switch(local)
+ */
 void MusicSyncTool::on_nextPageLocal_clicked() {
 	if (localPath == "") {
 		popError(PET::NPS);
@@ -920,7 +905,9 @@ void MusicSyncTool::on_nextPageLocal_clicked() {
 		getMusic(pathType::LOCAL, ++currentPage[0]);
 	}
 }
-
+/*
+ * @brief Slots for last page switch(remote)
+ */
 void MusicSyncTool::on_lastPageRemote_clicked() {
 	if (remotePath == "") {
 		popError(PET::NPS);
@@ -937,7 +924,9 @@ void MusicSyncTool::on_lastPageRemote_clicked() {
 		getMusic(pathType::REMOTE, --currentPage[1]);
 	}
 }
-
+/*
+ * @brief Slots for next page switch(remote)
+ */
 void MusicSyncTool::on_nextPageRemote_clicked() {
 	if (remotePath == "") {
 		popError(PET::NPS);
@@ -954,7 +943,9 @@ void MusicSyncTool::on_nextPageRemote_clicked() {
 		getMusic(pathType::REMOTE, ++currentPage[1]);
 	}
 }
-
+/*
+ * @brief End media playback
+ */
 void MusicSyncTool::endMedia(const QMediaPlayer::PlaybackState state) const {
 	if (state == QMediaPlayer::PlaybackState::StoppedState) {
 		ui.playControl->setText(tr("播放"));
@@ -963,15 +954,21 @@ void MusicSyncTool::endMedia(const QMediaPlayer::PlaybackState state) const {
 		ui.playProgress->setText("00:00");
 	}
 }
-
+/*
+ * @brief Slots for volume slider
+ */
 void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
 	audioOutput->setVolume(static_cast<float>(position / 100.0));
 	const QString text = tr("音量：") + QString::number(position) + "%";
 	ui.volumeLabel->setText(text);
 }
-
+/*
+ * @brief Slots for volume slider
+ */
 void MusicSyncTool::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
-
+/*
+ * @brief Set total length of play slider
+ */
 void MusicSyncTool::setTotalLength(const pathType path, const int row) {
 	const QTableWidget& widget = (path == pathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote);
 	QString sql = "SELECT fileName FROM musicInfo WHERE";
@@ -996,7 +993,11 @@ void MusicSyncTool::setTotalLength(const pathType path, const int row) {
 		ui.playProgress->setText("00:00");
 	}
 }
-
+/*
+ * @brief Get favorite music files
+ * @param Path type(local or remote)
+ * @param Page number
+ */
 void MusicSyncTool::getFavoriteMusic(const pathType path, short page) {
 	if (path == pathType::LOCAL && localPath == "") {
 		popError(PET::NPS);
@@ -1016,7 +1017,7 @@ void MusicSyncTool::getFavoriteMusic(const pathType path, short page) {
 	query.exec(sql);
 	query.next();
 	const int totalSize = query.value(0).toInt();
-	totalPage[(path == pathType::LOCAL ? 0 : 1)] = static_cast<short>(totalSize) / PAGESIZE + 1;
+	totalPage[(path == pathType::LOCAL ? 0 : 1)] = static_cast<short>(totalSize) / PAGESIZE + 1;  // NOLINT(cppcoreguidelines-narrowing-conversions)
 	sql = "SELECT * FROM musicInfo WHERE favorite = 1";
 	switch (entity.sortBy) {
 	case TITLE:
@@ -1063,7 +1064,9 @@ void MusicSyncTool::getFavoriteMusic(const pathType path, short page) {
 	}
 	emit finished();
 }
-
+/*
+ * @brief Connect slots for application
+ */
 void MusicSyncTool::connectSlots() const {
 	connect(this, &MusicSyncTool::total, loading, &LoadingPage::setTotal);
 	connect(this, &MusicSyncTool::current, loading, &LoadingPage::setProgress);
@@ -1076,7 +1079,10 @@ void MusicSyncTool::connectSlots() const {
 	connect(this, &MusicSyncTool::addToErrorListConcurrent, this,
 	        QOverload<const QString&, loadErrorType>::of(&MusicSyncTool::addToErrorList));
 }
-
+/*
+ * @brief Get available space and show it on the top
+ * @param Path type(local or remote)
+ */
 void MusicSyncTool::setAvailableSpace(const pathType path) const {
 	const QStorageInfo storage(path == pathType::LOCAL ? localPath : remotePath);
 	const QString textBuilder = tr("可用空间：") + QString::number(
@@ -1085,7 +1091,12 @@ void MusicSyncTool::setAvailableSpace(const pathType path) const {
 		+ "GB";
 	(path == pathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(textBuilder);
 }
-
+/*
+ * @brief Check if disk is full
+ * @param File path
+ * @param Target path
+ * @return True if disk is full
+ */
 bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
 	const QFileInfo musicInfo(filePath);
 	const QDir targetInfo(target);
