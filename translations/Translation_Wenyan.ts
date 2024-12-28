@@ -43,15 +43,15 @@
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="127"/>
         <location filename="../src/MusicSyncTool.cpp" line="172"/>
-        <location filename="../src/MusicSyncTool.cpp" line="843"/>
-        <location filename="../src/MusicSyncTool.cpp" line="930"/>
+        <location filename="../src/MusicSyncTool.cpp" line="859"/>
+        <location filename="../src/MusicSyncTool.cpp" line="962"/>
         <source>音量：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="128"/>
         <location filename="../src/MusicSyncTool.cpp" line="170"/>
-        <location filename="../src/MusicSyncTool.cpp" line="922"/>
+        <location filename="../src/MusicSyncTool.cpp" line="952"/>
         <source>播放已结束。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -87,8 +87,8 @@
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="148"/>
         <location filename="../src/MusicSyncTool.cpp" line="151"/>
-        <location filename="../src/MusicSyncTool.cpp" line="788"/>
-        <location filename="../src/MusicSyncTool.cpp" line="801"/>
+        <location filename="../src/MusicSyncTool.cpp" line="794"/>
+        <location filename="../src/MusicSyncTool.cpp" line="807"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
@@ -110,7 +110,7 @@
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="166"/>
         <location filename="../src/MusicSyncTool.cpp" line="169"/>
-        <location filename="../src/MusicSyncTool.cpp" line="921"/>
+        <location filename="../src/MusicSyncTool.cpp" line="951"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
@@ -173,17 +173,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="788"/>
+        <location filename="../src/MusicSyncTool.cpp" line="794"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="801"/>
+        <location filename="../src/MusicSyncTool.cpp" line="807"/>
         <source>日志文件已清除</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="1043"/>
+        <location filename="../src/MusicSyncTool.cpp" line="1088"/>
         <source>可用空间：</source>
         <translation type="unfinished"></translation>
     </message>
