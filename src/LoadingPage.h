@@ -15,6 +15,8 @@ public:
 private:
     Ui::LoadingPageClass ui;
     int total;
+signals:
+    void cancel();
 public slots:
     void showPage();
     void setTotal(int total);

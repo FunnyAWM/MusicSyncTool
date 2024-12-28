@@ -47,9 +47,8 @@ class MusicSyncTool : public QMainWindow {
     // 0: local, 1: remote
     short currentPage[2] = {1, 1};
     short totalPage[2];
-    const short PAGESIZE = 200;
     bool favoriteOnly[2] = {false, false};
-    qint64 availableSpace[2];
+    const short PAGESIZE = 200;
     set entity;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
@@ -82,6 +81,7 @@ public:
     void setTotalLength(pathType, int);
     void getFavoriteMusic(pathType, short);
     void connectSlots() const;
+	void setAvailableSpace(pathType);
     bool isFull(QString, QString);
 public slots:
     void on_actionRemote_triggered(bool);

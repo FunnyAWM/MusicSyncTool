@@ -251,7 +251,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
         }
     }
     for (int i = 0; i < newFileList.size(); i++) {
-        if (oldFileList.contains(newFileList.at(i)) || !supportedFormat.contains(newFileList.at(i).right(4))) {
+        if (oldFileList.contains(newFileList.at(i)) || !supportedFormat.contains(newFileList.at(i).right(5))) {
             newFileList.removeAt(i);
             i = -1;
         }
@@ -282,7 +282,7 @@ void MusicSyncTool::getMusicConcurrent(pathType path, short page) {
     if (entity.favoriteTag != "") {
         for (int i = 0; i < oldFileList.size(); i++) {
             QString file = (path == pathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
-            if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
+            if (QFile(file).fileTime(QFileDevice::FileBirthTime) <= dateTime) {
                 continue;
             }
             TagLib::FileRef f(file.toStdWString().c_str());
@@ -691,6 +691,7 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
         return;
     }
     getMusic(pathType::REMOTE, 1);
+	setAvailableSpace(pathType::REMOTE);
     showOperationResult(operationType::LOAD);
 }
 /**
@@ -703,6 +704,7 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
         return;
     }
     getMusic(pathType::LOCAL, 1);
+	setAvailableSpace(pathType::LOCAL);
     showOperationResult(operationType::LOAD);
 }
 /**
@@ -732,6 +734,9 @@ void MusicSyncTool::on_copyToRemote_clicked() {
         return;
     }
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, localPath, fileList, remotePath);
+	QFutureWatcher<void> watcher;
+	watcher.setFuture(future);
+	connect(loading, &LoadingPage::cancel, &watcher, &QFutureWatcher<void>::cancel);
 }
 /**
  * @brief 远程复制到本地按钮触发
@@ -747,6 +752,9 @@ void MusicSyncTool::on_copyToLocal_clicked() {
         return;
     }
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remotePath, fileList, localPath);
+	QFutureWatcher<void> watcher;
+	watcher.setFuture(future);
+    connect(loading, &LoadingPage::cancel, &watcher, &QFutureWatcher<void>::cancel);
 }
 /**
  * @brief 检测本地重复音乐
@@ -1033,6 +1041,14 @@ void MusicSyncTool::connectSlots() const {
     connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &MusicSyncTool::setSliderPosition);
     connect(mediaPlayer, &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
     connect(this, &MusicSyncTool::addToErrorListConcurrent, this, QOverload<QString, loadErrorType>::of(&MusicSyncTool::addToErrorList));
+}
+
+void MusicSyncTool::setAvailableSpace(pathType path)
+{
+    QStorageInfo storage(path == pathType::LOCAL ? localPath : remotePath);
+    QString textBuilder = tr("可用空间：") + QString::number((storage.bytesAvailable() / 1024.0 / 1024.0 / 1024.0), 10, 2) + "GB";
+    textBuilder += " / " + QString::number((storage.bytesTotal() / 1024.0 / 1024.0 / 1024.0), 10, 2) + "GB";
+    (path == pathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(textBuilder);
 }
 
 bool MusicSyncTool::isFull(QString filePath, QString target) { 
