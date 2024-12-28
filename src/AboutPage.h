@@ -4,15 +4,15 @@
 #include <QDialog>
 #include "ui_AboutPage.h"
 
-class AboutPage : public QDialog {
-    Q_OBJECT
+class AboutPage final : public QDialog {
+	Q_OBJECT
 
 public:
-    AboutPage(QWidget *parent = nullptr);
-    ~AboutPage() = default;
+	explicit AboutPage(QWidget* parent = nullptr);
+	~AboutPage() override = default;
 
 private:
-    Ui::AboutPageClass ui;
+	Ui::AboutPageClass ui;
 };
 
 #endif // ABOUTPAGE_H

@@ -8,7 +8,7 @@ LoadingPage::LoadingPage(QWidget *parent) : QWidget(parent), total(0) {
     this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 }
 
-void LoadingPage::setTitle(QString title) { this->setWindowTitle(title); }
+void LoadingPage::setTitle(const QString& title) { this->setWindowTitle(title); }
 
 void LoadingPage::showPage() {
     ui.progressBar->setValue(0);
@@ -17,6 +17,6 @@ void LoadingPage::showPage() {
 
 void LoadingPage::stopPage() { close(); }
 
-void LoadingPage::setProgress(int value) { ui.progressBar->setValue((static_cast<double>(value) / total) * 100); }
+void LoadingPage::setProgress(const qsizetype value) const { ui.progressBar->setValue((static_cast<double>(value) / total) * 100); }
 
-void LoadingPage::setTotal(int total) { this->total = total; }
+void LoadingPage::setTotal(const qsizetype total) { this->total = total; }

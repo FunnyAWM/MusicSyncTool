@@ -1,26 +1,23 @@
 ﻿#ifndef LOADINGPAGE_H
 #define LOADINGPAGE_H
 
-#include <QWidget>
 #include "ui_LoadingPage.h"
 
 class LoadingPage : public QWidget {
     Q_OBJECT
 
 public:
-    LoadingPage(QWidget *parent = nullptr);
-    void setTitle(QString);
-    ~LoadingPage() = default;
+    explicit LoadingPage(QWidget *parent = nullptr);
+    void setTitle(const QString&);
+    ~LoadingPage() override = default;
 
 private:
     Ui::LoadingPageClass ui;
-    int total;
-signals:
-    void cancel();
+    qsizetype total;
 public slots:
     void showPage();
-    void setTotal(int total);
-    void setProgress(int value);
+    void setTotal(qsizetype total);
+    void setProgress(qsizetype value) const;
     void stopPage();
 };
 

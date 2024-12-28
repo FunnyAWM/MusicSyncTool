@@ -14,26 +14,27 @@
 using TOOLPROPERTIES::orderByEnum;
 using TOOLPROPERTIES::sortByEnum;
 
-class Settings : public QWidget {
-    Q_OBJECT
+class Settings final : public QWidget {
+	Q_OBJECT
 
 public:
-    Settings(QWidget *parent = nullptr);
-    set getSettings();
-    void setIgnoreLyricToUI(bool);
-    void setSortByToUI(short);
-    void setLanguageToUI(QString);
-    void setFavoriteTagToUI(QString);
-    void setOrderByToUI(short);
-    ~Settings() = default;
+	explicit Settings(QWidget* parent = nullptr);
+	[[nodiscard]] set getSettings() const;
+	void setIgnoreLyricToUI(bool);
+	void setSortByToUI(short);
+	void setLanguageToUI(QString);
+	void setFavoriteTagToUI(const QString&);
+	void setOrderByToUI(short);
+	~Settings() override = default;
+
 public slots:
-    void on_confirmButton_clicked();
+	void on_confirmButton_clicked();
 
 private:
-    Ui::SettingsClass ui;
-    set entity;
+	Ui::SettingsClass ui;
+	set entity;
 signals:
-    void confirmPressed(set entity);
+	void confirmPressed(set entity);
 };
 
 #endif // SETTINGS_H
