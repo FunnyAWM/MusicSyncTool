@@ -32,7 +32,7 @@
 
 using namespace TOOLPROPERTIES;
 
-class MusicSyncTool : public QMainWindow {
+class MusicSyncTool final : public QMainWindow {
 	Q_OBJECT
 
 	Ui::MusicSyncToolClass ui;
