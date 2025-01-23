@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/MusicSyncTool">
+        <file>MusicSyncTool.ico</file>
+        <file>MusicSyncTool.rc</file>
+    </qresource>
+</RCC>
