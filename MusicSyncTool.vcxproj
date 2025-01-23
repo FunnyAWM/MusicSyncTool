@@ -211,6 +211,8 @@
     <QtMoc Include="src\LoadingPage.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="src\AddRuleWidget.h" />
+    <ClInclude Include="src\LyricIgnoreRuleSingleton.h" />
     <ClInclude Include="src\MusicProperties.h" />
     <ClInclude Include="src\SettingEntity.h" />
     <QtMoc Include="src\ShowDupe.h" />
@@ -220,7 +222,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AboutPage.cpp" />
+    <ClCompile Include="src\AddRuleWidget.cpp" />
     <ClCompile Include="src\LoadingPage.cpp" />
+    <ClCompile Include="src\LyricIgnoreRuleSingleton.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MusicSyncTool.cpp" />
     <ClCompile Include="src\OperationResult.cpp" />
@@ -238,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="forms\AboutPage.ui" />
+    <QtUic Include="forms\AddRuleWidget.ui" />
     <QtUic Include="forms\LoadingPage.ui" />
     <QtUic Include="forms\MusicSyncTool.ui" />
     <QtUic Include="forms\OperationResult.ui" />

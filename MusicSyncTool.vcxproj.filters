@@ -41,12 +41,18 @@
     <QtMoc Include="src\ShowDupe.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\AddRuleWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MusicProperties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SettingEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LyricIgnoreRuleSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -70,6 +76,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ShowDupe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AddRuleWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LyricIgnoreRuleSingleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,6 +117,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="forms\ShowDupe.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\AddRuleWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

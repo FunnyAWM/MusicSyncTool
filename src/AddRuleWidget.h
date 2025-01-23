@@ -18,5 +18,4 @@ signals:
 	void sendRules(QMap<QPair<PROPERTIES::lyricRules, PROPERTIES::ignoreLyricRules>, QString>);
 public slots:
 	void on_confirmButton_clicked();
-
 };
