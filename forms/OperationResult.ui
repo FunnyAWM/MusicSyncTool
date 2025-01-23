@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CopyResultClass</class>
- <widget class="QDialog" name="CopyResultClass">
+ <class>OperationResultClass</class>
+ <widget class="QDialog" name="OperationResultClass">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -70,7 +70,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>CopyResultClass</receiver>
+   <receiver>OperationResultClass</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -86,7 +86,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>CopyResultClass</receiver>
+   <receiver>OperationResultClass</receiver>
    <slot>deleteLater()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -1,9 +1,8 @@
-﻿#include "MusicSyncTool.h"
-#include <QTranslator>
+﻿#include <QTranslator>
 #include <QtWidgets/QApplication>
+#include "MusicSyncTool.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     MusicSyncTool w;
     w.show();
