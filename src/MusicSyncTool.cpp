@@ -457,7 +457,7 @@ void MusicSyncTool::addToErrorList(const QString& file, const loadErrorType erro
  * @param Path type(local or remote)
  */
 QStringList MusicSyncTool::getDuplicatedMusic(const pathType path) {
-	if (const QString selectedPath = (path == pathType::LOCAL ? localPath : remotePath); selectedPath == "") {
+	if (const QString selectedPath = path == pathType::LOCAL ? localPath : remotePath; selectedPath == "") {
 		qWarning() << "[WARN] No path selected";
 		popError(PET::NPS);
 		return {};

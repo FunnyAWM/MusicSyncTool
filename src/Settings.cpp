@@ -1,5 +1,7 @@
 ﻿#include "Settings.h"
 
+#include "AddRuleWidget.h"
+
 Settings::Settings(QWidget* parent) : QWidget(parent) {
 	ui.setupUi(this);
 	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -156,4 +158,14 @@ void Settings::on_confirmButton_clicked() {
 	this->close();
 	emit confirmPressed(getSettings());
 	this->deleteLater();
+}
+
+void Settings::on_addRule_clicked() {
+	const auto widget = new AddRuleWidget();
+	connect(widget, &AddRuleWidget::sendRules, this, &Settings::addRule);
+	widget->show();
+}
+
+void Settings::addRule(LyricIgnoreRuleSingleton)
+{
 }

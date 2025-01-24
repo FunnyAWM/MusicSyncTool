@@ -5,7 +5,7 @@
 #include "MusicProperties.h"
 using namespace PROPERTIES;
 
-class LyricIgnoreRuleSingleton final : QObject {
+class LyricIgnoreRuleSingleton final : public QObject {
 	ignoreLyricRules ruleType;
 	lyricRules ruleField;
 	QString ruleName;

@@ -32,7 +32,8 @@ public:
 
 public slots:
 	void on_confirmButton_clicked();
-
+	void on_addRule_clicked();
+	void addRule(LyricIgnoreRuleSingleton);
 private:
 	Ui::SettingsClass ui;
 	set entity;
