@@ -58,7 +58,6 @@ class MusicSyncTool final : public QMainWindow {
 	QString nowPlaying;
 	QStringList errorList;
 	const QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
-	//TODO 添加自定义歌词忽略规则
 
 public:
 	explicit MusicSyncTool(QWidget* parent = nullptr);
@@ -89,6 +88,7 @@ public:
 	static void cleanLog();
 	static bool isFull(const QString&, const QString&);
 	static bool getRuleHit(const LyricIgnoreRuleSingleton&, const TagLib::Tag*);
+
 public slots:
 	void on_actionRemote_triggered(bool);
 	void on_actionLocal_triggered(bool);
