@@ -6,20 +6,33 @@
 using namespace PROPERTIES;
 
 class LyricIgnoreRuleSingleton final : public QObject {
-	ignoreLyricRules ruleType;
-	lyricRules ruleField;
+	Q_OBJECT
+	RuleType ruleType;
+	RuleField ruleField;
 	QString ruleName;
+	QString ruleTypeStr;
+	QString ruleFieldStr;
 
 public:
-	explicit LyricIgnoreRuleSingleton(ignoreLyricRules, lyricRules, QString);
+	explicit LyricIgnoreRuleSingleton(RuleType, RuleField, QString);
 	LyricIgnoreRuleSingleton(const LyricIgnoreRuleSingleton&);
 	LyricIgnoreRuleSingleton& operator=(const LyricIgnoreRuleSingleton&);
 	~LyricIgnoreRuleSingleton() override = default;
-	[[nodiscard]] ignoreLyricRules getRuleType() const;
-	[[nodiscard]] lyricRules getRuleField() const;
+	[[nodiscard]] RuleType getRuleType() const;
+	[[nodiscard]] RuleField getRuleField() const;
 	[[nodiscard]] QString getRuleName() const;
-	static QString lyricRulesToString(lyricRules);
-	static QString ignoreRulesToString(ignoreLyricRules);
-	static ignoreLyricRules stringToIgnoreRules(const QString);
-	static lyricRules stringToLyricRules(const QString);
+	static QString lyricRulesToString(RuleField);
+	static QString ignoreRulesToString(RuleType);
+	static RuleType stringToIgnoreRules(const QString&);
+	static RuleField stringToLyricRules(const QString&);
+	void setRulesStr();
+	bool operator==(const LyricIgnoreRuleSingleton& other) const {
+		return ruleType == other.ruleType && ruleField == other.ruleField && ruleName == other.ruleName;
+	}
+
+	bool operator!=(const LyricIgnoreRuleSingleton& other) const {
+		return !(*this == other);
+	}
+	QString getRuleTypeStr() const;
+	QString getRuleFieldStr() const;
 };

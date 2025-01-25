@@ -7,33 +7,33 @@ AddRuleWidget::AddRuleWidget(QWidget* parent)
 }
 
 LyricIgnoreRuleSingleton AddRuleWidget::getRules() const {
-	lyricRules lyricRules;
-	ignoreLyricRules ignoreLyricRules;
-	QString rule;
-	rule = ui.valueEdit->text();
-	switch (ui.ruleComboBox->currentIndex()) {
-	case 0:
-		lyricRules = lyricRules::NAME;
-		break;
-	case 1:
-		lyricRules = lyricRules::ARTIST;
-		break;
-	case 2:
-		lyricRules = lyricRules::ALBUM;
-		break;
-	}
+	RuleField lyricRules;
+	RuleType ignoreLyricRules;
+	const QString rule = ui.valueEdit->text();
 	switch (ui.typeComboBox->currentIndex()) {
 	case 0:
-		ignoreLyricRules = ignoreLyricRules::INCLUDES;
+		lyricRules = RuleField::TITLE;
 		break;
 	case 1:
-		ignoreLyricRules = ignoreLyricRules::EXCLUDES;
+		lyricRules = RuleField::ARTIST;
+		break;
+	case 2:
+		lyricRules = RuleField::ALBUM;
+		break;
+	}
+	switch (ui.ruleComboBox->currentIndex()) {
+	case 0:
+		ignoreLyricRules = RuleType::INCLUDES;
+		break;
+	case 1:
+		ignoreLyricRules = RuleType::EXCLUDES;
 		break;
 	}
 	return LyricIgnoreRuleSingleton(ignoreLyricRules, lyricRules, rule);
 }
 
 void AddRuleWidget::on_confirmButton_clicked() {
+	getRules().setRulesStr();
 	emit sendRules(getRules());
 	close();
 }

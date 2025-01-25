@@ -21,19 +21,20 @@ class Settings final : public QWidget {
 
 public:
 	explicit Settings(QWidget* parent = nullptr);
-	[[nodiscard]] set getSettings() const;
+	[[nodiscard]] set getSettings();
 	void setIgnoreLyricToUI(bool);
 	void setSortByToUI(short);
 	void setLanguageToUI(QString);
 	void setFavoriteTagToUI(const QString&);
 	void setOrderByToUI(short);
-	void setIgnoreRulesToUI(const QList<LyricIgnoreRuleSingleton>&) const;
+	void setIgnoreRulesToUI(QList<LyricIgnoreRuleSingleton>&);
 	~Settings() override = default;
 
 public slots:
 	void on_confirmButton_clicked();
 	void on_addRule_clicked();
-	void addRule(LyricIgnoreRuleSingleton);
+	void on_deleteSelectedRule_clicked();
+	void addRule(const LyricIgnoreRuleSingleton&);
 private:
 	Ui::SettingsClass ui;
 	set entity;

@@ -1,10 +1,9 @@
 #ifndef SETTINGENTITY_H
 #define SETTINGENTITY_H
-#include <QMap>
 #include <QString>
 #include "MusicProperties.h"
-using PROPERTIES::lyricRules;
-using PROPERTIES::ignoreLyricRules;
+using PROPERTIES::RuleField;
+using PROPERTIES::RuleType;
 
 struct set {
 	bool ignoreLyric;

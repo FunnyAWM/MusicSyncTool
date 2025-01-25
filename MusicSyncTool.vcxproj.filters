@@ -44,15 +44,15 @@
     <QtMoc Include="src\AddRuleWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\LyricIgnoreRuleSingleton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MusicProperties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SettingEntity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\LyricIgnoreRuleSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

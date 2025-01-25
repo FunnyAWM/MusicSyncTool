@@ -1,6 +1,6 @@
 ﻿#include "LyricIgnoreRuleSingleton.h"
 
-LyricIgnoreRuleSingleton::LyricIgnoreRuleSingleton(const ignoreLyricRules ruleType, const lyricRules ruleField,
+LyricIgnoreRuleSingleton::LyricIgnoreRuleSingleton(const RuleType ruleType, const RuleField ruleField,
                                                    QString ruleName)
 	: ruleType(ruleType), ruleField(ruleField), ruleName(std::move(ruleName)) {
 }
@@ -11,16 +11,15 @@ LyricIgnoreRuleSingleton::LyricIgnoreRuleSingleton(const LyricIgnoreRuleSingleto
 	ruleName = ruleSingleton.ruleName;
 }
 
-LyricIgnoreRuleSingleton& LyricIgnoreRuleSingleton::operator=(const LyricIgnoreRuleSingleton&)
-{
+LyricIgnoreRuleSingleton& LyricIgnoreRuleSingleton::operator=(const LyricIgnoreRuleSingleton&) {
 	return *this;
 }
 
-[[nodiscard]] ignoreLyricRules LyricIgnoreRuleSingleton::getRuleType() const {
+[[nodiscard]] RuleType LyricIgnoreRuleSingleton::getRuleType() const {
 	return ruleType;
 }
 
-[[nodiscard]] lyricRules LyricIgnoreRuleSingleton::getRuleField() const {
+[[nodiscard]] RuleField LyricIgnoreRuleSingleton::getRuleField() const {
 	return ruleField;
 }
 
@@ -28,49 +27,79 @@ LyricIgnoreRuleSingleton& LyricIgnoreRuleSingleton::operator=(const LyricIgnoreR
 	return ruleName;
 }
 
-QString LyricIgnoreRuleSingleton::lyricRulesToString(const lyricRules rules) {
-	switch (static_cast<lyricRules>(rules)) {
-	case lyricRules::NAME:
-		return QString(tr("名称"));
-	case lyricRules::ARTIST:
-		return QString(tr("艺术家"));
-	case lyricRules::ALBUM:
-		return QString(tr("专辑"));
-	default:
-		return QString();
-	}
-}
-
-QString LyricIgnoreRuleSingleton::ignoreRulesToString(const ignoreLyricRules rules) {
+QString LyricIgnoreRuleSingleton::lyricRulesToString(const RuleField rules) {
 	switch (rules) {
-	case ignoreLyricRules::INCLUDES:
-		return QString(tr("包含"));
-	case ignoreLyricRules::EXCLUDES:
-		return QString(tr("排除"));
+	case RuleField::TITLE:
+		return tr("名称");
+	case RuleField::ARTIST:
+		return tr("艺术家");
+	case RuleField::ALBUM:
+		return tr("专辑");
 	default:
 		return QString();
 	}
 }
 
-ignoreLyricRules LyricIgnoreRuleSingleton::stringToIgnoreRules(const QString rule) {
+QString LyricIgnoreRuleSingleton::ignoreRulesToString(const RuleType rules) {
+	switch (rules) {
+	case RuleType::INCLUDES:
+		return tr("包含");
+	case RuleType::EXCLUDES:
+		return tr("排除");
+	default:
+		return QString();
+	}
+}
+
+RuleType LyricIgnoreRuleSingleton::stringToIgnoreRules(const QString& rule) {
 	if (rule == "包含") {
-		return ignoreLyricRules::INCLUDES;
+		return RuleType::INCLUDES;
 	}
 	if (rule == "排除") {
-		return ignoreLyricRules::EXCLUDES;
+		return RuleType::EXCLUDES;
 	}
-	return ignoreLyricRules::INCLUDES;
+	return RuleType::INCLUDES;
 }
 
-lyricRules LyricIgnoreRuleSingleton::stringToLyricRules(const QString rule) {
+RuleField LyricIgnoreRuleSingleton::stringToLyricRules(const QString& rule) {
 	if (rule == "名称") {
-		return lyricRules::NAME;
+		return RuleField::TITLE;
 	}
 	if (rule == "艺术家") {
-		return lyricRules::ARTIST;
+		return RuleField::ARTIST;
 	}
 	if (rule == "专辑") {
-		return lyricRules::ALBUM;
+		return RuleField::ALBUM;
 	}
-	return lyricRules::NAME;
+	return RuleField::TITLE;
+}
+
+void LyricIgnoreRuleSingleton::setRulesStr() {
+	switch (ruleType) {
+	case RuleType::INCLUDES:
+		ruleTypeStr = "包含";
+		break;
+	case RuleType::EXCLUDES:
+		ruleTypeStr = "排除";
+		break;
+	}
+	switch (ruleField) {
+	case RuleField::TITLE:
+		ruleFieldStr = "名称";
+		break;
+	case RuleField::ARTIST:
+		ruleFieldStr = "艺术家";
+		break;
+	case RuleField::ALBUM:
+		ruleFieldStr = "专辑";
+		break;
+	}
+}
+
+QString LyricIgnoreRuleSingleton::getRuleTypeStr() const {
+	return ruleTypeStr;
+}
+
+QString LyricIgnoreRuleSingleton::getRuleFieldStr() const {
+	return ruleFieldStr;
 }

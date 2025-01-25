@@ -8,7 +8,6 @@ class LoadingPage : public QWidget {
 
 public:
     explicit LoadingPage(QWidget *parent = nullptr);
-    void setTitle(const QString&);
     ~LoadingPage() override = default;
 
 private:

@@ -20,23 +20,24 @@ Settings::Settings(QWidget* parent) : QWidget(parent) {
 	}
 	QJsonObject obj = settings.object();
 	setIgnoreLyricToUI(obj["ignoreLyric"].toBool());
-	setSortByToUI(obj["sortBy"].toInt());
-	setOrderByToUI(obj["orderBy"].toInt());
+	setSortByToUI(static_cast<short>(obj["sortBy"].toInt()));
+	setOrderByToUI(static_cast<short>(obj["orderBy"].toInt()));
 	setLanguageToUI(obj["language"].toString());
 	setFavoriteTagToUI(obj["favoriteTag"].toString());
 	QList<LyricIgnoreRuleSingleton> rules;
 	QJsonArray rulesArray = obj["rules"].toArray();
 	for (QJsonValue rule : rulesArray) {
 		QJsonObject ruleObj = rule.toObject();
-		rules.append(LyricIgnoreRuleSingleton(static_cast<ignoreLyricRules>(ruleObj["ruleType"].toInt()),
-		                                      static_cast<lyricRules>(ruleObj["ruleField"].toInt()),
-		                                      ruleObj["ruleName"].toString()));
+		rules.append(LyricIgnoreRuleSingleton(
+			LyricIgnoreRuleSingleton::stringToIgnoreRules(ruleObj["ruleType"].toString()),
+			LyricIgnoreRuleSingleton::stringToLyricRules(ruleObj["ruleField"].toString()),
+			ruleObj["ruleName"].toString()));
 	}
 	setIgnoreRulesToUI(rules);
 	file.close();
 }
 
-set Settings::getSettings() const {
+set Settings::getSettings() {
 	set entity1;
 	entity1.ignoreLyric = ui.ignoreLyricBox->isChecked();
 	if (ui.titleSelect->isChecked()) {
@@ -56,14 +57,11 @@ set Settings::getSettings() const {
 	}
 	entity1.language = ui.languageComboBox->currentText();
 	entity1.favoriteTag = ui.favoriteTagEdit->text();
-	QList<LyricIgnoreRuleSingleton> rules;
-	for (int i = 0; i < ui.rulesWidget->rowCount(); i++) {
-		rules.append(LyricIgnoreRuleSingleton(
-			LyricIgnoreRuleSingleton::stringToIgnoreRules(ui.rulesWidget->item(i, 1)->text()),
-			LyricIgnoreRuleSingleton::stringToLyricRules(ui.rulesWidget->item(i, 0)->text()),
-			ui.rulesWidget->item(i, 2)->text()));
+	for (auto& rule : entity.rules) {
+		rule.setRulesStr();
 	}
 	// ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
+	entity1.rules = this->entity.rules;
 	return entity1;
 }
 
@@ -141,10 +139,12 @@ void Settings::setOrderByToUI(short orderBy) {
 	}
 }
 
-void Settings::setIgnoreRulesToUI(const QList<LyricIgnoreRuleSingleton>& rules) const {
+void Settings::setIgnoreRulesToUI(QList<LyricIgnoreRuleSingleton>& rules) {
+    entity.rules = rules;
 	ui.rulesWidget->setRowCount(static_cast<int>(rules.size()));
 	int row = 0;
-	for (const LyricIgnoreRuleSingleton& singleton : rules) {
+	for (LyricIgnoreRuleSingleton& singleton : rules) {
+		singleton.setRulesStr();
 		ui.rulesWidget->setItem(
 			row, 0, new QTableWidgetItem(LyricIgnoreRuleSingleton::lyricRulesToString(singleton.getRuleField())));
 		ui.rulesWidget->setItem(
@@ -166,6 +166,16 @@ void Settings::on_addRule_clicked() {
 	widget->show();
 }
 
-void Settings::addRule(LyricIgnoreRuleSingleton)
-{
+void Settings::on_deleteSelectedRule_clicked() {
+	const auto selectedRows = ui.rulesWidget->selectedItems();
+	for (const auto& item : selectedRows) {
+		qDebug() << item->row();
+		entity.rules.removeAt(item->row());
+		ui.rulesWidget->removeRow(item->row());
+	}
+}
+
+void Settings::addRule(const LyricIgnoreRuleSingleton& singleton) {
+	entity.rules.append(singleton);
+	setIgnoreRulesToUI(entity.rules);
 }

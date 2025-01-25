@@ -23,6 +23,8 @@
 #include <QThread>
 #include <QThreadPool>
 #include <QTranslator>
+#include <taglib/tag.h>
+
 #include "AboutPage.h"
 #include "LoadingPage.h"
 #include "MusicProperties.h"
@@ -67,25 +69,26 @@ public:
 	void initMediaPlayer() const;
 	void loadLanguage();
 	void initUI();
-	void setMediaWidget(playState) const;
-	void openFolder(pathType);
-	void getMusic(pathType, unsigned short);
-	void getMusicConcurrent(pathType, unsigned short);
-	void searchMusic(pathType, const QString&);
-	void addToErrorList(const QString&, fileErrorType);
+	void setMediaWidget(PlayState) const;
+	void openFolder(PathType);
+	void getMusic(PathType, unsigned short);
+	void getMusicConcurrent(PathType, unsigned short);
+	void searchMusic(PathType, const QString&);
+	void addToErrorList(const QString&, FileErrorType);
 	void popError(PET);
-	QStringList getDuplicatedMusic(pathType);
-	QStringList getSelectedMusic(pathType);
+	QStringList getDuplicatedMusic(PathType);
+	QStringList getSelectedMusic(PathType);
 	void showSettings() const;
 	void copyMusic(const QString&, const QStringList&, const QString&);
 	void setNowPlayingTitle(const QString&) const;
 	[[nodiscard]] QString getLanguage() const;
-	void setTotalLength(pathType, int);
-	void getFavoriteMusic(pathType, unsigned short);
+	void setTotalLength(PathType, int);
+	void getFavoriteMusic(PathType, unsigned short);
 	void connectSlots() const;
-	void setAvailableSpace(pathType) const;
+	void setAvailableSpace(PathType) const;
+	static void cleanLog();
 	static bool isFull(const QString&, const QString&);
-
+	static bool getRuleHit(const LyricIgnoreRuleSingleton&, const TagLib::Tag*);
 public slots:
 	void on_actionRemote_triggered(bool);
 	void on_actionLocal_triggered(bool);
@@ -118,16 +121,16 @@ public slots:
 	void on_nextPageRemote_clicked();
 	void endMedia(QMediaPlayer::PlaybackState) const;
 	void setSliderPosition(qint64) const;
-	void showOperationResult(operationType);
-	void addToErrorList(const QString&, loadErrorType);
+	void showOperationResult(OperationType);
+	void addToErrorList(const QString&, LoadErrorType);
 signals:
 	void started();
 	void total(qsizetype total);
 	void current(qsizetype current);
 	void finished();
-	void loadFinished(operationType);
-	void copyFinished(operationType);
-	void addToErrorListConcurrent(QString, loadErrorType);
+	void loadFinished(OperationType);
+	void copyFinished(OperationType);
+	void addToErrorListConcurrent(QString, LoadErrorType);
 };
 
 // QT_END_NAMESPACE

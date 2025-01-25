@@ -10,11 +10,6 @@ LoadingPage::LoadingPage(QWidget *parent) : QWidget(parent), total(0) {
     this->setWindowModality(Qt::ApplicationModal);
     this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
 }
-/*
- * @brief Set the title of the LoadingPage
- * @param title The title to set
- */
-void LoadingPage::setTitle(const QString& title) { this->setWindowTitle(title); }
 
 void LoadingPage::showPage() {
     ui.progressBar->setValue(0);

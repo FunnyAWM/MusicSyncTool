@@ -145,6 +145,11 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtTranslation>
+      <BuildAction>lupdate_lrelease</BuildAction>
+    </QtTranslation>
+  </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>true</VcpkgEnabled>
   </PropertyGroup>
@@ -212,7 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\AddRuleWidget.h" />
-    <ClInclude Include="src\LyricIgnoreRuleSingleton.h" />
+    <QtMoc Include="src\LyricIgnoreRuleSingleton.h" />
     <ClInclude Include="src\MusicProperties.h" />
     <ClInclude Include="src\SettingEntity.h" />
     <QtMoc Include="src\ShowDupe.h" />

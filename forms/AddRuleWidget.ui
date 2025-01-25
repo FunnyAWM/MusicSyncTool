@@ -157,5 +157,38 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>AddRuleWidgetClass</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>235</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>AddRuleWidgetClass</receiver>
+   <slot>deleteLater()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>235</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
