@@ -9,7 +9,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
     set(CMAKE_CXX_STANDARD 11)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+    #Replace this with your own Qt installation path
     set(CMAKE_PREFIX_PATH "~/Qt/6.8.1/gcc_64")
 
     find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
@@ -102,4 +102,4 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     endif ()
 else()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
-endif ()
+endif()
