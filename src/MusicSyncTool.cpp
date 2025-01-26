@@ -295,7 +295,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 	for (int i = 0; i < newFileList.size(); i++) {
 		QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
 		TagLib::FileRef f;
-#if defined(_WIN64)
+#if defined(_WIN64) or defined(_WIN32)
 		f = TagLib::FileRef(file.toStdWString().c_str());
 #else
 		f = TagLib::FileRef(file.toStdString().c_str());
@@ -325,7 +325,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 				continue;
 			}
 			TagLib::FileRef f;
-#if defined(_WIN64)
+#if defined(_WIN64) or defined(_WIN32)
 			f = TagLib::FileRef(file.toStdWString().c_str());
 #else
 			f = TagLib::FileRef(file.toStdString().c_str());
@@ -346,7 +346,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 				continue;
 			}
 			TagLib::FileRef f;
-#if defined(_WIN64)
+#if defined(_WIN64) or defined(_WIN32)
 			f = TagLib::FileRef(file.toStdWString().c_str());
 #else
 			f = TagLib::FileRef(file.toStdString().c_str());
@@ -713,7 +713,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 		if (!entity.ignoreLyric && !static_cast<bool>(list.at(1).toInt())) {
 			if (!QFile::exists(lyric)) {
 				TagLib::FileRef f;
-#if defined(_WIN64)
+#if defined(_WIN64) or defined(_WIN32)
 				f = TagLib::FileRef(sourceFile.toStdWString().c_str());
 #else
 				f = TagLib::FileRef(sourceFile.toStdString().c_str());
@@ -1112,7 +1112,7 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
 	const QString filePath = (path == PathType::LOCAL ? localPath : remotePath) + "/" + nowPlaying;
 	mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
 	TagLib::FileRef f;
-#if defined(_WIN64)
+#if defined(_WIN64) or defined(_WIN32)
 	f = TagLib::FileRef(filePath.toStdWString().c_str());
 #else
 	f = TagLib::FileRef(filePath.toStdString().c_str());
