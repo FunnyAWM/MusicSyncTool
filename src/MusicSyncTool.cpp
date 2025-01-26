@@ -127,7 +127,7 @@ void MusicSyncTool::loadLanguage() {
 		}
 		if (QJsonObject langObj = lang.toObject(); langObj["lang"].toString() == entity.language) {
 			// ReSharper disable once CppNoDiscardExpression
-			translator->load("translations/" + (langObj["fileName"]).toString());
+            translator->load("translations/" + (langObj["fileName"]).toString());
 			break;
 		}
 	}
