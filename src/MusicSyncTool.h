@@ -41,9 +41,10 @@ using PROPERTIES::PET;
 using PROPERTIES::OperationType;
 
 class MusicSyncTool final : public QMainWindow {
-	Q_OBJECT
 
-		Ui::MusicSyncToolClass ui;
+		Q_OBJECT
+
+	Ui::MusicSyncToolClass ui;
 	QTranslator* translator;
 	QString localPath;
 	QString remotePath;

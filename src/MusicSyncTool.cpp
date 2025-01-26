@@ -576,7 +576,7 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
 	}
 	QStringList titleList;
 	QStringList artistList;
-	for (const int i : selectedRows) {
+	for (const int& i : selectedRows) {
 		titleList.append(table->item(i, 0)->text());
 		artistList.append(table->item(i, 1)->text());
 	}
