@@ -2,10 +2,10 @@
 #define SETTINGS_H
 
 #include <QFile>
-#include <QObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QObject>
 #include <QTranslator>
 #include <QWidget>
 

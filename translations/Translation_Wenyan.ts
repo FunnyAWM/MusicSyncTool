@@ -38,7 +38,7 @@
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="24"/>
-        <source>类型：</source>
+        <source>字段：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -58,7 +58,12 @@
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="57"/>
-        <source>规则：</source>
+        <source>条件：</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/AddRuleWidget.ui" line="85"/>
+        <source>内容：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -69,11 +74,6 @@
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="73"/>
         <source>不包含</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/AddRuleWidget.ui" line="85"/>
-        <source>值：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -461,6 +461,19 @@
     </message>
 </context>
 <context>
+    <name>Settings</name>
+    <message>
+        <location filename="../src/Settings.cpp" line="99"/>
+        <source>错误</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Settings.cpp" line="99"/>
+        <source>无法打开语言文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SettingsClass</name>
     <message>
         <location filename="../forms/Settings.ui" line="14"/>
@@ -528,37 +541,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="289"/>
-        <source>类型</source>
+        <location filename="../forms/Settings.ui" line="292"/>
+        <source>字段</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="294"/>
-        <source>规则</source>
+        <location filename="../forms/Settings.ui" line="297"/>
+        <source>条件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="299"/>
-        <source>目标</source>
+        <location filename="../forms/Settings.ui" line="302"/>
+        <source>内容</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="324"/>
+        <location filename="../forms/Settings.ui" line="327"/>
         <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="331"/>
+        <location filename="../forms/Settings.ui" line="334"/>
         <source>取消</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="358"/>
+        <location filename="../forms/Settings.ui" line="361"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;打开此选项将禁止程序检查外部lrc文件和歌词标签。如果您不需要程序复制歌词，请打开此选项。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="361"/>
+        <location filename="../forms/Settings.ui" line="364"/>
         <source>忽略歌词</source>
         <translation type="unfinished"></translation>
     </message>

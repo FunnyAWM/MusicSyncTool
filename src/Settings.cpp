@@ -1,5 +1,7 @@
 ﻿#include "Settings.h"
 
+#include <QMessageBox>
+
 #include "AddRuleWidget.h"
 
 Settings::Settings(QWidget* parent) : QWidget(parent) {
@@ -93,9 +95,9 @@ void Settings::setSortByToUI(short sortBy) {
 
 void Settings::setLanguageToUI(QString language) {
 	auto file = QFile(QCoreApplication::applicationDirPath() + "/translations/langinfo.json");
-	assert(file.open(QIODevice::ReadOnly));
-	if (!file.isOpen()) {
-		file.open(QIODevice::ReadOnly);
+	if (!file.open(QIODevice::ReadOnly)) {
+		QMessageBox::critical(this, tr("错误"), tr("无法打开语言文件"));
+		qFatal() << "[FATAL] Error opening langinfo.json:" << file.errorString();
 	}
 	const QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
 	QJsonArray langArray = langinfo.array();

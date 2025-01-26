@@ -37,9 +37,13 @@
         <translation>Add new rule</translation>
     </message>
     <message>
-        <location filename="../forms/AddRuleWidget.ui" line="24"/>
         <source>类型：</source>
-        <translation>Type:</translation>
+        <translation type="vanished">Type:</translation>
+    </message>
+    <message>
+        <location filename="../forms/AddRuleWidget.ui" line="24"/>
+        <source>字段：</source>
+        <translation>Field:</translation>
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="35"/>
@@ -58,8 +62,17 @@
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="57"/>
+        <source>条件：</source>
+        <translation>Condition:</translation>
+    </message>
+    <message>
+        <location filename="../forms/AddRuleWidget.ui" line="85"/>
+        <source>内容：</source>
+        <translation>Value:</translation>
+    </message>
+    <message>
         <source>规则：</source>
-        <translation>Rule:</translation>
+        <translation type="vanished">Rule:</translation>
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="68"/>
@@ -72,9 +85,8 @@
         <translation>Exclude</translation>
     </message>
     <message>
-        <location filename="../forms/AddRuleWidget.ui" line="85"/>
         <source>值：</source>
-        <translation>Value:</translation>
+        <translation type="vanished">Value:</translation>
     </message>
     <message>
         <location filename="../forms/AddRuleWidget.ui" line="130"/>
@@ -466,6 +478,19 @@
     </message>
 </context>
 <context>
+    <name>Settings</name>
+    <message>
+        <location filename="../src/Settings.cpp" line="99"/>
+        <source>错误</source>
+        <translation type="unfinished">Error</translation>
+    </message>
+    <message>
+        <location filename="../src/Settings.cpp" line="99"/>
+        <source>无法打开语言文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SettingsClass</name>
     <message>
         <location filename="../forms/Settings.ui" line="14"/>
@@ -480,7 +505,7 @@
     <message>
         <location filename="../forms/Settings.ui" line="208"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用于指定由播放器定义的“我喜欢的音乐”的特殊音频标签。若无可不填写，但是会影响喜欢的音乐的筛选。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>It is used to specify &quot;My favorite&quot; tag defined by your music player. Keep it empty if you don&apos;t have one, but you can&apos;t use favorite music selection if you left it empty.</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is used to specify &quot;My favorite&quot; tag defined by your music player. Keep it empty if you don&apos;t have one, but you can&apos;t use favorite music selection if you left it empty.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../forms/Settings.ui" line="93"/>
@@ -533,41 +558,53 @@
         <translation>Delete selected rule</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="289"/>
+        <location filename="../forms/Settings.ui" line="292"/>
+        <source>字段</source>
+        <translation>Field</translation>
+    </message>
+    <message>
+        <location filename="../forms/Settings.ui" line="297"/>
+        <source>条件</source>
+        <translation>Condition</translation>
+    </message>
+    <message>
+        <location filename="../forms/Settings.ui" line="302"/>
+        <source>内容</source>
+        <translation>Value</translation>
+    </message>
+    <message>
         <source>类型</source>
-        <translation>Type</translation>
+        <translation type="vanished">Type</translation>
     </message>
     <message>
         <source>值</source>
         <translation type="obsolete">Value</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="294"/>
         <source>规则</source>
-        <translation>Rule</translation>
+        <translation type="vanished">Rule</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="299"/>
         <source>目标</source>
-        <translation>Target</translation>
+        <translation type="vanished">Target</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="324"/>
+        <location filename="../forms/Settings.ui" line="327"/>
         <source>确定</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="331"/>
+        <location filename="../forms/Settings.ui" line="334"/>
         <source>取消</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="358"/>
+        <location filename="../forms/Settings.ui" line="361"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;打开此选项将禁止程序检查外部lrc文件和歌词标签。如果您不需要程序复制歌词，请打开此选项。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turning this option on to disable program to check external lrc files and lyrics tag. If you don&apos;t need to copy lyrics, please turn this on.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../forms/Settings.ui" line="361"/>
+        <location filename="../forms/Settings.ui" line="364"/>
         <source>忽略歌词</source>
         <translation>Ignore lyrics</translation>
     </message>

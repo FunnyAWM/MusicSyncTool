@@ -28,9 +28,11 @@
 5. 在Debug和Release模式下分别进行一次源码编译，排除问题。
 6. 如果需要更改源码，在更改源码后再次进行Release编译，Qt工具会自动检查依赖库文件并补全。
    
-   ## 3. 自定义语言文件
-7. 安装Qt Linguist。
-8. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)翻译模板并在Qt Linguist中打开。
-9. 完成自定义语言文件翻译后，在Qt Linguist中生成qm文件，并移至程序的translations目录下。
-10. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z)语言配置生成工具重新生成语言配置文件语言。配置生成工具会智能检测当前配置并补全已有配置信息。
-11. 启动音乐同步工具并检查语言设置。
+
+## 3. 自定义语言文件
+
+1. 安装Qt Linguist。
+2. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)翻译模板并在Qt Linguist中打开。
+3. 完成自定义语言文件翻译后，在Qt Linguist中生成qm文件，并移至程序的translations目录下。
+4. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z)语言配置生成工具重新生成语言配置文件语言。配置生成工具会智能检测当前配置并补全已有配置信息。
+5. 启动音乐同步工具并检查语言设置。

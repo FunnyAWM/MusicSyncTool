@@ -272,6 +272,9 @@
      </item>
      <item>
       <widget class="QTableWidget" name="rulesWidget">
+       <property name="editTriggers">
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+       </property>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
@@ -286,17 +289,17 @@
        </attribute>
        <column>
         <property name="text">
-         <string>类型</string>
+         <string>字段</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>规则</string>
+         <string>条件</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>目标</string>
+         <string>内容</string>
         </property>
        </column>
       </widget>

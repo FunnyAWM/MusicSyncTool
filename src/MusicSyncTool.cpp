@@ -378,7 +378,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 		break;
 	}
 	sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
-		QString::number((currentPage[(path == PathType::LOCAL ? 0 : 1)] - 1) * PAGESIZE);
+		QString::number((page - 1) * PAGESIZE);
 	query.exec(sql);
 	QTableWidget* targetTable = (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
 	targetTable->clearContents();

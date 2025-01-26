@@ -33,7 +33,12 @@
 #include "ShowDupe.h"
 #include "ui_MusicSyncTool.h"
 
-using namespace PROPERTIES;
+using PROPERTIES::PathType;
+using PROPERTIES::PlayState;
+using PROPERTIES::FileErrorType;
+using PROPERTIES::LoadErrorType;
+using PROPERTIES::PET;
+using PROPERTIES::OperationType;
 
 class MusicSyncTool final : public QMainWindow {
 	Q_OBJECT

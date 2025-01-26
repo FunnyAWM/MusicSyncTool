@@ -21,7 +21,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>类型：</string>
+          <string>字段：</string>
          </property>
          <property name="buddy">
           <cstring>typeComboBox</cstring>
@@ -54,7 +54,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>规则：</string>
+          <string>条件：</string>
          </property>
          <property name="buddy">
           <cstring>ruleComboBox</cstring>
@@ -82,7 +82,7 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>值：</string>
+          <string>内容：</string>
          </property>
          <property name="buddy">
           <cstring>valueEdit</cstring>
