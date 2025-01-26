@@ -132,16 +132,16 @@
     <name>MusicSyncTool</name>
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="147"/>
-        <location filename="../src/MusicSyncTool.cpp" line="194"/>
-        <location filename="../src/MusicSyncTool.cpp" line="946"/>
-        <location filename="../src/MusicSyncTool.cpp" line="1055"/>
+        <location filename="../src/MusicSyncTool.cpp" line="197"/>
+        <location filename="../src/MusicSyncTool.cpp" line="983"/>
+        <location filename="../src/MusicSyncTool.cpp" line="1092"/>
         <source>音量：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="148"/>
-        <location filename="../src/MusicSyncTool.cpp" line="192"/>
-        <location filename="../src/MusicSyncTool.cpp" line="1044"/>
+        <location filename="../src/MusicSyncTool.cpp" line="195"/>
+        <location filename="../src/MusicSyncTool.cpp" line="1081"/>
         <source>播放已结束。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -150,7 +150,8 @@
         <location filename="../src/MusicSyncTool.cpp" line="161"/>
         <location filename="../src/MusicSyncTool.cpp" line="164"/>
         <location filename="../src/MusicSyncTool.cpp" line="167"/>
-        <location filename="../src/MusicSyncTool.cpp" line="598"/>
+        <location filename="../src/MusicSyncTool.cpp" line="176"/>
+        <location filename="../src/MusicSyncTool.cpp" line="618"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
@@ -177,8 +178,8 @@
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="170"/>
         <location filename="../src/MusicSyncTool.cpp" line="173"/>
-        <location filename="../src/MusicSyncTool.cpp" line="885"/>
-        <location filename="../src/MusicSyncTool.cpp" line="890"/>
+        <location filename="../src/MusicSyncTool.cpp" line="913"/>
+        <location filename="../src/MusicSyncTool.cpp" line="918"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
@@ -193,87 +194,92 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="184"/>
+        <location filename="../src/MusicSyncTool.cpp" line="176"/>
+        <source>程序已在运行！</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MusicSyncTool.cpp" line="187"/>
         <source>暂停</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="188"/>
         <location filename="../src/MusicSyncTool.cpp" line="191"/>
-        <location filename="../src/MusicSyncTool.cpp" line="1043"/>
+        <location filename="../src/MusicSyncTool.cpp" line="194"/>
+        <location filename="../src/MusicSyncTool.cpp" line="1080"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="460"/>
-        <location filename="../src/MusicSyncTool.cpp" line="463"/>
-        <location filename="../src/MusicSyncTool.cpp" line="466"/>
+        <location filename="../src/MusicSyncTool.cpp" line="480"/>
+        <location filename="../src/MusicSyncTool.cpp" line="483"/>
+        <location filename="../src/MusicSyncTool.cpp" line="486"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="460"/>
+        <location filename="../src/MusicSyncTool.cpp" line="480"/>
         <source>失败：文件已存在</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="463"/>
+        <location filename="../src/MusicSyncTool.cpp" line="483"/>
         <source>失败：找不到歌词文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="466"/>
+        <location filename="../src/MusicSyncTool.cpp" line="486"/>
         <source>失败：磁盘已满</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="479"/>
-        <location filename="../src/MusicSyncTool.cpp" line="482"/>
+        <location filename="../src/MusicSyncTool.cpp" line="499"/>
+        <location filename="../src/MusicSyncTool.cpp" line="502"/>
         <source>加载</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="479"/>
+        <location filename="../src/MusicSyncTool.cpp" line="499"/>
         <source>失败：文件不可扫描</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="482"/>
+        <location filename="../src/MusicSyncTool.cpp" line="502"/>
         <source>失败：标签错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="598"/>
+        <location filename="../src/MusicSyncTool.cpp" line="618"/>
         <source>无法打开设置文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="729"/>
+        <location filename="../src/MusicSyncTool.cpp" line="757"/>
         <source>复制结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="732"/>
+        <location filename="../src/MusicSyncTool.cpp" line="760"/>
         <source>加载结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="760"/>
+        <location filename="../src/MusicSyncTool.cpp" line="788"/>
         <source>正在播放：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="885"/>
+        <location filename="../src/MusicSyncTool.cpp" line="913"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="890"/>
+        <location filename="../src/MusicSyncTool.cpp" line="918"/>
         <source>日志文件已清除</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MusicSyncTool.cpp" line="1186"/>
+        <location filename="../src/MusicSyncTool.cpp" line="1228"/>
         <source>可用空间：</source>
         <translation type="unfinished"></translation>
     </message>

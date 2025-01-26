@@ -172,6 +172,9 @@ void MusicSyncTool::popError(const PET type) {
 	case PET::LAST:
 		QMessageBox::information(this, tr("提示"), tr("已经是最后一页了！"));
 		break;
+	case PET::RUNNING:
+		QMessageBox::critical(this, tr("错误"), tr("程序已在运行！"));
+		break;
 	}
 }
 
@@ -291,8 +294,13 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 	TagLib::String key(entity.favoriteTag.toStdString());
 	for (int i = 0; i < newFileList.size(); i++) {
 		QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
-		if (TagLib::FileRef f(file.toStdWString().c_str());
-			!f.isNull() && f.tag()) {
+		TagLib::FileRef f;
+#if defined(_WIN64)
+		f = TagLib::FileRef(file.toStdWString().c_str());
+#else
+		f = TagLib::FileRef(file.toStdString().c_str());
+#endif
+		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
 			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
 				QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
@@ -316,7 +324,12 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 			if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
 				continue;
 			}
-			TagLib::FileRef f(file.toStdWString().c_str());
+			TagLib::FileRef f;
+#if defined(_WIN64)
+			f = TagLib::FileRef(file.toStdWString().c_str());
+#else
+			f = TagLib::FileRef(file.toStdString().c_str());
+#endif
 			if (!f.isNull() && f.tag()) {
 				TagLib::Tag* tag = f.tag();
 				sql = QString("UPDATE musicInfo SET favorite = ") + (tag->properties().contains(key) ? "1" : "0") +
@@ -332,12 +345,19 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 			if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
 				continue;
 			}
-			if (TagLib::FileRef f(file.toStdWString().c_str()); !f.isNull() && f.tag()) {
+			TagLib::FileRef f;
+#if defined(_WIN64)
+			f = TagLib::FileRef(file.toStdWString().c_str());
+#else
+			f = TagLib::FileRef(file.toStdString().c_str());
+#endif
+			if (!f.isNull() && f.tag()) {
 				emit current(i + newFileList.size());
 				TagLib::Tag* tag = f.tag();
 				for (const LyricIgnoreRuleSingleton& rule : entity.rules) {
 					if (getRuleHit(rule, tag)) {
-						sql = "UPDATE musicInfo SET ruleHit = 1 WHERE fileName = \"" + oldFileList.at(i).toUtf8() + "\"";
+						sql = "UPDATE musicInfo SET ruleHit = 1 WHERE fileName = \"" + oldFileList.at(i).toUtf8() +
+							"\"";
 						query.exec(sql);
 						break;
 					}
@@ -616,6 +636,7 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 	const int tempSort = this->entity.sortBy;
 	const int tempOrder = this->entity.orderBy;
 	const QList<LyricIgnoreRuleSingleton> tempRules = this->entity.rules;
+	const QString tempTag = this->entity.favoriteTag;
 	this->entity = entityParam;
 	if (tempSort != entityParam.sortBy || tempOrder != entityParam.orderBy) {
 		if (localPath != "") {
@@ -625,7 +646,8 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 			getMusic(PathType::REMOTE, 1);
 		}
 	}
-	if (tempRules != entity.rules || entityParam.favoriteTag != entity.favoriteTag) {
+	if (tempRules != entity.rules || entityParam.favoriteTag != tempTag) {
+		cleanLog();
 		if (localPath != "") {
 			getMusic(PathType::LOCAL, 1);
 		}
@@ -690,7 +712,13 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 		}
 		if (!entity.ignoreLyric && !static_cast<bool>(list.at(1).toInt())) {
 			if (!QFile::exists(lyric)) {
-				if (TagLib::FileRef f(sourceFile.toStdWString().c_str()); !f.isNull() && f.tag()) {
+				TagLib::FileRef f;
+#if defined(_WIN64)
+				f = TagLib::FileRef(sourceFile.toStdWString().c_str());
+#else
+				f = TagLib::FileRef(sourceFile.toStdString().c_str());
+#endif
+				if (!f.isNull() && f.tag()) {
 					if (const TagLib::Tag* tag = f.tag(); !tag->properties().contains(key)) {
 						qWarning() << "[WARN] Lyric file not found, skipping" << lyric;
 						addToErrorList(list.at(0), FileErrorType::LNF);
@@ -913,12 +941,21 @@ void MusicSyncTool::on_playControl_clicked() {
  */
 void MusicSyncTool::setSliderPosition(const qint64 position) const {
 	ui.playSlider->setValue(static_cast<int>(position));
+	QString progress;
 	if (position % 60000 / 1000 < 10) {
-		ui.playProgress->setText(QString::number(position / 60000) + ":0" + QString::number(position % 60000 / 1000));
+		progress = QString::number(position / 60000) + ":0" + QString::number(position % 60000 / 1000);
 	}
 	else {
-		ui.playProgress->setText(QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000));
+		progress = QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000);
 	}
+	progress += "/" + QString::number(mediaPlayer->duration() / 60000) + ":";
+	if (mediaPlayer->duration() % 60000 / 1000 < 10) {
+		progress += "0" + QString::number(mediaPlayer->duration() % 60000 / 1000);
+	}
+	else {
+		progress += QString::number(mediaPlayer->duration() % 60000 / 1000);
+	}
+	ui.playProgress->setText(progress);
 }
 
 /*
@@ -1074,8 +1111,13 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
 	nowPlaying = query.value(0).toString();
 	const QString filePath = (path == PathType::LOCAL ? localPath : remotePath) + "/" + nowPlaying;
 	mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-	if (const TagLib::FileRef f(filePath.toStdWString().c_str());
-		!f.isNull() && f.audioProperties()) {
+	TagLib::FileRef f;
+#if defined(_WIN64)
+	f = TagLib::FileRef(filePath.toStdWString().c_str());
+#else
+	f = TagLib::FileRef(filePath.toStdString().c_str());
+#endif
+	if (!f.isNull() && f.audioProperties()) {
 		const qint64 length = f.audioProperties()->lengthInMilliseconds();
 		setNowPlayingTitle(nowPlaying);
 		mediaPlayer->setPlaybackRate(1.0);

@@ -22,7 +22,7 @@ namespace PROPERTIES {
 	// NFT : No Favorite Tag
 	// FIRST : First Page
 	// LAST : Last Page
-	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST };
+	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING };
 
 	enum class OperationType { COPY, LOAD };
 
