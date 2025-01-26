@@ -25,7 +25,7 @@ void LoadingPage::stopPage() { close(); }
  * @param value The value to set
  */
 void LoadingPage::setProgress(const qsizetype value) const {
-	ui.progressBar->setValue((static_cast<double>(value) / total) * 100);
+	ui.progressBar->setValue(static_cast<double>(value) / total * 100);
 }
 
 /*

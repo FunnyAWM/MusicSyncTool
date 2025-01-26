@@ -1,6 +1,8 @@
 ﻿// ReSharper disable CppClangTidyConcurrencyMtUnsafe
 #pragma warning(disable : 6031)
 #include "MusicSyncTool.h"
+
+#include <any>
 #include <iostream>
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
@@ -127,7 +129,7 @@ void MusicSyncTool::loadLanguage() {
 		}
 		if (QJsonObject langObj = lang.toObject(); langObj["lang"].toString() == entity.language) {
 			// ReSharper disable once CppNoDiscardExpression
-            translator->load("translations/" + (langObj["fileName"]).toString());
+			translator->load("translations/" + langObj["fileName"].toString());
 			break;
 		}
 	}
@@ -276,14 +278,15 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 	oldFileList.sort();
 	for (int i = 0; i < oldFileList.size(); i++) {
 		if (!newFileList.contains(oldFileList.at(i))) {
-			sql = "DELETE FROM musicInfo WHERE fileName = \"" + oldFileList.at(i) + "\"";
-			query.exec(sql);
+			query.prepare("DELETE FROM musicInfo WHERE fileName = :fileName");
+			query.bindValue(":fileName", oldFileList.at(i));
+			query.exec();
 			oldFileList.removeAt(i);
 			i = i - 2 < -1 ? -1 : i - 2;
 		}
 	}
 	for (int i = 0; i < newFileList.size(); i++) {
-		if (QStringList list = newFileList.at(i).split("."); oldFileList.contains(newFileList.at(i)) || !supportedFormat.contains(list.at(1))) {
+		if (oldFileList.contains(newFileList.at(i)) || !isFormatSupported(newFileList.at(i))) {
 			newFileList.removeAt(i);
 			i = i - 2 < 0 ? -1 : i - 2;
 		}
@@ -302,22 +305,22 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 #endif
 		if (!f.isNull() && f.tag()) {
 			TagLib::Tag* tag = f.tag();
-			sql = "INSERT INTO musicInfo (title, artist, album, genre, year, track, favorite, fileName) VALUES (\"" +
-				QString::fromStdString(tag->title().to8Bit(true)) + "\", \"" +
-				QString::fromStdString(tag->artist().to8Bit(true)) + "\", \"" +
-				QString::fromStdString(tag->album().to8Bit(true)) + "\", \"" +
-				QString::fromStdString(tag->genre().to8Bit(true)) + "\", " +
-				QString::number(tag->year()) + ", " +
-				QString::number(tag->track()) + ", " +
-				(tag->properties().contains(key) ? "1" : "0") + ", \"" +
-				newFileList.at(i) + "\")";
-			query.exec(sql);
+			query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
+				":artist, :album, :genre, :year, :track, :fileName)");
+			query.bindValue(":title", tag->title().toCString(true));
+			query.bindValue(":artist", tag->artist().toCString(true));
+			query.bindValue(":album", tag->album().toCString(true));
+			query.bindValue(":genre", tag->genre().toCString(true));
+			query.bindValue(":year", tag->year());
+			query.bindValue(":track", tag->track());
+			query.bindValue(":fileName", newFileList.at(i));
+			if (!query.exec()) {
+				qWarning() << "[WARN] Error inserting data to database:" << query.lastError().text();
+			}
 			emit current(i);
 		}
-		else {
-			emit addToErrorListConcurrent(newFileList.at(i), LoadErrorType::TAGERR);
-		}
 	}
+	query.clear();
 	if (entity.favoriteTag != "") {
 		for (int i = 0; i < oldFileList.size(); i++) {
 			QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
@@ -332,9 +335,10 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 #endif
 			if (!f.isNull() && f.tag()) {
 				TagLib::Tag* tag = f.tag();
-				sql = QString("UPDATE musicInfo SET favorite = ") + (tag->properties().contains(key) ? "1" : "0") +
-					" WHERE fileName = \"" + oldFileList.at(i) + "\"";
-				query.exec(sql);
+				query.prepare("UPDATE musicInfo SET favorite = :favorite WHERE fileName = :fileName");
+				query.bindValue(":favorite", tag->properties().contains(key));
+				query.bindValue(":fileName", oldFileList.at(i));
+				query.exec();
 				emit current(i + newFileList.size());
 			}
 		}
@@ -355,10 +359,9 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 				emit current(i + newFileList.size());
 				TagLib::Tag* tag = f.tag();
 				for (const LyricIgnoreRuleSingleton& rule : entity.rules) {
-					if (getRuleHit(rule, tag)) {
-						sql = "UPDATE musicInfo SET ruleHit = 1 WHERE fileName = \"" + oldFileList.at(i).toUtf8() +
-							"\"";
-						query.exec(sql);
+					if (isRuleHit(rule, tag)) {
+						query.prepare("UPDATE musicInfo SET ruleHit = 1 WHERE fileName = :fileName");
+						query.bindValue(":fileName", oldFileList.at(i));
 						break;
 					}
 				}
@@ -400,7 +403,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 	sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
 		QString::number((page - 1) * PAGESIZE);
 	query.exec(sql);
-	QTableWidget* targetTable = (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	QTableWidget* targetTable = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
 	targetTable->clearContents();
 	if (currentPage[(path == PathType::LOCAL ? 0 : 1)] == totalPage[(path == PathType::LOCAL ? 0 : 1)]) {
 		targetTable->setRowCount(lastPageSize);
@@ -448,17 +451,19 @@ void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
 		getMusic(path, 1);
 		return;
 	}
-	QSqlQuery& query = (path == PathType::LOCAL ? queryLocal : queryRemote);
+	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	(path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->clearContents();
-	QString sql = "SELECT COUNT(*) FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text +
-		"%\" OR album LIKE \"%" + text + "%\"";
-	query.exec(sql);
+	query.prepare("SELECT COUNT(*) FROM musicInfo WHERE title LIKE :text OR artist LIKE :text OR album LIKE :text");
+	query.bindValue(":text", "%" + text + "%");
+	query.exec();
 	query.next();
 	const int tableSize = query.value(0).toInt();
 	(path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
-	sql = "SELECT * FROM musicInfo WHERE title LIKE \"%" + text + "%\" OR artist LIKE \"%" + text +
-		"%\" OR album LIKE \"%" + text + "%\"";
-	query.exec(sql);
+	query.prepare(
+		"SELECT title, artist, album, genre, year, track FROM musicInfo WHERE title LIKE :text OR artist LIKE "
+		":text OR album LIKE :text");
+	query.bindValue(":text", "%" + text + "%");
+	query.exec();
 	while (query.next()) {
 		for (int i = 0; i < 6; i++) {
 			if (query.value(i) != 0) {
@@ -515,7 +520,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 		return {};
 	}
 	ShowDupe dp;
-	QSqlQuery& query = (path == PathType::LOCAL ? queryLocal : queryRemote);
+	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	const QString sql = "SELECT title, artist, album, year, fileName FROM musicInfo ORDER BY title";
 	query.exec(sql);
 	QStringList dupeList;
@@ -560,7 +565,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
  */
 QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
 	QSet<int> selectedRows;
-	const QTableWidget* const table = (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	const QTableWidget* const table = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
 	if (table->rowCount() == 0) {
 		return {};
 	}
@@ -578,7 +583,7 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
 	if (selectedRows.empty()) {
 		return {};
 	}
-	QSqlQuery& query = (path == PathType::LOCAL ? queryLocal : queryRemote);
+	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	QString titleListString;
 	QString artistListString;
 	for (int i = 0; i < selectedRows.size() - 1; i++) {
@@ -587,11 +592,11 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
 	}
 	titleListString += "\"" + titleList.at(selectedRows.size() - 1) + "\"";
 	artistListString += "\"" + artistList.at(selectedRows.size() - 1) + "\"";
-	const QString sql = "SELECT fileName, ruleHit FROM musicInfo WHERE title IN(" + titleListString + ") AND artist IN("
-		+
-		artistListString + ")";
+	query.prepare("SELECT fileName, ruleHit FROM musicInfo WHERE title IN ( :title ) AND artist IN ( :artist )");
+	query.bindValue(":title", titleListString);
+	query.bindValue(":artist", artistListString);
 	auto fileList = QStringList();
-	query.exec(sql);
+	query.exec();
 	while (query.next()) {
 		fileList.append(query.value(0).toString() + ":" + QString::number(query.value(1).toInt()));
 	}
@@ -1105,7 +1110,7 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
 	QString sql = "SELECT fileName FROM musicInfo WHERE";
 	sql += " title = \"" + widget.item(row, 0)->text() + "\" AND artist = \"" + widget.item(row, 1)->text() +
 		"\" AND album = \"" + widget.item(row, 2)->text() + "\"";
-	QSqlQuery& query = (path == PathType::LOCAL ? queryLocal : queryRemote);
+	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	query.exec(sql);
 	query.next();
 	nowPlaying = query.value(0).toString();
@@ -1149,7 +1154,7 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, unsigned short page) {
 		return;
 	}
 	emit started();
-	QSqlQuery& query = (path == PathType::LOCAL ? queryLocal : queryRemote);
+	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	QString sql = "SELECT COUNT(*) FROM musicInfo WHERE favorite = 1";
 	query.exec(sql);
 	query.next();
@@ -1185,7 +1190,7 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, unsigned short page) {
 	sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " +
 		QString::number((currentPage[(path == PathType::LOCAL ? 0 : 1)] - 1) * PAGESIZE);
 	query.exec(sql);
-	QTableWidget* targetTable = (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote);
+	QTableWidget* targetTable = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
 	(path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
 		->setText(QString::number(currentPage[0]) + "/" + QString::number(totalPage[0]));
 	targetTable->clearContents();
@@ -1259,7 +1264,7 @@ bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
 	return false;
 }
 
-bool MusicSyncTool::getRuleHit(const LyricIgnoreRuleSingleton& singleton, const TagLib::Tag* target) {
+bool MusicSyncTool::isRuleHit(const LyricIgnoreRuleSingleton& singleton, const TagLib::Tag* target) {
 	const QRegularExpression regExp(singleton.getRuleName());
 	switch (singleton.getRuleField()) {
 	case RuleField::TITLE:
@@ -1279,4 +1284,10 @@ bool MusicSyncTool::getRuleHit(const LyricIgnoreRuleSingleton& singleton, const 
 		return !regExp.match(QString::fromStdString(target->album().to8Bit(true))).hasMatch();
 	}
 	return false;
+}
+
+bool MusicSyncTool::isFormatSupported(const QString& fileName) const {
+	return std::any_of(supportedFormat.begin(), supportedFormat.end(), [&fileName](const QString& format) {
+		return fileName.contains(format);
+	});
 }
