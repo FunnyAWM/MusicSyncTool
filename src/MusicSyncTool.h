@@ -62,7 +62,7 @@ class MusicSyncTool final : public QMainWindow {
 	QAudioOutput* audioOutput;
 	QString nowPlaying;
 	QStringList errorList;
-	const QStringList supportedFormat = {".mp3", ".flac", ".ape", ".wav", ".wma"};
+	const QStringList supportedFormat = {"mp3", "flac", "ape", "wav", "wma"};
 
 public:
 	explicit MusicSyncTool(QWidget* parent = nullptr);

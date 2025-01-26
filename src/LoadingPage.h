@@ -3,7 +3,7 @@
 
 #include "ui_LoadingPage.h"
 
-class LoadingPage : public QWidget {
+class LoadingPage final : public QWidget {
     Q_OBJECT
 
 public:

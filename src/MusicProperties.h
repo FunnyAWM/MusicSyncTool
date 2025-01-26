@@ -15,13 +15,14 @@ namespace PROPERTIES {
 
 	enum OrderByEnum { ASC = 0x00000011, DESC };
 
+	// PET : Program Error Type
 	// LNF : Lyric Not Found
 	// NPS : No Path Selected
 	// NFS : No File Selected
-	// PET : Program Error Type
 	// NFT : No Favorite Tag
 	// FIRST : First Page
 	// LAST : Last Page
+	// RUNNING : Program Already Running
 	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING };
 
 	enum class OperationType { COPY, LOAD };

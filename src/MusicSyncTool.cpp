@@ -283,7 +283,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 		}
 	}
 	for (int i = 0; i < newFileList.size(); i++) {
-		if (oldFileList.contains(newFileList.at(i)) || !supportedFormat.contains(newFileList.at(i).right(5))) {
+		if (QStringList list = newFileList.at(i).split("."); oldFileList.contains(newFileList.at(i)) || !supportedFormat.contains(list.at(1))) {
 			newFileList.removeAt(i);
 			i = i - 2 < 0 ? -1 : i - 2;
 		}
