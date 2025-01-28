@@ -44,7 +44,7 @@ class MusicSyncTool final : public QMainWindow {
 
 		Q_OBJECT
 
-	Ui::MusicSyncToolClass ui;
+	Ui::MusicSyncToolClass ui{};
 	QTranslator* translator;
 	QString localPath;
 	QString remotePath;
@@ -55,7 +55,7 @@ class MusicSyncTool final : public QMainWindow {
 	LoadingPage* loading = new LoadingPage();
 	// 0: local, 1: remote
 	unsigned short currentPage[2] = { 1, 1 };
-	unsigned short totalPage[2];
+	unsigned short totalPage[2]{};
 	bool favoriteOnly[2] = { false, false };
 	const short PAGESIZE = 200;
 	set entity;

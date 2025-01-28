@@ -2,7 +2,7 @@
 #pragma warning(disable : 6031)
 #include "MusicSyncTool.h"
 
-#include <any>
+#include <algorithm>
 #include <iostream>
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
