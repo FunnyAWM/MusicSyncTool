@@ -7,10 +7,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
 
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     #Replace this with your own Qt installation path
-    set(CMAKE_PREFIX_PATH "~/Qt/6.8.1/gcc_64")
+    #If you are using distros with Qt6 library packages available(like openSUSE),
+    #Just install the package and ignore this set statement
+    #set(CMAKE_PREFIX_PATH "/opt/Qt/6.8.1/gcc_64")
 
     find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
