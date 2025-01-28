@@ -44,7 +44,7 @@ class MusicSyncTool final : public QMainWindow {
 
 		Q_OBJECT
 
-	Ui::MusicSyncToolClass ui{};
+	Ui::MusicSyncToolClass ui;
 	QTranslator* translator;
 	QString localPath;
 	QString remotePath;
