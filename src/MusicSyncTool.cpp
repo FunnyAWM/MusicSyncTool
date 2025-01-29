@@ -910,6 +910,7 @@ void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int co
  * @brief Slots for exiting the program
  */
 void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
+
 /*
  * @brief Pop up window to ask if user want to delete all the log files
  */
@@ -1107,11 +1108,15 @@ void MusicSyncTool::on_volumeSlider_valueChanged(const int position) const { on_
  */
 void MusicSyncTool::setTotalLength(const PathType path, const int row) {
 	const QTableWidget& widget = path == PathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote;
-	QString sql = "SELECT fileName FROM musicInfo WHERE";
-	sql += " title = \"" + widget.item(row, 0)->text() + "\" AND artist = \"" + widget.item(row, 1)->text() +
-		"\" AND album = \"" + widget.item(row, 2)->text() + "\"";
+	// QString sql = "SELECT fileName FROM musicInfo WHERE";
+	// sql += " title = \"" + widget.item(row, 0)->text() + "\" AND artist = \"" + widget.item(row, 1)->text() +
+	// 	"\" AND album = \"" + widget.item(row, 2)->text() + "\"";
 	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-	query.exec(sql);
+	query.prepare("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");
+	query.bindValue(":title", widget.item(row, 0)->text());
+	query.bindValue(":artist", widget.item(row, 1)->text());
+	query.bindValue(":album", widget.item(row, 2)->text());
+	query.exec();
 	query.next();
 	nowPlaying = query.value(0).toString();
 	const QString filePath = (path == PathType::LOCAL ? localPath : remotePath) + "/" + nowPlaying;
