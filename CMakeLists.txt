@@ -48,6 +48,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/AddRuleWidget.ui
             resources/MusicSyncTool.qrc
             resources/MusicSyncTool.rc
+            src/LinuxSingleInstance.h
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
