@@ -4,12 +4,14 @@
 
 #ifndef LINUXSINGLEINSTANCE_H
 #define LINUXSINGLEINSTANCE_H
-#if defined(__linux__)
 #include <QCoreApplication>
+#if defined(__linux__)
 #include <QString>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#else defined (_WIN32) or defined (_WIN64)
+#include <Windows.h>
 #endif
 #if defined(__linux__)
 inline bool singleInstance() {
@@ -40,6 +42,13 @@ inline bool singleInstance() {
     }
     return true;
 }
-#endif
-
+#else defined (_WIN32) or defined (_WIN64)
+inline bool singleInstance(HANDLE& mutex) {
+	mutex = CreateMutex(nullptr, TRUE, QCoreApplication::applicationName().toStdWString().c_str());
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		CloseHandle(mutex);
+		return false;
+	}
+	return true;
+}
 #endif // LINUXSINGLEINSTANCE_H

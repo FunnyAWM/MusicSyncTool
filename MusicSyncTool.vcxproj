@@ -216,6 +216,7 @@
     <QtMoc Include="src\LoadingPage.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\SingleInstance.h" />
     <QtMoc Include="src\AddRuleWidget.h" />
     <QtMoc Include="src\LyricIgnoreRuleSingleton.h" />
     <ClInclude Include="src\MusicProperties.h" />
