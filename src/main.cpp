@@ -2,7 +2,7 @@
 #if defined(_WIN64) or defined(_WIN32)
 #include <Windows.h>
 #else defined(__linux__)
-#include "LinuxSingleInstance.h"
+#include "SingleInstance.h"
 #endif
 
 int main(int argc, char* argv[]) {
@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
     if (!singleInstance()) {
         w.popError(PET::RUNNING);
         return 1;
+    } else if (argc >= 2 && argv[1] == "--parallel") {
+
     }
 #endif
     w.show();

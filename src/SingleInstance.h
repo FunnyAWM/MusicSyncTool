@@ -4,11 +4,14 @@
 
 #ifndef LINUXSINGLEINSTANCE_H
 #define LINUXSINGLEINSTANCE_H
+#if defined(__linux__)
 #include <QCoreApplication>
 #include <QString>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
+#if defined(__linux__)
 inline bool singleInstance() {
     QString lockFileBuilder = "/tmp/";
     lockFileBuilder += QCoreApplication::applicationName();
@@ -37,5 +40,6 @@ inline bool singleInstance() {
     }
     return true;
 }
+#endif
 
 #endif // LINUXSINGLEINSTANCE_H
