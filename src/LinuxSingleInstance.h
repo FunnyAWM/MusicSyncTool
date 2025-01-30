@@ -28,9 +28,8 @@ inline bool singleInstance() {
         qWarning() << "Failed to lock file: " << lockFileBuilder;
         return false;
     }
-    const int pid = getpid();
     ftruncate(fd, 0);
-    result = static_cast<int>(write(fd, &pid, sizeof(pid)));
+    result = static_cast<int>(write(fd, nullptr, 0));
     if (result == -1) {
         qWarning() << "Failed to write lock file: " << lockFileBuilder;
         close(fd);

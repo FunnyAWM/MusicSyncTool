@@ -1,7 +1,7 @@
 ﻿#include "MusicSyncTool.h"
 #if defined(_WIN64) or defined(_WIN32)
 #include <Windows.h>
-#else if defined(__linux__)
+#else defined(__linux__)
 #include "LinuxSingleInstance.h"
 #endif
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
         }
         return 1;
     }
-#else if defined(__linux__)
+#else defined(__linux__)
     if (!singleInstance()) {
         w.popError(PET::RUNNING);
         return 1;
