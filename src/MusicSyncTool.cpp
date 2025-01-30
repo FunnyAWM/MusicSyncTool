@@ -117,6 +117,7 @@ void MusicSyncTool::initMediaPlayer() const {
 void MusicSyncTool::loadLanguage() {
 	QFile file(QApplication::applicationDirPath() + "/translations/langinfo.json");
 	if (!file.open(QIODevice::ReadOnly)) {
+	    popError(PET::NOLANG);
 		qFatal() << "[FATAL] Error opening langinfo.json:" << file.errorString();
 		exit(EXIT_FAILURE);
 	}
@@ -177,6 +178,8 @@ void MusicSyncTool::popError(const PET type) {
 	case PET::RUNNING:
 		QMessageBox::critical(this, tr("错误"), tr("程序已在运行！"));
 		break;
+	case PET::NOLANG:
+	    QMessageBox::critical(this, tr("错误"), tr("找不到程序语言配置文件，程序即将退出！"));
 	}
 }
 

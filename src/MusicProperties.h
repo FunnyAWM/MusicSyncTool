@@ -23,7 +23,7 @@ namespace PROPERTIES {
 	// FIRST : First Page
 	// LAST : Last Page
 	// RUNNING : Program Already Running
-	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING };
+	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING, NOLANG };
 
 	enum class OperationType { COPY, LOAD };
 
