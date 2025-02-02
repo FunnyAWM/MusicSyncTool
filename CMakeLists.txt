@@ -14,7 +14,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     Just install the package and ignore this set statement]]
     #set(CMAKE_PREFIX_PATH "/opt/Qt/6.8.1/gcc_64")
 
-    find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
+    find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(ZLIB)
     find_package(TagLib 2.0.0 REQUIRED)

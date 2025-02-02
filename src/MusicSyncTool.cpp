@@ -12,7 +12,7 @@
 /*
  * @brief Default constructor
  */
-MusicSyncTool::MusicSyncTool(QWidget* parent) :
+MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init)
 	QMainWindow(parent), translator(new QTranslator(this)), mediaPlayer(new QMediaPlayer(this)),
 	audioOutput(new QAudioOutput(this)) {
 	initDatabase();
@@ -243,29 +243,20 @@ void MusicSyncTool::getMusic(PathType path, unsigned short page) {
  * @param Path type
  * @param Page number
  */
-void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
-	clock_t start = clock();
+void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short page) {
+    const clock_t start = clock();
 	emit started();
 	favoriteOnly[path == PathType::LOCAL ? 0 : 1] = false;
-	QStringList pathForLog = (path == PathType::LOCAL ? localPath : remotePath).split("/");
-	QString logFileNameBuilder = "lastScan";
-	pathForLog[0].remove(":");
-	for (const QString& tempStr : pathForLog) {
-		logFileNameBuilder += " - " + tempStr;
-	}
-	logFileNameBuilder += ".log";
-	QFile logFile("log/" + logFileNameBuilder);
-	QDateTime dateTime;
-	if (logFile.open(QIODevice::ReadOnly)) {
-		QTextStream in(&logFile);
-		dateTime = QDateTime::fromString(in.readLine());
-	}
-	else {
-		qWarning() << "[WARN] No last scan log found, scanning all files";
-		// Set last scan time to 1970-01-01 00:00:00 if no log found
-		dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
-	}
-	QDir dir(path == PathType::LOCAL ? localPath : remotePath);
+    QStringList pathForLog = (path == PathType::LOCAL ? localPath : remotePath).split("/");
+    QString logFileNameBuilder = "lastScan";
+    pathForLog[0].remove(":");
+    for (const QString& tempStr : pathForLog) {
+        logFileNameBuilder += " - " + tempStr;
+    }
+    logFileNameBuilder += ".log";
+    logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
+    const QDateTime dateTime = getDateFromLog(logFileNameBuilder);
+    const QDir dir(path == PathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
 		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)";
 	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
@@ -297,7 +288,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 	newFileList.removeOne("musicInfo.db");
 	emit total(newFileList.size() + oldFileList.size());
 	emit current(0);
-	TagLib::String key(entity.favoriteTag.toStdString());
+    const TagLib::String key(entity.favoriteTag.toStdString());
 	for (int i = 0; i < newFileList.size(); i++) {
 		QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
 		TagLib::FileRef f;
@@ -307,7 +298,7 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 		f = TagLib::FileRef(file.toStdString().c_str());
 #endif
 		if (!f.isNull() && f.tag()) {
-			TagLib::Tag* tag = f.tag();
+            const TagLib::Tag* tag = f.tag();
 			query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
 				":artist, :album, :genre, :year, :track, :fileName)");
 			query.bindValue(":title", tag->title().toCString(true));
@@ -323,59 +314,14 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 			emit current(i);
 		}
 	}
+    setFavorite(oldFileList, path, key, dateTime);
 	query.clear();
-	if (entity.favoriteTag != "") {
-		for (int i = 0; i < oldFileList.size(); i++) {
-			QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
-			if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
-				continue;
-			}
-			TagLib::FileRef f;
-#if defined(_WIN64) or defined(_WIN32)
-			f = TagLib::FileRef(file.toStdWString().c_str());
-#else
-			f = TagLib::FileRef(file.toStdString().c_str());
-#endif
-			if (!f.isNull() && f.tag()) {
-				TagLib::Tag* tag = f.tag();
-				query.prepare("UPDATE musicInfo SET favorite = :favorite WHERE fileName = :fileName");
-				query.bindValue(":favorite", tag->properties().contains(key));
-				query.bindValue(":fileName", oldFileList.at(i));
-				query.exec();
-				emit current(i + newFileList.size());
-			}
-		}
-	}
-	if (!entity.rules.isEmpty()) {
-		for (int i = 0; i < oldFileList.size(); i++) {
-			QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + oldFileList.at(i).toUtf8();
-			if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
-				continue;
-			}
-			TagLib::FileRef f;
-#if defined(_WIN64) or defined(_WIN32)
-			f = TagLib::FileRef(file.toStdWString().c_str());
-#else
-			f = TagLib::FileRef(file.toStdString().c_str());
-#endif
-			if (!f.isNull() && f.tag()) {
-				emit current(i + newFileList.size());
-				TagLib::Tag* tag = f.tag();
-				for (const LyricIgnoreRuleSingleton& rule : entity.rules) {
-					if (isRuleHit(rule, tag)) {
-						query.prepare("UPDATE musicInfo SET ruleHit = 1 WHERE fileName = :fileName");
-						query.bindValue(":fileName", oldFileList.at(i));
-						break;
-					}
-				}
-			}
-		}
-	}
+    setRuleHit(oldFileList, path, entity.rules, dateTime);
 	sql = "SELECT COUNT(*) FROM musicInfo";
 	query.exec(sql);
 	query.next();
 	totalPage[path == PathType::LOCAL ? 0 : 1] = static_cast<short>(query.value(0).toInt() / PAGESIZE + 1);
-	short lastPageSize = static_cast<short>(query.value(0).toInt() % PAGESIZE);
+    const short lastPageSize = static_cast<short>(query.value(0).toInt() % PAGESIZE);
 	emit total(PAGESIZE);
 	sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
 	switch (entity.sortBy) {
@@ -415,32 +361,19 @@ void MusicSyncTool::getMusicConcurrent(PathType path, unsigned short page) {
 		targetTable->setRowCount(PAGESIZE);
 	}
 	for (int j = 0; query.next(); j++) {
-		emit current(j);
-		for (int i = 0; i < 6; i++) {
-			if (query.value(i) != 0) {
-				targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
-			}
-		}
-	}
-	clock_t end = clock();
+        emit current(j);
+        for (int i = 0; i < 6; i++) {
+            if (query.value(i) != 0) {
+                targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
+            }
+        }
+    }
+    const clock_t end = clock();
 	qDebug() << "[INFO] Scanning finished in" << static_cast<double>(end - start) / CLOCKS_PER_SEC << "seconds";
-	if (QDir logDir("log"); !logDir.exists()) {
-		if (!logDir.mkpath(".")) {
-			qFatal() << "[FATAL] Cannot create log directory";
-			exit(EXIT_FAILURE);
-		}
-	}
-	QFile timeFile("log/" + logFileNameBuilder);
-	if (!timeFile.open(QIODevice::WriteOnly)) {
-		qWarning() << "[WARN] Cannot write to lastScan.log";
-		return;
-	}
 	(path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
 		->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
 			QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
-	QTextStream out(&timeFile);
-	out << QDateTime::currentDateTime().toString() << "\n";
-	timeFile.close();
+    writeLog(logFileNameBuilder, dateTime);
 	emit finished();
 }
 
@@ -524,8 +457,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 	}
 	ShowDupe dp;
 	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-	const QString sql = "SELECT title, artist, album, year, fileName FROM musicInfo ORDER BY title";
-	query.exec(sql);
+	query.exec("SELECT title, artist, album, year, fileName FROM musicInfo ORDER BY title");
 	QStringList dupeList;
 	query.next();
 	QString slow = query.value(0).toString() + ":" + query.value(1).toString() + ":" + query.value(2).toString() + ":" +
@@ -553,9 +485,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 	for (const auto& i : dupeList) {
 		qDebug() << "[INFO] Found duplicated music named" << i << "at"
 			<< (path == PathType::LOCAL ? localPath : remotePath);
-	}
-	for (const auto& i : dupeList) {
-		dp.add(i);
+	    dp.add(i);
 	}
 	dp.exec();
 	return dupeList;
@@ -610,11 +540,91 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
  * @brief Show settings dialog
  */
 void MusicSyncTool::showSettings() const {
-	const auto page = new Settings();
-	connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
-	page->show();
+    const auto page = new Settings();
+    connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
+    page->show();
 }
-
+void MusicSyncTool::setFavorite(const QStringList& list, const PathType path, const TagLib::String& key,
+                                const QDateTime& dateTime) {
+    emit total(list.size());
+    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
+    if (entity.favoriteTag != "") {
+        for (int i = 0; i < list.size(); i++) {
+            QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + list.at(i).toUtf8();
+            if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
+                continue;
+            }
+            TagLib::FileRef f;
+#if defined(_WIN64) or defined(_WIN32)
+            f = TagLib::FileRef(file.toStdWString().c_str());
+#else
+            f = TagLib::FileRef(file.toStdString().c_str());
+#endif
+            if (!f.isNull() && f.tag()) {
+                const TagLib::Tag* tag = f.tag();
+                query.prepare("UPDATE musicInfo SET favorite = :favorite WHERE fileName = :fileName");
+                query.bindValue(":favorite", tag->properties().contains(key));
+                query.bindValue(":fileName", list.at(i));
+                query.exec();
+                emit current(i);
+            }
+        }
+    }
+}
+void MusicSyncTool::setRuleHit(const QStringList& fileList, const PathType path, const QList<LyricIgnoreRuleSingleton>& rules, const QDateTime& dateTime) {
+    QSqlQuery &query = path == PathType::LOCAL ? queryLocal : queryRemote;
+    emit total(fileList.size());
+    if (!rules.isEmpty()) {
+        for (int i = 0; i < fileList.size(); i++) {
+            QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + fileList.at(i).toUtf8();
+            if (QFile(file).fileTime(QFileDevice::FileModificationTime) <= dateTime) {
+                continue;
+            }
+            TagLib::FileRef f;
+#if defined(_WIN64) or defined(_WIN32)
+            f = TagLib::FileRef(file.toStdWString().c_str());
+#else
+            f = TagLib::FileRef(file.toStdString().c_str());
+#endif
+            if (!f.isNull() && f.tag()) {
+                emit current(i);
+                TagLib::Tag* tag = f.tag();
+                for (const LyricIgnoreRuleSingleton& rule : entity.rules) {
+                    if (isRuleHit(rule, tag)) {
+                        query.prepare("UPDATE musicInfo SET ruleHit = :ruleHit WHERE fileName = :fileName");
+                        query.bindValue(":fileName", fileList.at(i));
+                        query.exec();
+                        break;
+                    }
+                }
+                query.prepare("UPDATE musicInfo SET ruleHit = 0 WHERE ruleHit IS NULL");
+                query.exec();
+            }
+        }
+    }
+}
+QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
+    QFile file(log);
+    QDateTime dateTime;
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream in(&file);
+        dateTime = QDateTime::fromString(in.readLine());
+    }
+    else {
+        qWarning() << "[WARN] No last scan log found, scanning all files";
+        // Set last scan time to 1970-01-01 00:00:00 if no log found
+        dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
+    }
+    return dateTime;
+}
+void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime){
+    QFile file(log);
+    QTextStream out(&file);
+    if (file.open(QIODevice::WriteOnly)) {
+        out << dateTime.toString();
+    }
+    file.close();
+}
 /*
  * @brief Save settings to settings file
  * @param Entity
@@ -834,7 +844,8 @@ void MusicSyncTool::on_actionSettings_triggered(bool triggered) const { showSett
 /*
  * @brief Slots for about action
  */
-void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void MusicSyncTool::on_actionAbout_triggered(bool triggered) { // NOLINT(*-convert-member-functions-to-static)
 	AboutPage about;
 	about.exec();
 }
@@ -912,7 +923,8 @@ void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int co
 /*
  * @brief Slots for exiting the program
  */
-void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); }
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void MusicSyncTool::on_actionExit_triggered(bool triggered) { exit(EXIT_SUCCESS); } // NOLINT(*-convert-member-functions-to-static)
 
 /*
  * @brief Pop up window to ask if user want to delete all the log files
@@ -1273,25 +1285,21 @@ bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
 }
 
 bool MusicSyncTool::isRuleHit(const LyricIgnoreRuleSingleton& singleton, const TagLib::Tag* target) {
-	const QRegularExpression regExp(singleton.getRuleName());
-	switch (singleton.getRuleField()) {
-	case RuleField::TITLE:
-		if (singleton.getRuleType() == RuleType::INCLUDES) {
-			return regExp.match(QString::fromStdString(target->title().to8Bit(true))).hasMatch();
-		}
-		return !regExp.match(QString::fromStdString(target->title().to8Bit(true))).hasMatch();
-	case RuleField::ARTIST:
-		if (singleton.getRuleType() == RuleType::INCLUDES) {
-			return regExp.match(QString::fromStdString(target->artist().to8Bit(true))).hasMatch();
-		}
-		return !regExp.match(QString::fromStdString(target->artist().to8Bit(true))).hasMatch();
-	case RuleField::ALBUM:
-		if (singleton.getRuleType() == RuleType::INCLUDES) {
-			return regExp.match(QString::fromStdString(target->album().to8Bit(true))).hasMatch();
-		}
-		return !regExp.match(QString::fromStdString(target->album().to8Bit(true))).hasMatch();
-	}
-	return false;
+    QString fieldStr;
+    switch (singleton.getRuleField()) {
+    case RuleField::TITLE:
+        fieldStr = QString::fromStdString(target->title().to8Bit(true));
+        break;
+    case RuleField::ARTIST:
+        fieldStr = QString::fromStdString(target->artist().to8Bit(true));
+        break;
+    case RuleField::ALBUM:
+        fieldStr = QString::fromStdString(target->album().to8Bit(true));
+        break;
+    }
+    const QRegularExpression regExp(singleton.getRuleName());
+    const bool hasMatch = regExp.match(fieldStr).hasMatch();
+    return (singleton.getRuleType() == RuleType::INCLUDES) ? hasMatch : !hasMatch;
 }
 
 bool MusicSyncTool::isFormatSupported(const QString& fileName) const {
