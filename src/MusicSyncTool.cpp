@@ -255,7 +255,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     }
     logFileNameBuilder += ".log";
     logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
-    const QDateTime dateTime = getDateFromLog(logFileNameBuilder);
+    QDateTime dateTime = getDateFromLog(logFileNameBuilder);
     const QDir dir(path == PathType::LOCAL ? localPath : remotePath);
 	QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
 		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)";
@@ -314,9 +314,9 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 			emit current(i);
 		}
 	}
-    setFavorite(oldFileList, path, key, dateTime);
+    setFavorite(oldFileList + newFileList, path, key, dateTime);
 	query.clear();
-    setRuleHit(oldFileList, path, entity.rules, dateTime);
+    setRuleHit(oldFileList + newFileList, path, entity.rules, dateTime);
 	sql = "SELECT COUNT(*) FROM musicInfo";
 	query.exec(sql);
 	query.next();
@@ -373,6 +373,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 	(path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
 		->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
 			QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
+	dateTime = QDateTime::currentDateTime();
     writeLog(logFileNameBuilder, dateTime);
 	emit finished();
 }
@@ -606,11 +607,21 @@ void MusicSyncTool::setRuleHit(const QStringList& fileList, const PathType path,
 QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
     QFile file(log);
     QDateTime dateTime;
+	const QString logDir = QCoreApplication::applicationDirPath() + "/log";
+	const QDir dir(logDir);
+	if (!dir.exists()) {
+		dir.mkpath(logDir);
+	}
     if (file.open(QIODevice::ReadOnly)) {
         QTextStream in(&file);
         dateTime = QDateTime::fromString(in.readLine());
+		if (dateTime.isNull()) {
+			qWarning() << "[WARN] No last scan log found, scanning all files";
+			dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
+		}
     }
     else {
+		qWarning() << file.errorString();
         qWarning() << "[WARN] No last scan log found, scanning all files";
         // Set last scan time to 1970-01-01 00:00:00 if no log found
         dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
