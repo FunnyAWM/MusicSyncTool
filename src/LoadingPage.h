@@ -9,7 +9,7 @@ class LoadingPage final : public QWidget {
 public:
     explicit LoadingPage(QWidget *parent = nullptr);
     ~LoadingPage() override = default;
-
+    void setTitle(const QString& title) const;
 private:
     Ui::LoadingPageClass ui;
     qsizetype total;
