@@ -785,8 +785,16 @@ void MusicSyncTool::showOperationResult(const OperationType type) {
     if (errorList.isEmpty()) {
         delete result;
         if (type == OperationType::COPY) {
-            getMusic(PathType::LOCAL, 1);
-            getMusic(PathType::REMOTE, 1);
+            if (favoriteOnly[0]) {
+                getFavoriteMusic(PathType::LOCAL, currentPage[0]);
+            } else {
+                getMusic(PathType::LOCAL, currentPage[0]);
+            }
+            if (favoriteOnly[1]) {
+                getFavoriteMusic(PathType::REMOTE, currentPage[1]);
+            } else {
+                getMusic(PathType::REMOTE, currentPage[1]);
+            }
         }
         return;
     }
@@ -797,8 +805,16 @@ void MusicSyncTool::showOperationResult(const OperationType type) {
     result->exec();
     errorList.clear();
     if (type == OperationType::COPY) {
-        getMusic(PathType::LOCAL, 1);
-        getMusic(PathType::REMOTE, 1);
+        if (favoriteOnly[0]) {
+            getFavoriteMusic(PathType::LOCAL, currentPage[0]);
+        } else {
+            getMusic(PathType::LOCAL, currentPage[0]);
+        }
+        if (favoriteOnly[1]) {
+            getFavoriteMusic(PathType::REMOTE, currentPage[1]);
+        } else {
+            getMusic(PathType::REMOTE, currentPage[1]);
+        }
     }
 }
 
