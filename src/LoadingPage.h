@@ -10,6 +10,7 @@ public:
     explicit LoadingPage(QWidget *parent = nullptr);
     ~LoadingPage() override = default;
     void setTitle(const QString& title) const;
+    void setRandomTitle() const;
 private:
     Ui::LoadingPageClass ui;
     qsizetype total;

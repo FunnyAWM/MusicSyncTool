@@ -1,5 +1,4 @@
 #include "LoadingPage.h"
-#include "../LoadingTitle.h"
 #include "MusicSyncTool.h"
 #include <cstdlib>
 #include <ctime>
@@ -12,16 +11,28 @@ LoadingPage::LoadingPage(QWidget* parent) : QWidget(parent), total(0) {
     this->setWindowFlags(Qt::FramelessWindowHint);
     this->setWindowModality(Qt::ApplicationModal);
     this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
-    srand(static_cast<unsigned>(time(nullptr)));
-    const int titleIndex = rand() % LOADINGTITLE::TITLE_LIST_SIZE;
-    this->setTitle(LOADINGTITLE::titleList[titleIndex]);
+    setRandomTitle();
 }
-void LoadingPage::setTitle(const QString& title) const {
-    ui.label->setText(title);
+void LoadingPage::setTitle(const QString& title) const { ui.label->setText(title); }
+void LoadingPage::setRandomTitle() const {
+    srand(static_cast<unsigned>(time(nullptr)));
+    QFile file(QCoreApplication::applicationDirPath() + "/resources/titles.txt");
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream stream(&file);
+        const int totalTitle = stream.readLine().toInt();
+        const int titleIndex = rand() % totalTitle;
+        for (int i = 0; i < titleIndex; i++) {
+            stream.readLine();
+        }
+        const QString title = stream.readLine();
+        setTitle(title);
+        file.close();
+    }
 }
 
 void LoadingPage::showPage() {
 	ui.progressBar->setValue(0);
+    setRandomTitle();
 	show();
 }
 
