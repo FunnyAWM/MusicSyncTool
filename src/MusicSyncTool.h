@@ -132,6 +132,7 @@ public slots:
     void on_volumeSlider_sliderMoved(int) const;
     void on_volumeSlider_sliderPressed() const;
     void on_volumeSlider_valueChanged(int) const;
+    void on_copyFinished(OperationType) const;
     void saveSettings(const set&);
 
 signals:

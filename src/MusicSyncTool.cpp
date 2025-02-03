@@ -516,21 +516,17 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
         return {};
     }
     QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    QString titleListString;
-    QString artistListString;
-    for (int i = 0; i < selectedRows.size() - 1; i++) {
-        titleListString += "\"" + titleList.at(i) + "\", ";
-        artistListString += "\"" + artistList.at(i) + "\", ";
-    }
-    titleListString += "\"" + titleList.at(selectedRows.size() - 1) + "\"";
-    artistListString += "\"" + artistList.at(selectedRows.size() - 1) + "\"";
-    query.prepare("SELECT fileName, ruleHit FROM musicInfo WHERE title IN ( :title ) AND artist IN ( :artist )");
-    query.bindValue(":title", titleListString);
-    query.bindValue(":artist", artistListString);
     auto fileList = QStringList();
-    query.exec();
-    while (query.next()) {
-        fileList.append(query.value(0).toString() + ":" + QString::number(query.value(1).toInt()));
+    for (const int& i : selectedRows) {
+        QString title = table->item(i, 0)->text();
+        QString artist = table->item(i, 1)->text();
+        query.prepare("SELECT fileName, ruleHit FROM musicInfo WHERE title = :title AND artist = :artist");
+        query.bindValue(":title", title);
+        query.bindValue(":artist", artist);
+        query.exec();
+        if (query.next()) {
+            fileList.append(query.value(0).toString() + ":" + query.value(1).toString());
+        }
     }
     return fileList;
 }
@@ -726,8 +722,8 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
             if (sourceFile.contains(format)) {
                 QString temp = sourceFile;
                 QString tempTarget = targetFile;
-                lyric = temp.replace(format, ".lrc");
-                lyricTarget = tempTarget.replace(format, ".lrc");
+                lyric = temp.replace(format, "lrc");
+                lyricTarget = tempTarget.replace(format, "lrc");
                 break;
             }
         }
@@ -1121,6 +1117,14 @@ void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
  * @brief Slots for volume slider
  */
 void MusicSyncTool::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
+void MusicSyncTool::on_copyFinished(OperationType op) const {
+    if (localPath != "") {
+        setAvailableSpace(PathType::LOCAL);
+    }
+    if (remotePath != "") {
+        setAvailableSpace(PathType::REMOTE);
+    }
+}
 /*
  * @brief Set total length of play slider
  */
@@ -1183,6 +1187,7 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, unsigned short page) {
     query.next();
     const int totalSize = query.value(0).toInt();
     totalPage[(path == PathType::LOCAL ? 0 : 1)] = static_cast<short>(totalSize / PAGESIZE) + 1;
+    const int lastPageSize = totalSize % PAGESIZE;
     // NOLINT(cppcoreguidelines-narrowing-conversions)
     sql = "SELECT * FROM musicInfo WHERE favorite = 1";
     switch (entity.sortBy) {
@@ -1215,9 +1220,13 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, unsigned short page) {
     query.exec(sql);
     QTableWidget* targetTable = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
     (path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
-        ->setText(QString::number(currentPage[0]) + "/" + QString::number(totalPage[0]));
+        ->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" + QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
     targetTable->clearContents();
-    targetTable->setRowCount(PAGESIZE);
+    if (currentPage[(path == PathType::LOCAL ? 0 : 1)] == totalPage[(path == PathType::LOCAL ? 0 : 1)]) {
+        targetTable->setRowCount(lastPageSize);
+    } else {
+        targetTable->setRowCount(PAGESIZE);
+    }
     favoriteOnly[(path == PathType::LOCAL ? 0 : 1)] = true;
     emit total(totalSize);
     for (int i = 0; query.next(); i++) {
@@ -1245,6 +1254,7 @@ void MusicSyncTool::connectSlots() const {
     connect(mediaPlayer, &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
     connect(this, &MusicSyncTool::addToErrorListConcurrent, this,
             QOverload<const QString&, LoadErrorType>::of(&MusicSyncTool::addToErrorList));
+    connect(this, &MusicSyncTool::copyFinished, this,&MusicSyncTool::on_copyFinished);
 }
 
 /*
