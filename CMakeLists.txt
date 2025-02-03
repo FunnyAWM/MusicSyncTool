@@ -49,7 +49,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             resources/MusicSyncTool.qrc
             resources/MusicSyncTool.rc
             src/SingleInstance.h
-            LoadingTitle.h
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -104,6 +103,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     if (QT_VERSION_MAJOR EQUAL 6)
         qt_finalize_executable(MusicSyncTool)
     endif ()
+    add_custom_command(TARGET MusicSyncTool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+            "$<TARGET_FILE_DIR:MusicSyncTool>/resources"
+            COMMENT "Copying file post-build"
+    )
 else()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
 endif()
