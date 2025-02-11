@@ -1,5 +1,5 @@
 #! /bin/sh
-ls ./forms
+result = $(ls ./forms)
 if [ "$?" = 0 ]
 then
   mv ./forms/* ./src

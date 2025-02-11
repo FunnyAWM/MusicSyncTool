@@ -260,6 +260,9 @@
     <QtTranslation Include="translations\Translation_Wenyan.ts" />
     <QtTranslation Include="translations\Translation_zh_Hans.ts" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\titles.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

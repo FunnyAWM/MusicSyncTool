@@ -137,4 +137,9 @@
       <Filter>Translation Files</Filter>
     </QtTranslation>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\titles.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
