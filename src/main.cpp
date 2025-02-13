@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
 #if defined(_WIN64) or defined(_WIN32)
 	HANDLE hMutex;
 	if (!singleInstance(hMutex)) {
-#else defined(__linux__)
+#else
 	if (!singleInstance()) {
 #endif
 		w.popError(PET::RUNNING);
