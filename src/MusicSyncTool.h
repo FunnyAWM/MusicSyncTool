@@ -103,6 +103,7 @@ public:
     void setRuleHit(const QStringList&, PathType, const QList<LyricIgnoreRuleSingleton>&, const QDateTime&);
     static QDateTime getDateFromLog(const QString&);
     static void writeLog(const QString&, const QDateTime&);
+    void rollBackCopy(const QString&);
 public slots:
     void on_actionAbout_triggered(bool);
     void on_actionClean_log_files_triggered(bool);
