@@ -47,6 +47,9 @@
     <QtMoc Include="src\LyricIgnoreRuleSingleton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="MSTDataSource.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MusicProperties.h">
@@ -85,6 +88,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\LyricIgnoreRuleSingleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MSTDataSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

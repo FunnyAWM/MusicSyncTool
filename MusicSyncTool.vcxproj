@@ -216,6 +216,7 @@
     <QtMoc Include="src\LoadingPage.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MSTDataSource.h" />
     <ClInclude Include="src\SingleInstance.h" />
     <QtMoc Include="src\AddRuleWidget.h" />
     <QtMoc Include="src\LyricIgnoreRuleSingleton.h" />
@@ -227,6 +228,7 @@
     <QtMoc Include="src\MusicSyncTool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MSTDataSource.cpp" />
     <ClCompile Include="src\AboutPage.cpp" />
     <ClCompile Include="src\AddRuleWidget.cpp" />
     <ClCompile Include="src\LoadingPage.cpp" />
