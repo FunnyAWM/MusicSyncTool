@@ -26,13 +26,13 @@ Settings::Settings(QWidget* parent) : QWidget(parent) {
     setOrderByToUI(static_cast<short>(obj["orderBy"].toInt()));
     setLanguageToUI(obj["language"].toString());
     setFavoriteTagToUI(obj["favoriteTag"].toString());
-    QList<LyricIgnoreRuleSingleton> rules;
+    QList<LyricIgnoreRule> rules;
     QJsonArray rulesArray = obj["rules"].toArray();
     for (QJsonValue rule : rulesArray) {
         QJsonObject ruleObj = rule.toObject();
         rules.append(
-            LyricIgnoreRuleSingleton(LyricIgnoreRuleSingleton::stringToIgnoreRules(ruleObj["ruleType"].toString()),
-                                     LyricIgnoreRuleSingleton::stringToLyricRules(ruleObj["ruleField"].toString()),
+            LyricIgnoreRule(LyricIgnoreRule::stringToIgnoreRules(ruleObj["ruleType"].toString()),
+                                     LyricIgnoreRule::stringToLyricRules(ruleObj["ruleField"].toString()),
                                      ruleObj["ruleName"].toString()));
     }
     setIgnoreRulesToUI(rules);
@@ -137,16 +137,16 @@ void Settings::setOrderByToUI(short orderBy) {
     }
 }
 
-void Settings::setIgnoreRulesToUI(QList<LyricIgnoreRuleSingleton>& rules) {
+void Settings::setIgnoreRulesToUI(QList<LyricIgnoreRule>& rules) {
     entity.rules = rules;
     ui.rulesWidget->setRowCount(static_cast<int>(rules.size()));
     int row = 0;
-    for (LyricIgnoreRuleSingleton& singleton : rules) {
+    for (LyricIgnoreRule& singleton : rules) {
         singleton.setRulesStr();
         ui.rulesWidget->setItem(
-            row, 0, new QTableWidgetItem(LyricIgnoreRuleSingleton::lyricRulesToString(singleton.getRuleField())));
+            row, 0, new QTableWidgetItem(LyricIgnoreRule::lyricRulesToString(singleton.getRuleField())));
         ui.rulesWidget->setItem(
-            row, 1, new QTableWidgetItem(LyricIgnoreRuleSingleton::ignoreRulesToString(singleton.getRuleType())));
+            row, 1, new QTableWidgetItem(LyricIgnoreRule::ignoreRulesToString(singleton.getRuleType())));
         ui.rulesWidget->setItem(row, 2, new QTableWidgetItem(singleton.getRuleName()));
         row++;
     }
@@ -173,7 +173,7 @@ void Settings::on_deleteSelectedRule_clicked() {
     }
 }
 
-void Settings::addRule(const LyricIgnoreRuleSingleton& singleton) {
+void Settings::addRule(const LyricIgnoreRule& singleton) {
     entity.rules.append(singleton);
     setIgnoreRulesToUI(entity.rules);
 }

@@ -114,31 +114,54 @@
     </message>
 </context>
 <context>
+    <name>LyricIgnoreRule</name>
+    <message>
+        <location filename="../src/LyricIgnoreRule.cpp" line="33"/>
+        <source>名称</source>
+        <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+        <location filename="../src/LyricIgnoreRule.cpp" line="35"/>
+        <source>艺术家</source>
+        <translation type="unfinished">Artist</translation>
+    </message>
+    <message>
+        <location filename="../src/LyricIgnoreRule.cpp" line="37"/>
+        <source>专辑</source>
+        <translation type="unfinished">Album</translation>
+    </message>
+    <message>
+        <location filename="../src/LyricIgnoreRule.cpp" line="46"/>
+        <source>包含</source>
+        <translation type="unfinished">Include</translation>
+    </message>
+    <message>
+        <location filename="../src/LyricIgnoreRule.cpp" line="48"/>
+        <source>排除</source>
+        <translation type="unfinished">Exclude</translation>
+    </message>
+</context>
+<context>
     <name>LyricIgnoreRuleSingleton</name>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="33"/>
         <source>名称</source>
-        <translation>Name</translation>
+        <translation type="vanished">Name</translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="35"/>
         <source>艺术家</source>
-        <translation>Artist</translation>
+        <translation type="vanished">Artist</translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="37"/>
         <source>专辑</source>
-        <translation>Album</translation>
+        <translation type="vanished">Album</translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="46"/>
         <source>包含</source>
-        <translation>Include</translation>
+        <translation type="vanished">Include</translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="48"/>
         <source>排除</source>
-        <translation>Exclude</translation>
+        <translation type="vanished">Exclude</translation>
     </message>
 </context>
 <context>

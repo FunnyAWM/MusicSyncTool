@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "LyricIgnoreRuleSingleton.h"
+#include "LyricIgnoreRule.h"
 #include "MusicProperties.h"
 #include "ui_AddRuleWidget.h"
 
@@ -12,12 +12,12 @@ class AddRuleWidget final : public QDialog
 
 public:
 	explicit AddRuleWidget(QWidget *parent = nullptr);
-	LyricIgnoreRuleSingleton getRules() const;
+	LyricIgnoreRule getRules() const;
 	~AddRuleWidget() override = default;
 private:
 	Ui::AddRuleWidgetClass ui;
 signals:
-	void sendRules(LyricIgnoreRuleSingleton);
+	void sendRules(LyricIgnoreRule);
 public slots:
 	void on_confirmButton_clicked();
 };

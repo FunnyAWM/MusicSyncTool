@@ -6,7 +6,7 @@ AddRuleWidget::AddRuleWidget(QWidget* parent)
 	this->setWindowModality(Qt::ApplicationModal);
 }
 
-LyricIgnoreRuleSingleton AddRuleWidget::getRules() const {
+LyricIgnoreRule AddRuleWidget::getRules() const {
 	RuleField lyricRules;
 	RuleType ignoreLyricRules;
 	const QString rule = ui.valueEdit->text();
@@ -29,7 +29,7 @@ LyricIgnoreRuleSingleton AddRuleWidget::getRules() const {
 		ignoreLyricRules = RuleType::EXCLUDES;
 		break;
 	}
-	return LyricIgnoreRuleSingleton(ignoreLyricRules, lyricRules, rule);
+	return LyricIgnoreRule(ignoreLyricRules, lyricRules, rule);
 }
 
 void AddRuleWidget::on_confirmButton_clicked() {

@@ -44,10 +44,7 @@
     <QtMoc Include="src\AddRuleWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\LyricIgnoreRuleSingleton.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="MSTDataSource.h">
+    <QtMoc Include="src\LyricIgnoreRule.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -65,6 +62,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\QueryItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MSTDataSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,16 +93,16 @@
     <ClCompile Include="src\AddRuleWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\LyricIgnoreRuleSingleton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MSTDataSource.cpp">
+    <ClCompile Include="src\LyricIgnoreRule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MSTMediaPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\QueryItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MSTDataSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

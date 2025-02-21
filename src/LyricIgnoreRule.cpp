@@ -1,33 +1,33 @@
-﻿#include "LyricIgnoreRuleSingleton.h"
+﻿#include "LyricIgnoreRule.h"
 
-LyricIgnoreRuleSingleton::LyricIgnoreRuleSingleton(const RuleType ruleType, const RuleField ruleField,
-                                                   QString ruleName)
+LyricIgnoreRule::LyricIgnoreRule(const RuleType ruleType, const RuleField ruleField,
+                                 QString ruleName)
 	: ruleType(ruleType), ruleField(ruleField), ruleName(std::move(ruleName)) {
 }
 
-LyricIgnoreRuleSingleton::LyricIgnoreRuleSingleton(const LyricIgnoreRuleSingleton& ruleSingleton) {
+LyricIgnoreRule::LyricIgnoreRule(const LyricIgnoreRule& ruleSingleton) {
 	ruleType = ruleSingleton.ruleType;
 	ruleField = ruleSingleton.ruleField;
 	ruleName = ruleSingleton.ruleName;
 }
 
-LyricIgnoreRuleSingleton& LyricIgnoreRuleSingleton::operator=(const LyricIgnoreRuleSingleton&) {
+LyricIgnoreRule& LyricIgnoreRule::operator=(const LyricIgnoreRule&) {
 	return *this;
 }
 
-[[nodiscard]] RuleType LyricIgnoreRuleSingleton::getRuleType() const {
+[[nodiscard]] RuleType LyricIgnoreRule::getRuleType() const {
 	return ruleType;
 }
 
-[[nodiscard]] RuleField LyricIgnoreRuleSingleton::getRuleField() const {
+[[nodiscard]] RuleField LyricIgnoreRule::getRuleField() const {
 	return ruleField;
 }
 
-[[nodiscard]] QString LyricIgnoreRuleSingleton::getRuleName() const {
+[[nodiscard]] QString LyricIgnoreRule::getRuleName() const {
 	return ruleName;
 }
 
-QString LyricIgnoreRuleSingleton::lyricRulesToString(const RuleField rules) {
+QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 	switch (rules) {
 	case RuleField::TITLE:
 		return tr("名称");
@@ -40,7 +40,7 @@ QString LyricIgnoreRuleSingleton::lyricRulesToString(const RuleField rules) {
 	}
 }
 
-QString LyricIgnoreRuleSingleton::ignoreRulesToString(const RuleType rules) {
+QString LyricIgnoreRule::ignoreRulesToString(const RuleType rules) {
 	switch (rules) {
 	case RuleType::INCLUDES:
 		return tr("包含");
@@ -51,7 +51,7 @@ QString LyricIgnoreRuleSingleton::ignoreRulesToString(const RuleType rules) {
 	}
 }
 
-RuleType LyricIgnoreRuleSingleton::stringToIgnoreRules(const QString& rule) {
+RuleType LyricIgnoreRule::stringToIgnoreRules(const QString& rule) {
 	if (rule == "包含") {
 		return RuleType::INCLUDES;
 	}
@@ -61,7 +61,7 @@ RuleType LyricIgnoreRuleSingleton::stringToIgnoreRules(const QString& rule) {
 	return RuleType::INCLUDES;
 }
 
-RuleField LyricIgnoreRuleSingleton::stringToLyricRules(const QString& rule) {
+RuleField LyricIgnoreRule::stringToLyricRules(const QString& rule) {
 	if (rule == "名称") {
 		return RuleField::TITLE;
 	}
@@ -74,7 +74,7 @@ RuleField LyricIgnoreRuleSingleton::stringToLyricRules(const QString& rule) {
 	return RuleField::TITLE;
 }
 
-void LyricIgnoreRuleSingleton::setRulesStr() {
+void LyricIgnoreRule::setRulesStr() {
 	switch (ruleType) {
 	case RuleType::INCLUDES:
 		ruleTypeStr = "包含";
@@ -96,10 +96,10 @@ void LyricIgnoreRuleSingleton::setRulesStr() {
 	}
 }
 
-QString LyricIgnoreRuleSingleton::getRuleTypeStr() const {
+QString LyricIgnoreRule::getRuleTypeStr() const {
 	return ruleTypeStr;
 }
 
-QString LyricIgnoreRuleSingleton::getRuleFieldStr() const {
+QString LyricIgnoreRule::getRuleFieldStr() const {
 	return ruleFieldStr;
 }

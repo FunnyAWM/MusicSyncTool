@@ -73,13 +73,13 @@ void MusicSyncTool::loadSettings() {
 	entity.orderBy = static_cast<short>(obj["orderBy"].toInt());
 	entity.language = obj["language"].toString();
 	entity.favoriteTag = obj["favoriteTag"].toString();
-	QList<LyricIgnoreRuleSingleton> rules;
+	QList<LyricIgnoreRule> rules;
 	QJsonArray rulesArray = obj["rules"].toArray();
 	for (QJsonValue rule : rulesArray) {
 		QJsonObject ruleObj = rule.toObject();
 		rules.append(
-			LyricIgnoreRuleSingleton(LyricIgnoreRuleSingleton::stringToIgnoreRules(ruleObj["ruleType"].toString()),
-			                         LyricIgnoreRuleSingleton::stringToLyricRules(ruleObj["ruleField"].toString()),
+			LyricIgnoreRule(LyricIgnoreRule::stringToIgnoreRules(ruleObj["ruleType"].toString()),
+			                         LyricIgnoreRule::stringToLyricRules(ruleObj["ruleField"].toString()),
 			                         ruleObj["ruleName"].toString()));
 	}
 	entity.rules = rules;
@@ -574,7 +574,7 @@ void MusicSyncTool::setFavorite(const QStringList& list, const PathType path, co
 }
 
 void MusicSyncTool::setRuleHit(const QStringList& fileList, const PathType path,
-                               const QList<LyricIgnoreRuleSingleton>& rules, const QDateTime& dateTime) {
+                               const QList<LyricIgnoreRule>& rules, const QDateTime& dateTime) {
 	QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
 	emit total(fileList.size());
 	if (!rules.isEmpty()) {
@@ -592,7 +592,7 @@ void MusicSyncTool::setRuleHit(const QStringList& fileList, const PathType path,
 			if (!f.isNull() && f.tag()) {
 				emit current(i);
 				TagLib::Tag* tag = f.tag();
-				for (const LyricIgnoreRuleSingleton& rule : entity.rules) {
+				for (const LyricIgnoreRule& rule : entity.rules) {
 					if (isRuleHit(rule, tag)) {
 						query.prepare("UPDATE musicInfo SET ruleHit = :ruleHit WHERE fileName = :fileName");
 						query.bindValue(":fileName", fileList.at(i));
@@ -679,7 +679,7 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 	obj["rules"] = rulesArray;
 	const int tempSort = this->entity.sortBy;
 	const int tempOrder = this->entity.orderBy;
-	const QList<LyricIgnoreRuleSingleton> tempRules = this->entity.rules;
+	const QList<LyricIgnoreRule> tempRules = this->entity.rules;
 	const QString tempTag = this->entity.favoriteTag;
 	this->entity = entityParam;
 	if (tempSort != entityParam.sortBy || tempOrder != entityParam.orderBy) {
@@ -1360,7 +1360,7 @@ bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
 	return false;
 }
 
-bool MusicSyncTool::isRuleHit(const LyricIgnoreRuleSingleton& singleton, const TagLib::Tag* target) {
+bool MusicSyncTool::isRuleHit(const LyricIgnoreRule& singleton, const TagLib::Tag* target) {
 	QString fieldStr;
 	switch (singleton.getRuleField()) {
 	case RuleField::TITLE:

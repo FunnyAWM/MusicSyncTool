@@ -11,6 +11,6 @@ struct set {
 	short orderBy;
 	QString language;
 	QString favoriteTag;
-	QList<LyricIgnoreRuleSingleton> rules;
+	QList<LyricIgnoreRule> rules;
 };
 #endif // SETTINGENTITY_H

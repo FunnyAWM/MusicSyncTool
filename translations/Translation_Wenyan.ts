@@ -101,29 +101,29 @@
     </message>
 </context>
 <context>
-    <name>LyricIgnoreRuleSingleton</name>
+    <name>LyricIgnoreRule</name>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="33"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="33"/>
         <source>名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="35"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="35"/>
         <source>艺术家</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="37"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="37"/>
         <source>专辑</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="46"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="46"/>
         <source>包含</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRuleSingleton.cpp" line="48"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="48"/>
         <source>排除</source>
         <translation type="unfinished"></translation>
     </message>

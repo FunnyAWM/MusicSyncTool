@@ -9,7 +9,7 @@
 #include <QTranslator>
 #include <QWidget>
 
-#include "LyricIgnoreRuleSingleton.h"
+#include "LyricIgnoreRule.h"
 #include "MusicProperties.h"
 #include "SettingEntity.h"
 #include "ui_Settings.h"
@@ -27,14 +27,14 @@ public:
 	void setLanguageToUI(QString);
 	void setFavoriteTagToUI(const QString&);
 	void setOrderByToUI(short);
-	void setIgnoreRulesToUI(QList<LyricIgnoreRuleSingleton>&);
+	void setIgnoreRulesToUI(QList<LyricIgnoreRule>&);
 	~Settings() override = default;
 
 public slots:
 	void on_confirmButton_clicked();
 	void on_addRule_clicked() const;
 	void on_deleteSelectedRule_clicked();
-	void addRule(const LyricIgnoreRuleSingleton&);
+	void addRule(const LyricIgnoreRule&);
 private:
 	Ui::SettingsClass ui;
 	set entity;

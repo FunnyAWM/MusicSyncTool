@@ -85,7 +85,7 @@ public:
     void initUI();
     [[nodiscard]] bool isFormatSupported(const QString&) const;
     static bool isFull(const QString&, const QString&);
-    static bool isRuleHit(const LyricIgnoreRuleSingleton&, const TagLib::Tag*);
+    static bool isRuleHit(const LyricIgnoreRule&, const TagLib::Tag*);
     void loadLanguage();
     void loadSettings();
     static void loadDefaultSettings();
@@ -100,7 +100,7 @@ public:
     void showOperationResult(OperationType);
     void showSettings() const;
     void setFavorite(const QStringList&, PathType, const TagLib::String&, const QDateTime&);
-    void setRuleHit(const QStringList&, PathType, const QList<LyricIgnoreRuleSingleton>&, const QDateTime&);
+    void setRuleHit(const QStringList&, PathType, const QList<LyricIgnoreRule>&, const QDateTime&);
     static QDateTime getDateFromLog(const QString&);
     static void writeLog(const QString&, const QDateTime&);
     void rollBackCopy(const QString&);
