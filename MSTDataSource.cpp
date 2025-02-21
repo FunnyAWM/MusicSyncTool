@@ -102,6 +102,28 @@ QStringList MSTDataSource::getFileName(const QList<QueryItem>& items)
 	return fileList;
 }
 
+inline bool MSTDataSource::getFavorite(const QueryItem& item) {
+	prepareStatement("SELECT favorite FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album AND fileName = :fileName");
+	bindValue(":title", item.getTitle());
+	bindValue(":artist", item.getArtist());
+	bindValue(":album", item.getAlbum());
+	bindValue(":fileName", item.getFileName());
+	execQuery();
+	query.next();
+	return query.value(0).toBool();
+}
+
+inline bool MSTDataSource::getRuleHit(const QueryItem& item) {
+	prepareStatement("SELECT ruleHit FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album AND fileName = :fileName");
+	bindValue(":title", item.getTitle());
+	bindValue(":artist", item.getArtist());
+	bindValue(":album", item.getAlbum());
+	bindValue(":fileName", item.getFileName());
+	execQuery();
+	query.next();
+	return query.value(0).toBool();
+}
+
 bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 	for (const QString& file : fileList) {  // NOLINT(readability-use-anyofallof)
 		prepareStatement("DELETE FROM musicInfo WHERE fileName = :fileName");

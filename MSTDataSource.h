@@ -1,7 +1,5 @@
 #pragma once
-#include <QObject>
 #include <QSqlDatabase>
-#include <QSqlError>
 #include <QSqlQuery>
 #include <QString>
 
@@ -10,8 +8,6 @@
 class MSTDataSource final :
 	public QObject {
 	Q_OBJECT
-
-private:
 	QString path;
 	QSqlDatabase db;
 	QSqlQuery query;
@@ -28,5 +24,7 @@ public:
 	QStringList addMusic(const QStringList&);
 	QList<QueryItem> searchMusic(const QString&);
 	QStringList getFileName(const QList<QueryItem>&);
+	bool getFavorite(const QueryItem&);
+	bool getRuleHit(const QueryItem&);
 	[[nodiscard]] bool deleteMusic(const QStringList&);
 };
