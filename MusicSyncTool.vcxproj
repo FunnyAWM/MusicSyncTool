@@ -217,6 +217,8 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MSTDataSource.h" />
+    <ClInclude Include="src\MSTMediaPlayer.h" />
+    <ClInclude Include="src\QueryItem.h" />
     <ClInclude Include="src\SingleInstance.h" />
     <QtMoc Include="src\AddRuleWidget.h" />
     <QtMoc Include="src\LyricIgnoreRuleSingleton.h" />
@@ -234,8 +236,10 @@
     <ClCompile Include="src\LoadingPage.cpp" />
     <ClCompile Include="src\LyricIgnoreRuleSingleton.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MSTMediaPlayer.cpp" />
     <ClCompile Include="src\MusicSyncTool.cpp" />
     <ClCompile Include="src\OperationResult.cpp" />
+    <ClCompile Include="src\QueryItem.cpp" />
     <ClCompile Include="src\Settings.cpp" />
     <ClCompile Include="src\ShowDupe.cpp" />
   </ItemGroup>

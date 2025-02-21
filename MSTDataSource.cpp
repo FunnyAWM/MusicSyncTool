@@ -71,10 +71,13 @@ QStringList MSTDataSource::addMusic(const QStringList& fileList) {
 }
 
 bool MSTDataSource::deleteMusic(const QStringList& fileList) {
-	std::all_of(fileList.begin(), fileList.end(), [this](const QString& file) {
+	for (const QString& file : fileList) {  // NOLINT(readability-use-anyofallof)
 		prepareStatement("DELETE FROM musicInfo WHERE fileName = :fileName");
 		bindValue(":fileName", file);
-		return query.exec();
-	});
+		if (!query.exec()) {
+			qWarning() << "[WARN] Error deleting data from database:" << query.lastError().text();
+			return false;
+		}
+	}
 	return true;
 }

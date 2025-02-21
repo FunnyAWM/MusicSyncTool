@@ -5,6 +5,8 @@
 #include <QSqlQuery>
 #include <QString>
 
+#include "src/QueryItem.h"
+
 class MSTDataSource final :
 	public QObject {
 	Q_OBJECT
@@ -23,5 +25,5 @@ public:
 	void execQuery();
 	void getAll(const QStringList& cols);
 	QStringList addMusic(const QStringList&);
-	bool deleteMusic(const QStringList&);
+	[[nodiscard]] bool deleteMusic(const QStringList&);
 };
