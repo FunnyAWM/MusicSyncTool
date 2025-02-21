@@ -28,9 +28,9 @@ This software includes msi package and unpack-and-run version, you can freely ch
 5. Generate the exe file in both Debug and Release configuration, fix the errors.
 6. If you want to generate after you changed the source code, make sure you enabled Qt Deploy Tool after generation under Release configuration, and generate the files. Qt Deploy Tools will automatically find dependencies and copy dll files to the folder where the exe file was.
    
-   ## 3. Customize translation
-7. Install Qt Linguist。
-8. [Download translation template here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)and open it in Qt Linguist.
-9. Generate qm files with Qt Linguist and move it to translations folder of the program after translation finished.
-10. [Download language configuration tool here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z) to regenerate the language configurations. The program will automatically detect existing configuration and fill out the info that already exists.
-11. Launch Music Sync Tool and check for language settings.
+## 3. Customize translation
+1. Install Qt Linguist。
+2. [Download translation template here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)and open it in Qt Linguist.
+3. Generate qm files with Qt Linguist and move it to translations folder of the program after translation finished.
+4. [Download language configuration tool here](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/Generator.7z) to regenerate the language configurations. The program will automatically detect existing configuration and fill out the info that already exists.
+5. Launch Music Sync Tool and check for language settings.
