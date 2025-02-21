@@ -19,11 +19,14 @@ public:
 	explicit MSTDataSource(const QString&);
 	~MSTDataSource() override = default;
 	void openDB(const QString&);
+	void initTable();
 	void closeDB();
 	void prepareStatement(const QString&);
 	void bindValue(const QString&, const QString&);
 	void execQuery();
-	void getAll(const QStringList& cols);
+	QList<QueryItem> getAll();
 	QStringList addMusic(const QStringList&);
+	QList<QueryItem> searchMusic(const QString&);
+	QStringList getFileName(const QList<QueryItem>&);
 	[[nodiscard]] bool deleteMusic(const QStringList&);
 };

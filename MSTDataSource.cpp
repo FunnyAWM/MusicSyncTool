@@ -16,6 +16,12 @@ void MSTDataSource::openDB(const QString& path) {
 	query = QSqlQuery(db);
 }
 
+void MSTDataSource::initTable()
+{
+	query.exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
+		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)");
+}
+
 void MSTDataSource::closeDB() {
 	if (db.isOpen()) {
 		db.close();
@@ -34,40 +40,66 @@ void MSTDataSource::execQuery() {
 	query.exec();
 }
 
-void MSTDataSource::getAll(const QStringList& cols) {
-	QString sql = "SELECT ";
-	for (const QString& col : cols) {
-		sql += col + ", ";
+QList<QueryItem> MSTDataSource::getAll() {
+	prepareStatement("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo");
+	execQuery();
+	QList<QueryItem> items;
+	while (query.next()) {
+		items.append(QueryItem(query.value(0).toString(), query.value(1).toString(), query.value(2).toString(), query.value(3).toString(), query.value(4).toUInt(), query.value(5).toUInt(), query.value(6).toString()));
 	}
-	sql.chop(2);
-	sql += " FROM musicInfo";
-	query.exec(sql);
+	return items;
 }
 
-QStringList MSTDataSource::addMusic(const QStringList& fileList) {
+QStringList MSTDataSource::addMusic(const QStringList& files) {
 	auto errList = QStringList();
-	for (const QString& file : fileList) {
-		TagLib::FileRef f;
-		f = TagLib::FileRef(file.toStdString().c_str());
-		if (f.isNull() || !f.tag()) {
-			qWarning() << "[WARN] Error reading file:" << file;
+	for (const QString& file : files) {
+		const TagLib::FileRef fileRef(file.toStdWString().c_str());
+		if (fileRef.isNull()) {
 			errList.append(file);
 			continue;
 		}
-		prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
-			":artist, :album, :genre, :year, :track, :fileName)");
-		bindValue(":title", f.tag()->title().toCString(true));
-		bindValue(":artist", f.tag()->artist().toCString(true));
-		bindValue(":album", f.tag()->album().toCString(true));
-		bindValue(":genre", f.tag()->genre().toCString(true));
-		bindValue(":year", QString::number(f.tag()->year()));
-		bindValue(":track", QString::number(f.tag()->track()));
+		const TagLib::Tag* tag = fileRef.tag();
+		prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) "
+			"VALUES (:title, :artist, :album, :genre, :year, :track, :fileName)");
+		bindValue(":title", tag->title().toCString());
+		bindValue(":artist", tag->artist().toCString());
+		bindValue(":album", tag->album().toCString());
+		bindValue(":genre", tag->genre().toCString());
+		bindValue(":year", QString::number(tag->year()));
+		bindValue(":track", QString::number(tag->track()));
+		bindValue(":fileName", file);
 		if (!query.exec()) {
-			qWarning() << "[WARN] Error inserting data to database:" << query.lastError().text();
+			qWarning() << "[WARN] Error inserting data into database:" << query.lastError().text();
 			errList.append(file);
 		}
 	}
 	return errList;
+}
+
+QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
+	prepareStatement("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title = :text OR artist = :text OR album = :text");
+	bindValue(":text", text);
+	execQuery();
+	QList<QueryItem> items;
+	while (query.next()) {
+		items.append(QueryItem(query.value(0).toString(), query.value(1).toString(), query.value(2).toString(), query.value(3).toString(), query.value(4).toUInt(), query.value(5).toUInt(), query.value(6).toString()));
+	}
+	return items;
+}
+
+QStringList MSTDataSource::getFileName(const QList<QueryItem>& items)
+{
+	QStringList fileList;
+	for (const QueryItem& item : items) {
+		prepareStatement("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");
+		bindValue(":title", item.getTitle());
+		bindValue(":artist", item.getArtist());
+		bindValue(":album", item.getAlbum());
+		execQuery();
+		query.next();
+		fileList.append(query.value(0).toString());
+	}
+	return fileList;
 }
 
 bool MSTDataSource::deleteMusic(const QStringList& fileList) {

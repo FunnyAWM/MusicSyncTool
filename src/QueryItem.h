@@ -1,13 +1,25 @@
 ﻿#pragma once
+#include <inttypes.h>
 #include <QString>
+#include <taglib/tag.h>
 
 class QueryItem {
 private:
-	QString column;
-	QString value;
-
+	QString title;
+	QString artist;
+	QString album;
+	QString genre;
+	uint year;
+	uint track;
+	QString fileName;
 public:
-	QueryItem(QString column, QString value) : column(std::move(column)), value(std::move(value)) {}
-	[[nodiscard]] QString getColumn() const { return column; }
-	[[nodiscard]] QString getValue() const { return value; }
+	explicit QueryItem(const QString &);
+	explicit QueryItem(const QString&, const QString&, const QString&, const QString&, uint, uint, const QString&);
+	QString getTitle() const;
+	QString getArtist() const;
+	QString getAlbum() const;
+	QString getGenre() const;
+	uint getYear() const;
+	uint getTrack() const;
+	QString getFileName() const;
 };

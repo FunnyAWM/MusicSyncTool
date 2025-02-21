@@ -62,10 +62,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\MSTMediaPlayer.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\QueryItem.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

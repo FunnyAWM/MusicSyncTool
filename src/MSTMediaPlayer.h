@@ -6,14 +6,14 @@ class MSTMediaPlayer {
 private:
 	QMediaPlayer mediaPlayer;
 	QAudioOutput audioOutput;
+	QString nowPlaying;
 public:
 	MSTMediaPlayer();
 	~MSTMediaPlayer();
 	void setFile(const QString&);
 	void play();
 	void pause();
-	void stop();
 	void setPosition(qint64);
-	void setVolume(double);
-	bool isPlaying();
+	void setVolume(float);
+	bool isPlaying() const;
 };
