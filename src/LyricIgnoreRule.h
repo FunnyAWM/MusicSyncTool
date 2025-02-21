@@ -3,7 +3,7 @@
 #include <QString>
 
 #include "MusicProperties.h"
-using namespace PROPERTIES;
+using namespace PROPERTIES;  // NOLINT(clang-diagnostic-header-hygiene)
 
 class LyricIgnoreRule final : public QObject {
 	Q_OBJECT
