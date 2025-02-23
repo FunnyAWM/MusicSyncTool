@@ -15,5 +15,5 @@ public:
 	void pause();
 	void setPosition(qint64);
 	void setVolume(float);
-	bool isPlaying() const;
+	[[nodiscard]] bool isPlaying() const;
 };
