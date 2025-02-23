@@ -8,7 +8,9 @@
 
 class MSTDataSource final :
 	public QObject {
-	Q_OBJECT
+
+		Q_OBJECT
+	
 	QString path;
 	QSqlDatabase db;
 	QSqlQuery query;

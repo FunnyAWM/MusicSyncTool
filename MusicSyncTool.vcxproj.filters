@@ -47,6 +47,9 @@
     <QtMoc Include="src\LyricIgnoreRule.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\MSTDataSource.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MusicProperties.h">
@@ -62,9 +65,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\QueryItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MSTDataSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
