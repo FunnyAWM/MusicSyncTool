@@ -128,7 +128,7 @@
     </Link>
     <QtTranslation>
       <BuildAction>lupdate_lrelease</BuildAction>
-      <QmOutputDir>$(OutDir)\translations</QmOutputDir>
+      <QmOutputDir>$(OutDir)translations</QmOutputDir>
     </QtTranslation>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -118,27 +118,27 @@
     <message>
         <location filename="../src/LyricIgnoreRule.cpp" line="33"/>
         <source>名称</source>
-        <translation type="unfinished">Name</translation>
+        <translation>Name</translation>
     </message>
     <message>
         <location filename="../src/LyricIgnoreRule.cpp" line="35"/>
         <source>艺术家</source>
-        <translation type="unfinished">Artist</translation>
+        <translation>Artist</translation>
     </message>
     <message>
         <location filename="../src/LyricIgnoreRule.cpp" line="37"/>
         <source>专辑</source>
-        <translation type="unfinished">Album</translation>
+        <translation>Album</translation>
     </message>
     <message>
         <location filename="../src/LyricIgnoreRule.cpp" line="46"/>
         <source>包含</source>
-        <translation type="unfinished">Include</translation>
+        <translation>Include</translation>
     </message>
     <message>
         <location filename="../src/LyricIgnoreRule.cpp" line="48"/>
         <source>排除</source>
-        <translation type="unfinished">Exclude</translation>
+        <translation>Exclude</translation>
     </message>
 </context>
 <context>
@@ -233,12 +233,12 @@
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="179"/>
         <source>程序已在运行！</source>
-        <translation type="unfinished"></translation>
+        <translation>Program is already running!</translation>
     </message>
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="182"/>
         <source>找不到程序语言配置文件，程序即将退出！</source>
-        <translation type="unfinished"></translation>
+        <translation>Failed to locate program language configuration, program will quit!</translation>
     </message>
     <message>
         <location filename="../src/MusicSyncTool.cpp" line="192"/>
@@ -517,12 +517,12 @@
     <message>
         <location filename="../src/Settings.cpp" line="96"/>
         <source>错误</source>
-        <translation type="unfinished">Error</translation>
+        <translation>Error</translation>
     </message>
     <message>
         <location filename="../src/Settings.cpp" line="96"/>
         <source>无法打开语言文件</source>
-        <translation type="unfinished"></translation>
+        <translation>Can&apos;t open language file</translation>
     </message>
 </context>
 <context>
