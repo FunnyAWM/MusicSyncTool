@@ -28,7 +28,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Settings.cpp
             src/OperationResult.cpp
             src/AddRuleWidget.cpp
-            src/LyricIgnoreRuleSingleton.cpp
+            src/LyricIgnoreRule.cpp
             src/Settings.h
             src/AboutPage.h
             src/LoadingPage.h
@@ -38,7 +38,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/MusicProperties.h
             src/SettingEntity.h
             src/AddRuleWidget.h
-            src/LyricIgnoreRuleSingleton.h
+            src/LyricIgnoreRule.h
             src/AboutPage.ui
             src/LoadingPage.ui
             src/MusicSyncTool.ui
