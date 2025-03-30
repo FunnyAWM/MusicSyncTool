@@ -4,7 +4,11 @@
 #include <taglib/tag.h>
 
 QueryItem::QueryItem(const QString& fileName) {
+#if defined(_WIN64) or defined(_WIN32)
 	const TagLib::FileRef file(fileName.toStdWString().c_str());
+#else
+    const TagLib::FileRef file(fileName.toStdString().c_str());
+#endif
 	if (file.isNull()) {
 		return;
 	}

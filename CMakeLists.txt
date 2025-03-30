@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(MusicSyncTool VERSION 2.2.3 LANGUAGES CXX)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message(STATUS "Detected supported system. Applying settings.")
+    message(STATUS "Supported system detected. Applying settings.")
     set(CMAKE_AUTOUIC ON)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
@@ -12,12 +12,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 #[[ Replace this with your own Qt installation path
     If you are using distros with Qt6 library packages available(like openSUSE),
     Just install the package and ignore this set statement]]
-    #set(CMAKE_PREFIX_PATH "/opt/Qt/6.8.1/gcc_64")
+    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.2/gcc_64")
 
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(ZLIB)
-    find_package(TagLib 2.0.0 REQUIRED)
+    find_package(TagLib REQUIRED)
     find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
     set(PROJECT_SOURCES
             src/main.cpp
@@ -28,7 +28,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Settings.cpp
             src/OperationResult.cpp
             src/AddRuleWidget.cpp
-            src/LyricIgnoreRuleSingleton.cpp
+            src/LyricIgnoreRule.cpp
             src/Settings.h
             src/AboutPage.h
             src/LoadingPage.h
@@ -38,7 +38,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/MusicProperties.h
             src/SettingEntity.h
             src/AddRuleWidget.h
-            src/LyricIgnoreRuleSingleton.h
+            src/LyricIgnoreRule.h
             src/AboutPage.ui
             src/LoadingPage.ui
             src/MusicSyncTool.ui
@@ -49,6 +49,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             resources/MusicSyncTool.qrc
             resources/MusicSyncTool.rc
             src/SingleInstance.h
+            src/MSTDataSource.cpp
+            src/MSTDataSource.h
+            src/MSTMediaPlayer.cpp
+            src/MSTMediaPlayer.h
+            src/QueryItem.cpp
+            src/QueryItem.h
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -109,6 +115,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             "$<TARGET_FILE_DIR:MusicSyncTool>/resources"
             COMMENT "Copying file post-build"
     )
+    add_custom_command(TARGET MusicSyncTool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/translations"
+            "$<TARGET_FILE_DIR:MusicSyncTool>/translations"
+            COMMENT "Copying translation files"
+    )
 else()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
+    message(SEND_ERROR "Or you can modify this file if you know what you are doing.")
 endif()

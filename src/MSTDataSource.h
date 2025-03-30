@@ -1,10 +1,15 @@
 #pragma once
+
+// ReSharper disable once CppUnusedIncludeDirective
+#include <QRegularExpression>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QString>
 
-#include "src/QueryItem.h"
+#include "LyricIgnoreRule.h"
+#include "QueryItem.h"
 
 class MSTDataSource final :
 	public QObject {
@@ -21,8 +26,11 @@ public:
 	void initTable();
 	void closeDB();
 	void prepareStatement(const QString&);
-	void bindValue(const QString&, const QString&);
+    template<class T>
+	void bindValue(const QString&, const T&);
 	void execQuery();
+    void setFavorite(const QString&);
+    void setRuleHit(const QList<LyricIgnoreRule>&);
 	QList<QueryItem> getAll();
 	QStringList addMusic(const QStringList&);
 	QList<QueryItem> searchMusic(const QString&);
