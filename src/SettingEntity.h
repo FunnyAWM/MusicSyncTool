@@ -8,5 +8,6 @@ struct set {
 	short orderBy;
 	QString language;
 	QString favoriteTag;
+	bool dsEnabled;
 };
 #endif // SETTINGENTITY_H

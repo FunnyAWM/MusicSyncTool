@@ -83,7 +83,7 @@ public:
 	void connectSlots() const;
 	void setAvailableSpace(pathType) const;
 	static bool isFull(const QString&, const QString&);
-
+	AboutPage checkDS();
 public slots:
 	void on_actionRemote_triggered(bool);
 	void on_actionLocal_triggered(bool);

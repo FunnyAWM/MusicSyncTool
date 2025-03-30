@@ -25,6 +25,7 @@ public:
 	void setLanguageToUI(QString);
 	void setFavoriteTagToUI(const QString&);
 	void setOrderByToUI(short);
+	void setDeepSeekToUI(bool) const;
 	~Settings() override = default;
 
 public slots:

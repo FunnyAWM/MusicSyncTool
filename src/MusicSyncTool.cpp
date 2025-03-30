@@ -570,6 +570,7 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 	obj["orderBy"] = entityParam.orderBy;
 	obj["language"] = entityParam.language;
 	obj["favoriteTag"] = entityParam.favoriteTag;
+	obj["deepseek"] = entityParam.dsEnabled;
 	const int tempSort = this->entity.sortBy;
 	const int tempOrder = this->entity.orderBy;
 	this->entity = entityParam;
@@ -742,7 +743,6 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
 	AboutPage about;
 	about.exec();
 }
-
 /*
  * @brief Slots for copy to remote action
  */

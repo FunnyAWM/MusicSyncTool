@@ -5,8 +5,6 @@ VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MusicSyncTool", "MusicSyncTool.vcxproj", "{8ADE6059-CA74-4C0E-A027-E1BC89212226}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MusicSyncToolSetup", "..\MusicSyncToolSetup\MusicSyncToolSetup.vdproj", "{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -29,12 +27,6 @@ Global
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x64.Build.0 = Release|x64
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x86.ActiveCfg = Release|Win32
 		{8ADE6059-CA74-4C0E-A027-E1BC89212226}.Release|x86.Build.0 = Release|Win32
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Debug|Win32.ActiveCfg = Debug
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Debug|x64.ActiveCfg = Debug
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Debug|x86.ActiveCfg = Debug
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Release|Win32.ActiveCfg = Release
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Release|x64.ActiveCfg = Release
-		{7EC7AE02-3629-44FE-9CD5-8A70BB14C8B1}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

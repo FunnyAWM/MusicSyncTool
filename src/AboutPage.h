@@ -10,7 +10,6 @@ class AboutPage final : public QDialog {
 public:
 	explicit AboutPage(QWidget* parent = nullptr);
 	~AboutPage() override = default;
-
 private:
 	Ui::AboutPageClass ui;
 };

@@ -22,6 +22,7 @@ Settings::Settings(QWidget* parent) : QWidget(parent) {
 	setOrderByToUI(obj["orderBy"].toInt());
 	setLanguageToUI(obj["language"].toString());
 	setFavoriteTagToUI(obj["favoriteTag"].toString());
+	setDeepSeekToUI(obj["deepseek"].toBool());
 	file.close();
 }
 
@@ -45,6 +46,7 @@ set Settings::getSettings() const {
 	}
 	entity1.language = ui.languageComboBox->currentText();
 	entity1.favoriteTag = ui.favoriteTagEdit->text();
+	entity1.dsEnabled = ui.deepseek->checkState();
 	// ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
 	return entity1;
 }
@@ -88,8 +90,8 @@ void Settings::setLanguageToUI(QString language) {
 		ui.languageComboBox->addItem(langObj["lang"].toString());
 	}
 	if (language.isEmpty()) {
-		if (ui.languageComboBox->findText(QString::fromUtf8("中文")) != -1) {
-			language = QString::fromUtf8("中文");
+		if (ui.languageComboBox->findText(QString::fromUtf8("涓枃")) != -1) {
+			language = QString::fromUtf8("涓枃");
 		}
 		else {
 			language = ui.languageComboBox->itemText(0);
@@ -121,6 +123,14 @@ void Settings::setOrderByToUI(short orderBy) {
 		ui.ascButton->setChecked(true);
 		break;
 	}
+}
+
+void Settings::setDeepSeekToUI(const bool checked) const {
+	if (checked) {
+		ui.deepseek->setCheckState(Qt::Checked);
+		return;
+	}
+	ui.deepseek->setCheckState(Qt::Unchecked);
 }
 
 void Settings::on_confirmButton_clicked() {
