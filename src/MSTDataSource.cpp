@@ -2,7 +2,7 @@
 
 #include <QFile>
 #include <taglib/fileref.h>
-#include <tpropertymap.h>
+#include <taglib/tpropertymap.h>
 
 MSTDataSource::MSTDataSource(const QString& path) {
     this->path = path;
