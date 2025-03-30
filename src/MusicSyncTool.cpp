@@ -465,15 +465,17 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 	query.exec("SELECT title, artist, album, year, fileName FROM musicInfo ORDER BY title");
 	QStringList dupeList;
 	query.next();
-	QString slow = query.value(0).toString() + ":" + query.value(1).toString() + ":" + query.value(2).toString() + ":" +
-		query.value(3).toString();
+	QStringList slowList;
+	for (int i = 0; i < 4; i++) {
+		slowList.append(query.value(i).toString());
+	}
 	QString slowFileName = query.value(4).toString();
 	while (query.next()) {
-		QString fast = query.value(0).toString() + ":" + query.value(1).toString() + ":" + query.value(2).toString() +
-			":" + query.value(3).toString();
+		QStringList fastList;
+		for (int i = 0; i < 4; i++) {
+			fastList.append(query.value(i).toString());
+		}
 		QString fastFileName = query.value(4).toString();
-		auto slowList = slow.split(":");
-		auto fastList = fast.split(":");
 		for (int i = 0, dupeCount = 0; i < 4; i++) {
 			if (slowList.at(i) == fastList.at(i)) {
 				dupeCount++;
@@ -483,7 +485,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 				dupeList.append(fastFileName);
 			}
 		}
-		slow = fast;
+		slowList = fastList;
 		slowFileName = fastFileName;
 	}
 	for (const auto& i : dupeList) {
