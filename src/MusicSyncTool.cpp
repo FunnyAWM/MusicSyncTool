@@ -179,6 +179,10 @@ void MusicSyncTool::popError(const PET type) {
         break;
     case PET::NOLANG:
         QMessageBox::critical(this, tr("错误"), tr("找不到程序语言配置文件，程序即将退出！"));
+		break;
+	case PET::DBERROR:
+		QMessageBox::critical(this, tr("错误"), tr("操作数据库中数据时出现严重错误，程序即将退出！"));
+		break;
     }
 }
 
@@ -210,13 +214,13 @@ void MusicSyncTool::openFolder(const PathType path) {
     }
     (path == PathType::LOCAL ? localPath : remotePath) = dir;
     if (path == PathType::LOCAL) {
-        dbLocal.setDatabaseName(localPath + "/musicInfo.db");
+        if (!local.openDB(localPath)) {
+            exit(EXIT_FAILURE);
+        }
     } else {
-        dbRemote.setDatabaseName(remotePath + "/musicInfo.db");
-    }
-    if (QSqlDatabase& db = path == PathType::LOCAL ? dbLocal : dbRemote; !db.open()) {
-        qFatal() << "[FATAL] Error opening database:" << db.lastError().text().toStdString();
-        exit(EXIT_FAILURE);
+        if (!remote.openDB(remotePath)) {
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -257,24 +261,22 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
     QDateTime dateTime = getDateFromLog(logFileNameBuilder);
     const QDir dir(path == PathType::LOCAL ? localPath : remotePath);
-    QString sql = "CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
-                  "track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)";
+    MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    ds.initTable();
+    QString sql;
     QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    query.exec(sql);
     QStringList newFileList = dir.entryList(QDir::Files);
-    sql = "SELECT fileName FROM musicInfo";
-    query.exec(sql);
-    QStringList oldFileList;
-    while (query.next()) {
-        oldFileList.append(query.value(0).toString());
-    }
+    QList<QueryItem> tempList = ds.getAll({QueryRows::FILENAME});
+	QStringList oldFileList;
+	for (const QueryItem& item : tempList) {
+		oldFileList.append(item.getFileName());
+	}
     newFileList.sort();
     oldFileList.sort();
+    QStringList deleteList;
     for (int i = 0; i < oldFileList.size(); i++) {
         if (!newFileList.contains(oldFileList.at(i))) {
-            query.prepare("DELETE FROM musicInfo WHERE fileName = :fileName");
-            query.bindValue(":fileName", oldFileList.at(i));
-            query.exec();
+            deleteList.append(oldFileList.at(i));
             oldFileList.removeAt(i);
             i = i - 2 < -1 ? -1 : i - 2;
         }
@@ -284,6 +286,10 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
             newFileList.removeAt(i);
             i = i - 2 < 0 ? -1 : i - 2;
         }
+    }
+	if (!ds.deleteMusic(deleteList)) {
+        popError(PET::DBERROR);
+		exit(EXIT_FAILURE); 
     }
     newFileList.removeOne("musicInfo.db");
     emit total(newFileList.size() + oldFileList.size());

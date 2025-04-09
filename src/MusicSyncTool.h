@@ -27,6 +27,7 @@
 
 #include "AboutPage.h"
 #include "LoadingPage.h"
+#include "MSTDataSource.h"
 #include "MusicProperties.h"
 #include "OperationResult.h"
 #include "Settings.h"
@@ -52,6 +53,8 @@ class MusicSyncTool final : public QMainWindow {
     QSqlDatabase dbRemote;
     QSqlQuery queryLocal;
     QSqlQuery queryRemote;
+    MSTDataSource local;
+    MSTDataSource remote;
     LoadingPage* loading = new LoadingPage();
     // 0: local, 1: remote
     unsigned short currentPage[2] = {1, 1};

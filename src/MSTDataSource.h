@@ -22,7 +22,7 @@ class MSTDataSource final :
 public:
 	explicit MSTDataSource(const QString&);
 	~MSTDataSource() override = default;
-	void openDB(const QString&);
+	[[nodiscard]]bool openDB(const QString&path_);
 	void initTable();
 	void closeDB();
 	void prepareStatement(const QString&);
@@ -31,10 +31,10 @@ public:
 	void execQuery();
     void setFavorite(const QString&);
     void setRuleHit(const QList<LyricIgnoreRule>&);
-	QList<QueryItem> getAll();
+	QList<QueryItem> getAll(const QVector<QueryRows>&);
 	QStringList addMusic(const QStringList&);
 	QList<QueryItem> searchMusic(const QString&);
-	QStringList getFileName(const QList<QueryItem>&);
+	QStringList getFileNameByMD(const QList<QueryItem>&);
 	bool getFavorite(const QueryItem&);
 	bool getRuleHit(const QueryItem&);
 	[[nodiscard]] bool deleteMusic(const QStringList&);

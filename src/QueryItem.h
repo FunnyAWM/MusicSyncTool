@@ -13,7 +13,8 @@ private:
 	uint track;
 	QString fileName;
 public:
-	explicit QueryItem(const QString &);
+	explicit QueryItem() = default;
+	explicit QueryItem(const QString&);
 	explicit QueryItem(const QString&, const QString&, const QString&, const QString&, uint, uint, const QString&);
 	QString getTitle() const;
 	QString getArtist() const;
@@ -22,4 +23,11 @@ public:
 	uint getYear() const;
 	uint getTrack() const;
 	QString getFileName() const;
+	void setTitle(const QString&);
+	void setArtist(const QString&);
+	void setAlbum(const QString&);
+	void setGenre(const QString&);
+	void setYear(const uint);
+	void setTrack(const uint);
+	void setFileName(const QString&);
 };

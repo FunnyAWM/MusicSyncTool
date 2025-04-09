@@ -61,3 +61,31 @@ uint QueryItem::getTrack() const {
 QString QueryItem::getFileName() const {
 	return fileName;
 }
+
+void QueryItem::setTitle(const QString& title) {
+	this->title = title;
+}
+
+void QueryItem::setArtist(const QString& artist) {
+	this->artist = artist;
+}
+
+void QueryItem::setAlbum(const QString& album) {
+	this->album = album;
+}
+
+void QueryItem::setGenre(const QString& genre) {
+	this->genre = genre;
+}
+
+void QueryItem::setYear(const uint year) {
+	this->year = year;
+}
+
+void QueryItem::setTrack(const uint track) {
+	this->track = track;
+}
+
+void QueryItem::setFileName(const QString& fileName) {
+	this->fileName = fileName;
+}
