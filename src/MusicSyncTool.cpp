@@ -8,6 +8,7 @@
 #include <taglib/flacfile.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
+#include <unistd.h>
 
 /*
  * @brief Default constructor
@@ -179,10 +180,10 @@ void MusicSyncTool::popError(const PET type) {
         break;
     case PET::NOLANG:
         QMessageBox::critical(this, tr("错误"), tr("找不到程序语言配置文件，程序即将退出！"));
-		break;
-	case PET::DBERROR:
-		QMessageBox::critical(this, tr("错误"), tr("操作数据库中数据时出现严重错误，程序即将退出！"));
-		break;
+        break;
+    case PET::DBERROR:
+        QMessageBox::critical(this, tr("错误"), tr("操作数据库中数据时出现严重错误，程序即将退出！"));
+        break;
     }
 }
 
@@ -214,11 +215,13 @@ void MusicSyncTool::openFolder(const PathType path) {
     }
     (path == PathType::LOCAL ? localPath : remotePath) = dir;
     if (path == PathType::LOCAL) {
-        if (!local.openDB(localPath)) {
+        local.setPath(dir);
+        if (!local.openDB()) {
             exit(EXIT_FAILURE);
         }
     } else {
-        if (!remote.openDB(remotePath)) {
+        remote.setPath(dir);
+        if (!remote.openDB()) {
             exit(EXIT_FAILURE);
         }
     }
@@ -263,14 +266,13 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     const QDir dir(path == PathType::LOCAL ? localPath : remotePath);
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
     ds.initTable();
-    QString sql;
     QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
     QStringList newFileList = dir.entryList(QDir::Files);
     QList<QueryItem> tempList = ds.getAll({QueryRows::FILENAME});
-	QStringList oldFileList;
-	for (const QueryItem& item : tempList) {
-		oldFileList.append(item.getFileName());
-	}
+    QStringList oldFileList;
+    for (const QueryItem& item : tempList) {
+        oldFileList.append(item.getFileName());
+    }
     newFileList.sort();
     oldFileList.sort();
     QStringList deleteList;
@@ -287,90 +289,45 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
             i = i - 2 < 0 ? -1 : i - 2;
         }
     }
-	if (!ds.deleteMusic(deleteList)) {
+    if (!ds.deleteMusic(deleteList)) {
         popError(PET::DBERROR);
-		exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
     newFileList.removeOne("musicInfo.db");
     emit total(newFileList.size() + oldFileList.size());
     emit current(0);
     const TagLib::String key(entity.favoriteTag.toStdString());
     for (int i = 0; i < newFileList.size(); i++) {
-        QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
-        TagLib::FileRef f;
-#if defined(_WIN64) or defined(_WIN32)
-        f = TagLib::FileRef(file.toStdWString().c_str());
-#else
-        f = TagLib::FileRef(file.toStdString().c_str());
-#endif
-        if (!f.isNull() && f.tag()) {
-            const TagLib::Tag* tag = f.tag();
-            query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
-                          ":artist, :album, :genre, :year, :track, :fileName)");
-            query.bindValue(":title", tag->title().toCString(true));
-            query.bindValue(":artist", tag->artist().toCString(true));
-            query.bindValue(":album", tag->album().toCString(true));
-            query.bindValue(":genre", tag->genre().toCString(true));
-            query.bindValue(":year", tag->year());
-            query.bindValue(":track", tag->track());
-            query.bindValue(":fileName", newFileList.at(i));
-            if (!query.exec()) {
-                qWarning() << "[WARN] Error inserting data to database:" << query.lastError().text();
-            }
-            emit current(i);
+        if (QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
+            !ds.addMusic(file)) {
+            popError(PET::DBERROR);
         }
     }
     setFavorite(oldFileList + newFileList, path, key, dateTime);
     query.clear();
     setRuleHit(oldFileList + newFileList, path, entity.rules, dateTime);
-    sql = "SELECT COUNT(*) FROM musicInfo";
-    query.exec(sql);
-    query.next();
-    totalPage[path == PathType::LOCAL ? 0 : 1] = static_cast<short>(query.value(0).toInt() / PAGESIZE + 1);
-    const short lastPageSize = static_cast<short>(query.value(0).toInt() % PAGESIZE);
-    emit total(PAGESIZE);
-    sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
-    switch (entity.sortBy) {
-    case TITLE:
-        sql += " title";
-        break;
-    case ARTIST:
-        sql += " artist";
-        break;
-    case ALBUM:
-        sql += " album";
-        break;
-    default:
-        sql += " title";
-        break;
-    }
-    switch (entity.orderBy) {
-    case ASC:
-        sql += " ASC";
-        break;
-    case DESC:
-        sql += " DESC";
-        break;
-    default:
-        sql += " ASC";
-        break;
-    }
-    sql += " LIMIT " + QString::number(PAGESIZE) + " OFFSET " + QString::number((page - 1) * PAGESIZE);
-    query.exec(sql);
+    totalPage[path == PathType::LOCAL ? 0 : 1] = static_cast<short>(ds.getCount() / ds.getPageSize() + 1);
+    const short lastPageSize = static_cast<short>(ds.getCount() % ds.getPageSize());
+    emit total(ds.getPageSize());
+    QList<QueryItem> items = ds.getMusic(page, static_cast<SortByEnum>(entity.sortBy), static_cast<OrderByEnum>(entity.orderBy));
     QTableWidget* targetTable = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
     targetTable->clearContents();
-    if (currentPage[(path == PathType::LOCAL ? 0 : 1)] == totalPage[(path == PathType::LOCAL ? 0 : 1)]) {
+    if (page == totalPage[(path == PathType::LOCAL ? 0 : 1)]) {
         targetTable->setRowCount(lastPageSize);
     } else {
-        targetTable->setRowCount(PAGESIZE);
+        targetTable->setRowCount(ds.getPageSize());
     }
-    for (int j = 0; query.next(); j++) {
-        emit current(j);
-        for (int i = 0; i < 6; i++) {
-            if (query.value(i) != 0) {
-                targetTable->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
-            }
-        }
+    int progress = 0;
+    for (const QueryItem& item : items) {
+        emit current(progress);
+        const int row = progress + 1;
+        targetTable->setItem(row, 1, new QTableWidgetItem(item.getTitle()));
+        targetTable->setItem(row, 2, new QTableWidgetItem(item.getArtist()));
+        targetTable->setItem(row, 3, new QTableWidgetItem(item.getAlbum()));
+        targetTable->setItem(row, 4, new QTableWidgetItem(item.getGenre()));
+        targetTable->setItem(row, 5, new QTableWidgetItem(item.getYear()));
+        targetTable->setItem(row, 6, new QTableWidgetItem(item.getTrack()));
+        progress++;
     }
     const clock_t end = clock();
     qDebug() << "[INFO] Scanning finished in" << static_cast<double>(end - start) / CLOCKS_PER_SEC << "seconds";
@@ -641,6 +598,7 @@ void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime) {
     file.close();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void MusicSyncTool::rollBackCopy(const QString& fileName) {
     const QStringList list = fileName.split(".");
     const QString lyric = list.at(0) + ".lrc";

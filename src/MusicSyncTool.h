@@ -19,10 +19,10 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QString>
-#include <QtConcurrent>
 #include <QThread>
 #include <QThreadPool>
 #include <QTranslator>
+#include <QtConcurrent>
 #include <taglib/tag.h>
 
 #include "AboutPage.h"
@@ -34,12 +34,13 @@
 #include "ShowDupe.h"
 #include "ui_MusicSyncTool.h"
 
-using PROPERTIES::PathType;
-using PROPERTIES::PlayState;
 using PROPERTIES::FileErrorType;
 using PROPERTIES::LoadErrorType;
-using PROPERTIES::PET;
 using PROPERTIES::OperationType;
+using PROPERTIES::PathType;
+using PROPERTIES::PET;
+using PROPERTIES::PlayState;
+using std::shared_ptr;
 
 class MusicSyncTool final : public QMainWindow {
 

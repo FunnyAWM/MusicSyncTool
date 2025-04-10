@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #if defined(_WIN32) or defined(_WIN64)
 #include <Windows.h>
-#else 
+#else
 #include <QString>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -22,7 +22,7 @@ inline bool singleInstance(HANDLE& mutex) {
     }
     return true;
 }
-#else 
+#elif defined(__linux)
 inline bool singleInstance() {
     QString lockFileBuilder = "/tmp/";
     lockFileBuilder += QCoreApplication::applicationName();
