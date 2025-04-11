@@ -18,8 +18,7 @@
  * @brief Default constructor
  */
 MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init)
-    QMainWindow(parent), translator(new QTranslator(this)), mediaPlayer(new QMediaPlayer(this)),
-    audioOutput(new QAudioOutput(this)) {
+    QMainWindow(parent), translator(new QTranslator(this)), player(new MSTMediaPlayer(this)) {
     initDatabase();
     loadSettings();
     initUI();
@@ -112,10 +111,7 @@ void MusicSyncTool::loadDefaultSettings() {
 /*
  * @brief Initialize media player module
  */
-void MusicSyncTool::initMediaPlayer() const {
-    mediaPlayer->setAudioOutput(audioOutput.get());
-    audioOutput->setVolume(0.5);
-}
+void MusicSyncTool::initMediaPlayer() const { player->setVolume(0.5); }
 
 /*
  * @brief Load language file by settings
@@ -200,7 +196,7 @@ void MusicSyncTool::popError(const PET type) {
 void MusicSyncTool::setMediaWidget(const PlayState state) const {
     if (state == PlayState::PLAYING) {
         ui.playControl->setText(tr("暂停"));
-        setNowPlayingTitle(nowPlaying);
+        setNowPlayingTitle(player->getNowPlaying());
     } else if (state == PlayState::PAUSED) {
         ui.playControl->setText(tr("播放"));
     } else if (state == PlayState::STOPPED) {
@@ -930,15 +926,15 @@ void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
  * @brief Play or pause the music
  */
 void MusicSyncTool::on_playControl_clicked() {
-    if (!mediaPlayer->hasAudio()) {
+    if (player->getNowPlaying().isEmpty()) {
         popError(PET::NOAUDIO);
         return;
     }
-    if (mediaPlayer->isPlaying()) {
-        mediaPlayer->pause();
+    if (player->isPlaying()) {
+        player->pause();
         setMediaWidget(PlayState::PAUSED);
     } else {
-        mediaPlayer->play();
+        player->play();
         setMediaWidget(PlayState::PLAYING);
     }
 }
@@ -954,11 +950,11 @@ void MusicSyncTool::setSliderPosition(const qint64 position) const {
     } else {
         progress = QString::number(position / 60000) + ":" + QString::number(position % 60000 / 1000);
     }
-    progress += "/" + QString::number(mediaPlayer->duration() / 60000) + ":";
-    if (mediaPlayer->duration() % 60000 / 1000 < 10) {
-        progress += "0" + QString::number(mediaPlayer->duration() % 60000 / 1000);
+    progress += "/" + QString::number(player->getDuration() / 60000) + ":";
+    if (player->getDuration() % 60000 / 1000 < 10) {
+        progress += "0" + QString::number(player->getDuration() % 60000 / 1000);
     } else {
-        progress += QString::number(mediaPlayer->duration() % 60000 / 1000);
+        progress += QString::number(player->getDuration() % 60000 / 1000);
     }
     ui.playProgress->setText(progress);
 }
@@ -967,7 +963,7 @@ void MusicSyncTool::setSliderPosition(const qint64 position) const {
  * @brief Slots for play slider
  */
 void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
-    mediaPlayer->setPosition(position);
+    player->setPosition(position);
     if (position % 60000 / 1000 < 10) {
         ui.playProgress->setText(QString::number(position / 60000) + ":0" + QString::number(position % 60000 / 1000));
     } else {
@@ -978,12 +974,12 @@ void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
 /*
  * @brief Slots for play slider
  */
-void MusicSyncTool::on_playSlider_sliderPressed() const { mediaPlayer->setPosition(ui.playSlider->value()); }
+void MusicSyncTool::on_playSlider_sliderPressed() const { player->setPosition(ui.playSlider->value()); }
 /*
  * @brief Slots for volume slider
  */
 void MusicSyncTool::on_volumeSlider_sliderPressed() const {
-    audioOutput->setVolume(static_cast<float>(ui.volumeSlider->value() / 100.0));
+    player->setVolume(static_cast<float>(ui.volumeSlider->value() / 100.0));
     const QString text = tr("音量：") + QString::number(ui.volumeSlider->value()) + "%";
     ui.volumeLabel->setText(text);
 }
@@ -1088,7 +1084,7 @@ void MusicSyncTool::endMedia(const QMediaPlayer::PlaybackState state) const {
  * @brief Slots for volume slider
  */
 void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
-    audioOutput->setVolume(static_cast<float>(position / 100.0));
+    player->setVolume(static_cast<float>(position / 100.0));
     const QString text = tr("音量：") + QString::number(position) + "%";
     ui.volumeLabel->setText(text);
 }
@@ -1112,19 +1108,19 @@ void MusicSyncTool::on_copyFinished(OperationType op) const {
  */
 void MusicSyncTool::setTotalLength(const PathType path, const int row) {
     const QTableWidget& widget = path == PathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote;
+    auto& ds = path == PathType::LOCAL ? local : remote;
     // QString sql = "SELECT fileName FROM musicInfo WHERE";
     // sql += " title = \"" + widget.item(row, 0)->text() + "\" AND artist = \"" + widget.item(row, 1)->text() +
     // 	"\" AND album = \"" + widget.item(row, 2)->text() + "\"";
-    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    query.prepare("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");
-    query.bindValue(":title", widget.item(row, 0)->text());
-    query.bindValue(":artist", widget.item(row, 1)->text());
-    query.bindValue(":album", widget.item(row, 2)->text());
-    query.exec();
-    query.next();
-    nowPlaying = query.value(0).toString();
+    const auto item = std::make_shared<QueryItem>();
+    item->setTitle(widget.item(row, 0)->text());
+    item->setArtist(widget.item(row, 1)->text());
+    item->setAlbum(widget.item(row, 2)->text());
+    QList<QueryItem> file;
+    file.append(*item);
+    nowPlaying = ds.getFileNameByMD(file).at(0);
     const QString filePath = (path == PathType::LOCAL ? localPath : remotePath) + "/" + nowPlaying;
-    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    player->setNowPlaying(filePath);
     TagLib::FileRef f;
 #if defined(_WIN64) or defined(_WIN32)
     f = TagLib::FileRef(filePath.toStdWString().c_str());
@@ -1134,9 +1130,8 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
     if (!f.isNull() && f.audioProperties()) {
         const qint64 length = f.audioProperties()->lengthInMilliseconds();
         setNowPlayingTitle(nowPlaying);
-        mediaPlayer->setPlaybackRate(1.0);
-        mediaPlayer->setPosition(0);
-        mediaPlayer->play();
+        player->setPosition(0);
+        player->play();
         setMediaWidget(PlayState::PLAYING);
         ui.playSlider->setMaximum(static_cast<int>(length));
         ui.playSlider->setValue(0);
@@ -1233,8 +1228,8 @@ void MusicSyncTool::connectSlots() const {
     connect(this, &MusicSyncTool::finished, loading, &LoadingPage::stopPage);
     connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::showOperationResult);
     connect(this, &MusicSyncTool::loadFinished, this, &MusicSyncTool::showOperationResult);
-    connect(mediaPlayer.get(), &QMediaPlayer::positionChanged, this, &MusicSyncTool::setSliderPosition);
-    connect(mediaPlayer.get(), &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
+    connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged, this, &MusicSyncTool::setSliderPosition);
+    connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
     connect(this, &MusicSyncTool::addToErrorListConcurrent, this,
             QOverload<const QString&, LoadErrorType>::of(&MusicSyncTool::addToErrorList));
     connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::on_copyFinished);

@@ -7,13 +7,18 @@ class MSTMediaPlayer {
 	QAudioOutput audioOutput;
 	QString nowPlaying;
 public:
-	MSTMediaPlayer();
+	explicit MSTMediaPlayer(QObject*);
 	~MSTMediaPlayer();
-	void setFile(const QString&);
+	void setNowPlaying(const QString&);
+    QMediaPlayer* getMediaPlayer();
+    qint64 getPosition() const;
+    qint64 getDuration() const;
 	void play();
 	void pause();
+    void stop();
 	void setPosition(qint64);
 	void setVolume(float);
+    float getVolume() const;
     QString getNowPlaying() const;
 	[[nodiscard]] bool isPlaying() const;
 };

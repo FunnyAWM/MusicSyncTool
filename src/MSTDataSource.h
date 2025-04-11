@@ -1,8 +1,6 @@
 #pragma once
 
-// ReSharper disable once CppUnusedIncludeDirective
 #include <QRegularExpression>
-// ReSharper disable once CppUnusedIncludeDirective
 #include <QDateTime>
 #include <QSqlDatabase>
 #include <QSqlError>
