@@ -253,10 +253,9 @@ void MusicSyncTool::getMusic(PathType path, unsigned short page) {
 void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short page) {
 	const clock_t start = clock();
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
-	emit started();
 	favoriteOnly[path == PathType::LOCAL ? 0 : 1] = false;
 	QStringList pathForLog = ds.getPath().split("/");
-	QString logFileNameBuilder = "lastScan";
+	QString logFile = "lastScan";
 	if (!pathForLog[0].isEmpty()) {
 		pathForLog[0].remove(":");
 	}
@@ -264,12 +263,11 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 		pathForLog.removeFirst();
 	}
 	for (const QString& tempStr : pathForLog) {
-		logFileNameBuilder += " - " + tempStr;
+		logFile += " - " + tempStr;
 	}
-	logFileNameBuilder += ".log";
-	logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
-	QDateTime dateTime = getDateFromLog(logFileNameBuilder);
-
+	logFile += ".log";
+	logFile = QCoreApplication::applicationDirPath() + "/log/" + logFile;
+	QDateTime dateTime = getDateFromLog(logFile);
 	const QDir dir(ds.getPath());
 	ds.initTable();
 	QStringList filters;
@@ -341,8 +339,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 		->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
 			QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
 	dateTime = QDateTime::currentDateTime();
-	writeLog(logFileNameBuilder, dateTime);
-	emit finished();
+	writeLog(logFile, dateTime);
 }
 
 /*
