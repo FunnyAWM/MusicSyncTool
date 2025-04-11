@@ -9,9 +9,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#[[ Replace this with your own Qt installation path
-    If you are using distros with Qt6 library packages available(like openSUSE),
-    Just install the package and ignore this set statement]]
+    #[[ Replace this with your own Qt installation path
+        If you are using distros with Qt6 library packages available(like openSUSE),
+        Just install the package and ignore this set statement]]
     set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.2/gcc_64")
 
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
@@ -66,17 +66,17 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         )
 
         qt_add_translations(MusicSyncTool TS_FILES translations/Translation_en_US.ts translations/Translation_Wenyan.ts translations/Translation_zh_Hans.ts)
-#[[     Define target properties for Android with Qt 6 as:
-        set_property(TARGET MusicSyncTool APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-                     ${CMAKE_CURRENT_SOURCE_DIR}/android)
-        For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation]]
+        #[[     Define target properties for Android with Qt 6 as:
+                set_property(TARGET MusicSyncTool APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+                             ${CMAKE_CURRENT_SOURCE_DIR}/android)
+                For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation]]
     else ()
         if (ANDROID)
             add_library(MusicSyncTool SHARED
                     ${PROJECT_SOURCES}
             )
-#[[         Define properties for Android with Qt 5 after find_package() calls as:
-            set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")]]
+            #[[         Define properties for Android with Qt 5 after find_package() calls as:
+                        set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")]]
         else ()
             add_executable(MusicSyncTool
                     ${PROJECT_SOURCES}
@@ -87,9 +87,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_link_libraries(MusicSyncTool PRIVATE Qt6::Widgets Qt6::Sql Qt6::Multimedia Qt6::Concurrent)
     target_link_libraries(MusicSyncTool PRIVATE TagLib::tag)
 
-#[[  Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-     If you are developing for iOS or macOS you should consider setting an
-     explicit, fixed bundle identifier manually though.]]
+    #[[  Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+         If you are developing for iOS or macOS you should consider setting an
+         explicit, fixed bundle identifier manually though.]]
     if (${QT_VERSION} VERSION_LESS 6.1.0)
         set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.MusicSyncTool)
     endif ()
@@ -123,7 +123,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             "$<TARGET_FILE_DIR:MusicSyncTool>/translations"
             COMMENT "Copying translation files"
     )
-else()
+else ()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
     message(SEND_ERROR "Or you can modify this file if you know what you are doing.")
-endif()
+endif ()

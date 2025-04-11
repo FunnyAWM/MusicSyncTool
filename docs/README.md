@@ -12,13 +12,13 @@
  git clone https://github.com/FunnyAWM/MusicSyncTool.git
 ```
  或从VS中通过VCS导入代码。
-3. 在VS中安装Qt VS Tools扩展，并调整Qt文件夹设置。
-4. 通过Vcpkg安装utfcpp、taglib包，运行如下命令：
+1. 在VS中安装Qt VS Tools扩展，并调整Qt文件夹设置。
+2. 通过Vcpkg安装utfcpp、taglib包，运行如下命令：
 ```
 vcpkg install taglib utfcpp
 ```
-5. 在Debug和Release模式下分别进行一次源码编译，排除问题。
-6. 如果需要更改源码，在更改源码后再次进行Release编译，Qt工具会自动检查依赖库文件并补全。
+1. 在Debug和Release模式下分别进行一次源码编译，排除问题。
+2. 如果需要更改源码，在更改源码后再次进行Release编译，Qt工具会自动检查依赖库文件并补全。
 ## 3. 自定义语言文件
 1. 安装Qt Linguist。
 2. [从此处下载](https://github.com/FunnyAWM/MusicSyncTool_files/raw/refs/heads/master/template.ts)翻译模板并在Qt Linguist中打开。

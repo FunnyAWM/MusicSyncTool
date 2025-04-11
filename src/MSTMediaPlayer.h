@@ -3,7 +3,6 @@
 #include <QMediaPlayer>
 
 class MSTMediaPlayer {
-private:
 	QMediaPlayer mediaPlayer;
 	QAudioOutput audioOutput;
 	QString nowPlaying;
@@ -15,5 +14,6 @@ public:
 	void pause();
 	void setPosition(qint64);
 	void setVolume(float);
+    QString getNowPlaying() const;
 	[[nodiscard]] bool isPlaying() const;
 };

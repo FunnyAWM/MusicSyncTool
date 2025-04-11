@@ -24,6 +24,7 @@
 #include <QTranslator>
 #include <QtConcurrent>
 #include <taglib/tag.h>
+#include <memory>
 
 #include "AboutPage.h"
 #include "LoadingPage.h"
@@ -63,8 +64,8 @@ class MusicSyncTool final : public QMainWindow {
     bool favoriteOnly[2] = {false, false};
     const short PAGESIZE = 200;
     set entity;
-    QMediaPlayer* mediaPlayer;
-    QAudioOutput* audioOutput;
+    shared_ptr<QMediaPlayer> mediaPlayer;
+    shared_ptr<QAudioOutput> audioOutput;
     QString nowPlaying;
     QStringList errorList;
     const QStringList supportedFormat = {"mp3", "flac", "ape", "wav", "wma"};

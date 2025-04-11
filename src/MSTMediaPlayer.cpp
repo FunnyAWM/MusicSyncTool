@@ -31,8 +31,9 @@ void MSTMediaPlayer::setPosition(const qint64 pos) {
 	mediaPlayer.setPosition(pos);
 }
 
-void MSTMediaPlayer::setVolume(const float vol) {
-	audioOutput.setVolume(vol);
+void MSTMediaPlayer::setVolume(const float vol) { audioOutput.setVolume(vol); }
+QString MSTMediaPlayer::getNowPlaying() const {
+    return nowPlaying;
 }
 
 bool MSTMediaPlayer::isPlaying() const {

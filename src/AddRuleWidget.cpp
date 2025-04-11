@@ -1,5 +1,9 @@
 ﻿#include "AddRuleWidget.h"
 
+#include <QDialog>
+
+#include "MusicProperties.h"
+
 AddRuleWidget::AddRuleWidget(QWidget* parent)
 	: QDialog(parent) {
 	ui.setupUi(this);
@@ -20,6 +24,8 @@ LyricIgnoreRule AddRuleWidget::getRules() const {
 	case 2:
 		lyricRules = RuleField::ALBUM;
 		break;
+	default:
+	    break;
 	}
 	switch (ui.ruleComboBox->currentIndex()) {
 	case 0:
@@ -28,6 +34,8 @@ LyricIgnoreRule AddRuleWidget::getRules() const {
 	case 1:
 		ignoreLyricRules = RuleType::EXCLUDES;
 		break;
+	default:
+	    break;
 	}
 	return LyricIgnoreRule(ignoreLyricRules, lyricRules, rule);
 }

@@ -2,27 +2,27 @@
 
 ## 1. 成员列表
 
-| 类型                   | 成员            | 描述                           |
-| :--------------------- | :-------------- | ------------------------------ |
-| Ui::MusicSyncToolClass | ui              | 程序主界面组件类               |
-| QTranslator*           | translator      | 待加载翻译器（全局）           |
-| QString                | localPath       | 本地路径                       |
-| QString                | remotePath      | 设备路径                       |
-| QSqlDatabase           | dbLocal         | 本地数据库连接                 |
-| QSqlDatabase           | dbRemote        | 设备数据库连接                 |
-| QSqlQuery              | queryLocal      | 本地数据库查询                 |
-| QSqlQuery              | queryRemote     | 设备数据库查询                 |
-| LoadingPage*           | loading         | 加载界面组件（全局）           |
-| unsigned short         | currentPage[2]  | 当前页码                       |
-| unsigned short         | totalPage[2]    | 总页码数                       |
+| 类型                     | 成员              | 描述              |
+|:-----------------------|:----------------|-----------------|
+| Ui::MusicSyncToolClass | ui              | 程序主界面组件类        |
+| QTranslator*           | translator      | 待加载翻译器（全局）      |
+| QString                | localPath       | 本地路径            |
+| QString                | remotePath      | 设备路径            |
+| QSqlDatabase           | dbLocal         | 本地数据库连接         |
+| QSqlDatabase           | dbRemote        | 设备数据库连接         |
+| QSqlQuery              | queryLocal      | 本地数据库查询         |
+| QSqlQuery              | queryRemote     | 设备数据库查询         |
+| LoadingPage*           | loading         | 加载界面组件（全局）      |
+| unsigned short         | currentPage[2]  | 当前页码            |
+| unsigned short         | totalPage[2]    | 总页码数            |
 | bool                   | favoriteOnly[2] | 是否仅显示喜爱的音乐（指示位） |
-| const short            | PAGESIZE        | 每页显示行数                   |
-| set                    | entity          | 设置实体类                     |
-| QMediaPlayer           | *mediaPlayer    | 媒体播放器类（全局）           |
-| QAudioOutput           | *audioOutput    | 音频输出类（全局）             |
-| QString                | nowPlaying      | 正在播放文件名                 |
-| QStringList            | errorList       | 加载及复制的错误列表           |
-| const QStringList      | supportedFormat | 支持的格式清单                 |
+| const short            | PAGESIZE        | 每页显示行数          |
+| set                    | entity          | 设置实体类           |
+| QMediaPlayer           | *mediaPlayer    | 媒体播放器类（全局）      |
+| QAudioOutput           | *audioOutput    | 音频输出类（全局）       |
+| QString                | nowPlaying      | 正在播放文件名         |
+| QStringList            | errorList       | 加载及复制的错误列表      |
+| const QStringList      | supportedFormat | 支持的格式清单         |
 
 ## 2. 方法列表
 

@@ -1,4 +1,5 @@
 #include "OperationResult.h"
+#include <QDialog>
 
 OperationResult::OperationResult(QWidget* parent) : QDialog(parent) {
 	ui.setupUi(this);
