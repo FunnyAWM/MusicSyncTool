@@ -41,8 +41,8 @@ public:
     template <class T>
     void bindValue(const QString&, const T&);
     void execQuery();
-    void setFavorite(const QString&, QDateTime);
-    void setRuleHit(const QList<LyricIgnoreRule>&, QDateTime);
+    void setFavorite(const QString&, const QDateTime&);
+    void setRuleHit(const QList<LyricIgnoreRule>&, const QDateTime&);
     QList<QueryItem> getAll(const QVector<QueryRows>&);
     QStringList addMusic(const QStringList&);
     [[nodiscard]] bool addMusic(const QString&);

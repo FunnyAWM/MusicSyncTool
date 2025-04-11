@@ -55,6 +55,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/MSTMediaPlayer.h
             src/QueryItem.cpp
             src/QueryItem.h
+            src/Logger.cpp
+            src/Logger.h
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

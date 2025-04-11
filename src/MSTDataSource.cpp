@@ -3,6 +3,7 @@
 #include <QFile>
 #include <taglib/fileref.h>
 #include <taglib/tpropertymap.h>
+#include "Logger.h"
 
 int MSTDataSource::getPageSize() const { return pageSize; }
 void MSTDataSource::setPageSize(const int page_size) { pageSize = page_size; }
@@ -24,7 +25,7 @@ bool MSTDataSource::openDB(const QString& path_) {
 		db.setDatabaseName(path_ + "/musicInfo.db");
 	}
 	if (!db.open()) {
-		qWarning() << "[WARN] Error opening database:" << db.lastError().text();
+		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
 	query = QSqlQuery(db);
@@ -40,7 +41,7 @@ bool MSTDataSource::openDB() {
 		db.setDatabaseName(path + "/musicInfo.db");
 	}
 	if (!db.open()) {
-		qWarning() << "[WARN] Error opening database:" << db.lastError().text();
+	    Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
 	query = QSqlQuery(db);
@@ -74,7 +75,7 @@ void MSTDataSource::bindValue(const QString& key, const T& value) {
 
 void MSTDataSource::execQuery() { query.exec(); }
 
-void MSTDataSource::setFavorite(const QString& tag, const QDateTime timeFromLog) {
+void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog) {
 	prepareStatement("SELECT fileName FROM musicInfo");
 	execQuery();
 	QStringList fileName;
@@ -87,9 +88,9 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime timeFromLog)
 		}
 		TagLib::FileRef f;
 #if defined(_WIN64) or defined(_WIN32)
-		f = TagLib::FileRef(file.toStdWString().c_str());
+		f = TagLib::FileRef((path + "/" + file).toStdWString().c_str());
 #elif defined(__linux)
-		f = TagLib::FileRef(file.toStdString());
+		f = TagLib::FileRef((path + "/" + file).toStdString().c_str());
 #endif
 		prepareStatement(
 			"UPDATE musicInfo SET favorite = :fav WHERE title = :title, artist = :artist, album = :album, fileName = :fileName");
@@ -100,7 +101,7 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime timeFromLog)
 	}
 }
 
-void MSTDataSource::setRuleHit(const QList<LyricIgnoreRule>& rules, const QDateTime timeFromLog) {
+void MSTDataSource::setRuleHit(const QList<LyricIgnoreRule>& rules, const QDateTime& timeFromLog) {
 	QList<QueryItem> items = getAll({QueryRows::ALL});
 	for (auto& item : items) {
 		if (QFile(item.getFileName()).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
@@ -221,12 +222,13 @@ QStringList MSTDataSource::addMusic(const QStringList& files) {
 	for (const QString& file : files) {
 		TagLib::FileRef fileRef;
 #if defined(_WIN64) or defined(_WIN32)
-		fileRef = TagLib::FileRef(file.toStdWString().c_str());
+		fileRef = TagLib::FileRef((path + "/" + file).toStdWString().c_str());
 #elif defined(__linux)
-		fileRef = TagLib::FileRef(file.toStdString());
+		fileRef = TagLib::FileRef((path + "/" + file).toStdString().c_str());
 #endif
 		if (fileRef.isNull()) {
 			errList.append(file);
+		    Logger::Warn("Failed to add file" + file);
 			continue;
 		}
 		const TagLib::Tag* tag = fileRef.tag();
@@ -253,9 +255,9 @@ bool MSTDataSource::addMusic(const QString& file) {
 	}
 	TagLib::FileRef fileRef;
 #if defined(_WIN64) or defined(_WIN32)
-	fileRef = TagLib::FileRef(file.toStdWString().c_str());
+	fileRef = TagLib::FileRef((path + "/" + file).toStdWString().c_str());
 #elif defined(__linux)
-	fileRef = TagLib::FileRef(file.toStdString());
+	fileRef = TagLib::FileRef((path + "/" + file).toStdString().c_str());
 #endif
 	if (fileRef.isNull()) {
 		return false;
@@ -382,7 +384,7 @@ bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 		prepareStatement("DELETE FROM musicInfo WHERE fileName = :fileName");
 		bindValue(":fileName", file);
 		if (!query.exec()) {
-			qWarning() << "[WARN] Error deleting data from database:" << query.lastError().text();
+			Logger::Error("Error deleting data from database:" + query.lastError().text());
 			return false;
 		}
 		return true;

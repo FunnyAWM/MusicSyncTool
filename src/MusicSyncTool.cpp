@@ -8,6 +8,8 @@
 #include <taglib/flacfile.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
+#include "Logger.h"
+
 #if defined(__linux)
 #include <unistd.h>
 #endif
@@ -56,14 +58,14 @@ void MusicSyncTool::initDatabase() {
 void MusicSyncTool::loadSettings() {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
-		qWarning() << "[WARN] No settings file found, creating new setting file named settings.json";
+		Logger::Warn("No settings file found, creating default setting file named settings.json");
 		file.close();
 		loadDefaultSettings();
 		return;
 	}
 	const QJsonDocument settings = QJsonDocument::fromJson(file.readAll());
 	if (settings.isNull()) {
-		qWarning() << "[WARN] Invalid settings file, creating new setting file named settings.json";
+	    Logger::Warn("No settings file found, creating default setting file named settings.json");
 		file.close();
 		loadDefaultSettings();
 		return;
@@ -272,15 +274,14 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 	ds.initTable();
 	QStringList newFileList = dir.entryList(QDir::Files);
 	for (const QString& file : newFileList) {
-		if (!isFormatSupported(file)) {
+		if (!isFormatSupported(file)) { // Remove unsupported files
 			newFileList.removeOne(file);
 		}
 	}
 	QList<QueryItem> tempList = ds.getAll({QueryRows::FILENAME});
 	QStringList oldFileList;
 	for (const QueryItem& item : tempList) {
-		QString fileName = item.getFileName().split("/").last();
-		oldFileList.append(fileName);
+		oldFileList.append(item.getFileName());
 	}
 	newFileList.sort();
 	oldFileList.sort();
@@ -308,7 +309,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 	const TagLib::String key(entity.favoriteTag.toStdString());
 	for (int i = 0; i < newFileList.size(); i++) {
 		emit current(i);
-		QString file = (path == PathType::LOCAL ? localPath : remotePath) + "/" + newFileList.at(i).toUtf8();
+		QString file = newFileList.at(i).toUtf8();
 		if (!isFormatSupported(file)) {
 			continue;
 		}
