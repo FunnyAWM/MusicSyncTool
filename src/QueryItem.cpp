@@ -3,6 +3,7 @@
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 
+int QueryItem::sensitivity = 3;
 QueryItem::QueryItem(const QString& fileName) {
 #if defined(_WIN64) or defined(_WIN32)
 	const TagLib::FileRef file(fileName.toStdWString().c_str());
@@ -89,4 +90,27 @@ void QueryItem::setTrack(const uint track) {
 
 void QueryItem::setFileName(const QString& fileName) {
 	this->fileName = fileName;
+}
+
+bool QueryItem::operator==(const QueryItem& other) const {
+	int threshold = 0;
+	if (title == other.title) {
+		threshold++;
+	}
+	if (artist == other.artist) {
+		threshold++;
+	}
+	if (album == other.album) {
+		threshold++;
+	}
+	if (year == other.year) {
+		threshold++;
+	}
+	if (track == other.track) {
+		threshold++;
+	}
+	if (genre == other.genre) {
+		threshold++;
+	}
+	return threshold >= sensitivity;
 }

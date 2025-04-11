@@ -67,6 +67,9 @@
     <ClInclude Include="src\QueryItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AboutPage.cpp">
@@ -103,6 +106,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MSTDataSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

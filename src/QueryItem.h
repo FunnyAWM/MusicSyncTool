@@ -1,7 +1,5 @@
 ﻿#pragma once
 #include <QString>
-#include <cinttypes>
-#include <taglib/tag.h>
 
 class QueryItem {
     QString title;
@@ -11,7 +9,7 @@ class QueryItem {
     uint year;
     uint track;
     QString fileName;
-
+    static int sensitivity;
 public:
     explicit QueryItem() = default;
     explicit QueryItem(const QString&);
@@ -23,6 +21,8 @@ public:
     [[nodiscard]] uint getYear() const;
     [[nodiscard]] uint getTrack() const;
     [[nodiscard]] QString getFileName() const;
+	[[nodiscard]] static int getSensitivity() { return sensitivity; }
+	static void setSensitivity(const int s = 3) { sensitivity = s; }
     void setTitle(const QString&);
     void setArtist(const QString&);
     void setAlbum(const QString&);
@@ -30,4 +30,5 @@ public:
     void setYear(uint);
     void setTrack(uint);
     void setFileName(const QString&);
+    bool operator==(const QueryItem& other) const;
 };

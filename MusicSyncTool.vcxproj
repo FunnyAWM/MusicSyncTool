@@ -217,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\MSTDataSource.h" />
+    <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\MSTMediaPlayer.h" />
     <ClInclude Include="src\QueryItem.h" />
     <ClInclude Include="src\SingleInstance.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="src\AboutPage.cpp" />
     <ClCompile Include="src\AddRuleWidget.cpp" />
     <ClCompile Include="src\LoadingPage.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\LyricIgnoreRule.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MSTDataSource.cpp" />

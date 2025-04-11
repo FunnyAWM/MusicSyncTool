@@ -2,6 +2,7 @@
 #ifndef MUSICSYNCTOOL_H
 #define MUSICSYNCTOOL_H
 
+#include <memory>
 #include <QAudioOutput>
 #include <QDir>
 #include <QFile>
@@ -19,12 +20,11 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QString>
+#include <QtConcurrent>
 #include <QThread>
 #include <QThreadPool>
 #include <QTranslator>
-#include <QtConcurrent>
 #include <taglib/tag.h>
-#include <memory>
 
 #include "AboutPage.h"
 #include "LoadingPage.h"
@@ -106,8 +106,8 @@ public:
     void setTotalLength(PathType, int);
     void showOperationResult(OperationType);
     void showSettings() const;
-    void setFavorite(const QStringList&, PathType, const TagLib::String&, const QDateTime&);
-    void setRuleHit(const QStringList&, PathType, const QList<LyricIgnoreRule>&, const QDateTime&);
+    void setFavorite(PathType, const TagLib::String&, const QDateTime&);
+    void setRuleHit(PathType, const QList<LyricIgnoreRule>&, const QDateTime&);
     static QDateTime getDateFromLog(const QString&);
     static void writeLog(const QString&, const QDateTime&);
     void rollBackCopy(const QString&);

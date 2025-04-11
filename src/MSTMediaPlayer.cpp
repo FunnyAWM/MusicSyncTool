@@ -14,7 +14,7 @@ qint64 MSTMediaPlayer::getPosition() const { return mediaPlayer.position(); }
 qint64 MSTMediaPlayer::getDuration() const { return mediaPlayer.duration(); }
 
 void MSTMediaPlayer::setNowPlaying(const QString& file) {
-    nowPlaying = file;
+    nowPlaying = file.split("/").last();
     mediaPlayer.setSource(QUrl::fromLocalFile(file));
 }
 
