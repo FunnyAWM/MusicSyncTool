@@ -13,10 +13,11 @@ QueryItem::QueryItem(const QString& fileName) {
 		return;
 	}
 	const TagLib::Tag* tag = file.tag();
-	title = tag->title().toCString();
-	artist = tag->artist().toCString();
-	album = tag->album().toCString();
-	genre = tag->genre().toCString();
+	title = QString::fromStdString(tag->title().to8Bit(true));
+	artist = QString::fromStdString(tag->artist().to8Bit(true));
+	album = QString::fromStdString(tag->album().to8Bit(true));
+	genre = QString::fromStdString(tag->genre().to8Bit(true));
+	genre = QString::fromStdString(tag->genre().to8Bit(true));
 	year = tag->year();
 	track = tag->track();
 	this->fileName = fileName;
