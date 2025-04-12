@@ -185,6 +185,8 @@ void MusicSyncTool::popError(const PET type) {
 	case PET::DBERROR:
 		QMessageBox::critical(this, tr("错误"), tr("操作数据库中数据时出现严重错误，程序即将退出！"));
 		break;
+	case PET::DOF:
+		QMessageBox::critical(this, tr("错误"), tr("打开或创建目录失败，请检查程序是否有相关权限！"));
 	}
 }
 
@@ -423,7 +425,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
 
 	ShowDupe dp;
 	QStringList dupeList;
-	for (int i = 0;i < result.size() - 1; i++) {
+	for (int i = 0; i < result.size() - 1; i++) {
 		auto& slow = result[i];
 		auto& fast = result[i + 1];
 		if (slow == fast) {
@@ -515,13 +517,13 @@ QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
 		QTextStream in(&file);
 		dateTime = QDateTime::fromString(in.readLine());
 		if (dateTime.isNull()) {
-			qWarning() << "[WARN] No last scan log found, scanning all files";
+			Logger::Warn("No last scan log found, scanning all files");
 			dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
 		}
 	}
 	else {
-		qWarning() << file.errorString();
-		qWarning() << "[WARN] No last scan log found, scanning all files";
+		Logger::Warn("Failed to open last scan log:" + file.errorString());
+		Logger::Warn("No last scan log found, scanning all files");
 		// Set last scan time to 1970-01-01 00:00:00 if no log found
 		dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
 	}
@@ -556,7 +558,7 @@ void MusicSyncTool::rollBackCopy(const QString& fileName) {
 void MusicSyncTool::saveSettings(const set& entityParam) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
-		qFatal() << "[FATAL] Error opening settings file";
+		Logger::Fatal("Failed to open settings file:" + file.errorString());
 		QMessageBox::critical(this, tr("错误"), tr("无法打开设置文件"));
 		return;
 	}
@@ -598,17 +600,17 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
 		}
 	}
 	loadLanguage();
-	qDebug() << "[INFO] IgnoreLyric:" << this->entity.ignoreLyric;
-	qDebug() << "[INFO] SortBy:" << this->entity.sortBy;
-	qDebug() << "[INFO] OrderBy:" << this->entity.orderBy;
-	qDebug() << "[INFO] Language:" << this->entity.language;
-	qDebug() << "[INFO] FavoriteTag:" << this->entity.favoriteTag;
+	Logger::Info(QString("IgnoreLyric:") + QString::number(this->entity.ignoreLyric));
+	Logger::Info("SortBy:" + QString::number(this->entity.sortBy));
+	Logger::Info("OrderBy:" + QString::number(this->entity.orderBy));
+	Logger::Info("Language:" + this->entity.language);
+	Logger::Info("FavoriteTag:" + this->entity.favoriteTag);
 	int i = 1;
 	for (const auto& rule : entityParam.rules) {
-		qDebug() << "[INFO] Rule No." << i++ << ":";
-		qDebug() << "[INFO] RuleTypeConverter:" << rule.getRuleTypeStr();
-		qDebug() << "[INFO] RuleFieldConverter:" << rule.getRuleFieldStr();
-		qDebug() << "[INFO] Rule:" << rule.getRuleName();
+		Logger::Info("Rule No." + QString::number(i++) + ":");
+		Logger::Info("RuleTypeConverter:" + rule.getRuleTypeStr());
+		Logger::Info("RuleFieldConverter:" + rule.getRuleFieldStr());
+		Logger::Info("Rule:" + rule.getRuleName());
 	}
 	QJsonDocument settings;
 	settings.setObject(obj);
@@ -628,8 +630,9 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
 	emit total(fileList.size());
 	if (const QDir dir(target); dir.isEmpty()) {
 		if (!dir.mkpath(target)) {
-			qFatal() << "[FATAL] Error creating directory:" << target;
-			exit(EXIT_FAILURE);
+			Logger::Fatal("Failed to create target directory");
+			popError(PET::DOF);
+			return;
 		}
 	}
 	bool diskFull = false;
