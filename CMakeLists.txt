@@ -20,43 +20,25 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_package(TagLib REQUIRED)
     find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
     set(PROJECT_SOURCES
-            src/main.cpp
-            src/AboutPage.cpp
-            src/LoadingPage.cpp
-            src/MusicSyncTool.cpp
-            src/ShowDupe.cpp
-            src/Settings.cpp
-            src/OperationResult.cpp
-            src/AddRuleWidget.cpp
-            src/LyricIgnoreRule.cpp
-            src/Settings.h
-            src/AboutPage.h
-            src/LoadingPage.h
-            src/MusicSyncTool.h
-            src/ShowDupe.h
-            src/OperationResult.h
-            src/MusicProperties.h
-            src/SettingEntity.h
-            src/AddRuleWidget.h
-            src/LyricIgnoreRule.h
-            src/AboutPage.ui
-            src/LoadingPage.ui
-            src/MusicSyncTool.ui
-            src/Settings.ui
-            src/ShowDupe.ui
-            src/OperationResult.ui
-            src/AddRuleWidget.ui
-            resources/MusicSyncTool.qrc
-            resources/MusicSyncTool.rc
-            src/SingleInstance.h
-            src/MSTDataSource.cpp
-            src/MSTDataSource.h
-            src/MSTMediaPlayer.cpp
-            src/MSTMediaPlayer.h
-            src/QueryItem.cpp
-            src/QueryItem.h
             src/Logger.cpp
-            src/Logger.h
+            src/LyricIgnoreRule.cpp
+            src/MSTDataSource.cpp
+            src/MSTMediaPlayer.cpp
+            src/QueryItem.cpp
+            src/Widgets/AboutPage/AboutPage.cpp
+            src/Widgets/AboutPage/AboutPage.ui
+            src/Widgets/AddRuleWidget/AddRuleWidget.cpp
+            src/Widgets/AddRuleWidget/AddRuleWidget.ui
+            src/Widgets/LoadingPage/LoadingPage.cpp
+            src/Widgets/LoadingPage/LoadingPage.ui
+            src/Widgets/MusicSyncTool/MusicSyncTool.cpp
+            src/Widgets/MusicSyncTool/MusicSyncTool.ui
+            src/Widgets/OperationResult/OperationResult.cpp
+            src/Widgets/OperationResult/OperationResult.ui
+            src/Widgets/Settings/Settings.cpp
+            src/Widgets/Settings/Settings.ui
+            src/Widgets/ShowDupe/ShowDupe.cpp
+            src/Widgets/ShowDupe/ShowDupe.ui
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
