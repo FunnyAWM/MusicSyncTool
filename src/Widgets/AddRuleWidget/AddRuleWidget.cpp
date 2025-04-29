@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "MusicProperties.h"
+#include "../../MusicProperties.h"
 
 AddRuleWidget::AddRuleWidget(QWidget* parent)
 	: QDialog(parent) {

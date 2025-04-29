@@ -9,9 +9,9 @@
 #include <QTranslator>
 #include <QWidget>
 
-#include "LyricIgnoreRule.h"
-#include "MusicProperties.h"
-#include "SettingEntity.h"
+#include "../../LyricIgnoreRule.h"
+#include "../../MusicProperties.h"
+#include "../../SettingEntity.h"
 #include "ui_Settings.h"
 
 using namespace PROPERTIES;

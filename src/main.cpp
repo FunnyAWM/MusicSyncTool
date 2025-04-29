@@ -1,4 +1,4 @@
-﻿#include "MusicSyncTool.h"
+﻿#include "Widgets/MusicSyncTool/MusicSyncTool.h"
 #include "SingleInstance.h"
 
 int main(int argc, char* argv[]) {

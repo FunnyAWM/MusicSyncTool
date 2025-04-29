@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 
-#include "AddRuleWidget.h"
+#include "../AddRuleWidget/AddRuleWidget.h"
 
 Settings::Settings(QWidget* parent) : QWidget(parent) {
     ui.setupUi(this);

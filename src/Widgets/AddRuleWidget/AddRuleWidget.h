@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "LyricIgnoreRule.h"
+#include "../../LyricIgnoreRule.h"
 #include "ui_AddRuleWidget.h"
 
 class AddRuleWidget final : public QDialog

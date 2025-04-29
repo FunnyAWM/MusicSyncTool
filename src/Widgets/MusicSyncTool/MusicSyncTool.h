@@ -26,14 +26,14 @@
 #include <QTranslator>
 #include <taglib/tag.h>
 
-#include "AboutPage.h"
-#include "LoadingPage.h"
-#include "MSTDataSource.h"
-#include "MSTMediaPlayer.h"
-#include "MusicProperties.h"
-#include "OperationResult.h"
-#include "Settings.h"
-#include "ShowDupe.h"
+#include "../AboutPage/AboutPage.h"
+#include "../LoadingPage/LoadingPage.h"
+#include "../../MSTDataSource.h"
+#include "../../MSTMediaPlayer.h"
+#include "../../MusicProperties.h"
+#include "../OperationResult/OperationResult.h"
+#include "../Settings/Settings.h"
+#include "../ShowDupe/ShowDupe.h"
 #include "ui_MusicSyncTool.h"
 
 using PROPERTIES::FileErrorType;

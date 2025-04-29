@@ -8,7 +8,7 @@
 #include <taglib/flacfile.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
-#include "Logger.h"
+#include "../../Logger.h"
 
 #if defined(__linux)
 #include <unistd.h>
