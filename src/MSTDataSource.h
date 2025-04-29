@@ -1,15 +1,13 @@
 #pragma once
 
-#include <QDateTime>
 #include <QRegularExpression>
+#include <QDateTime>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QString>
-#include <taglib/tstring.h>
 
-#include "LoadingPage.h"
 #include "LyricIgnoreRule.h"
 #include "QueryItem.h"
 
@@ -41,15 +39,15 @@ public:
     template <class T>
     void bindValue(const QString&, const T&);
     void execQuery();
-    void setFavorite(const TagLib::String&, const QDateTime&);
+    void setFavorite(const QString&, const QDateTime&);
     void setRuleHit(const QList<LyricIgnoreRule>&, const QDateTime&);
-    QList<QueryItem> getAll(const QVector<QueryRows>&, OrderByEnum, SortByEnum);
+    QList<QueryItem> getAll(const QVector<QueryRows>&);
     QStringList addMusic(const QStringList&);
     [[nodiscard]] bool addMusic(const QString&);
-    QPair<int, QList<QueryItem>> searchMusic(const QString&);
-    QString getFileNameByMD(const QueryItem&);
-    bool getFavorite(const QueryItem&);
-    bool getRuleHit(const QueryItem&);
+    QList<QueryItem> searchMusic(const QString&);
+    QStringList getFileNameByMD(const QList<QueryItem>&);
+    QList<QueryItem> getFavorite(unsigned short, SortByEnum, OrderByEnum);
+    QList<QueryItem> getRuleHit(unsigned short, SortByEnum, OrderByEnum);
     QList<QueryItem> getMusicToTable(unsigned short, SortByEnum, OrderByEnum);
     int getCount();
     [[nodiscard]] bool deleteMusic(const QStringList&);
