@@ -211,7 +211,7 @@ void MusicSyncTool::openFolder(const PathType path) {
     if (dir == "") {
         return;
     }
-    (path == PathType::LOCAL ? localPath : remotePath) = dir;
+    (path == PathType::LOCAL ? local.getPath() : remote.getPath()) = dir;
     if (path == PathType::LOCAL) {
         local.setPath(dir);
         if (!local.openDB()) {
@@ -232,7 +232,7 @@ void MusicSyncTool::openFolder(const PathType path) {
  */
 void MusicSyncTool::getMusic(PathType path, unsigned short page) {
     Logger::Info("Scanning started");
-    if (localPath == "" && remotePath == "") {
+    if (local.getPath() == "" && remote.getPath() == "") {
         Logger::Warn("No path selected");
         return;
     }
@@ -248,7 +248,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     const clock_t start = clock();
     emit started();
     favoriteOnly[path == PathType::LOCAL ? 0 : 1] = false;
-    QStringList pathForLog = (path == PathType::LOCAL ? localPath : remotePath).split("/");
+    QStringList pathForLog = (path == PathType::LOCAL ? local.getPath() : remote.getPath()).split("/");
     QString logFileNameBuilder = "lastScan";
     if (!pathForLog[0].isEmpty()) {
         pathForLog[0].remove(":");
@@ -261,7 +261,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     logFileNameBuilder += ".log";
     logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
     QDateTime dateTime = getDateFromLog(logFileNameBuilder);
-    const QDir dir(path == PathType::LOCAL ? localPath : remotePath);
+    const QDir dir(path == PathType::LOCAL ? local.getPath() : remote.getPath());
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
     ds.initTable();
     QStringList newFileList = dir.entryList(QDir::Files);
@@ -355,26 +355,18 @@ void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
         getMusic(path, 1);
         return;
     }
-    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->clearContents();
-    query.prepare("SELECT COUNT(*) FROM musicInfo WHERE title LIKE :text OR artist LIKE :text OR album LIKE :text");
-    query.bindValue(":text", "%" + text + "%");
-    query.exec();
-    query.next();
-    const int tableSize = query.value(0).toInt();
-    (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)->setRowCount(tableSize);
-    query.prepare(
-        "SELECT title, artist, album, genre, year, track FROM musicInfo WHERE title LIKE :text OR artist LIKE "
-        ":text OR album LIKE :text");
-    query.bindValue(":text", "%" + text + "%");
-    query.exec();
-    while (query.next()) {
-        for (int i = 0; i < 6; i++) {
-            if (query.value(i) != 0) {
-                (path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote)
-                    ->setItem(query.at(), i, new QTableWidgetItem(query.value(i).toString()));
-            }
-        }
+    MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    QTableWidget* targetTable = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
+    targetTable->clearContents();
+    const QList<QueryItem> items = ds.searchMusic(text);
+    targetTable->setRowCount(items.count());
+    for (int i = 0; i < items.count(); i++) {
+        targetTable->setItem(i, 0, new QTableWidgetItem(items.at(i).getTitle()));
+        targetTable->setItem(i, 1, new QTableWidgetItem(items.at(i).getArtist()));
+        targetTable->setItem(i, 2, new QTableWidgetItem(items.at(i).getAlbum()));
+        targetTable->setItem(i, 3, new QTableWidgetItem(items.at(i).getGenre()));
+        targetTable->setItem(i, 4, new QTableWidgetItem(QString::number(items.at(i).getYear())));
+        targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(items.at(i).getTrack())));
     }
 }
 
@@ -418,42 +410,28 @@ void MusicSyncTool::addToErrorList(const QString& file, const LoadErrorType erro
  * @param Path type(local or remote)
  */
 QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
-    if (const QString selectedPath = path == PathType::LOCAL ? localPath : remotePath; selectedPath == "") {
+    if (const QString selectedPath = path == PathType::LOCAL ? local.getPath() : remote.getPath(); selectedPath == "") {
         qWarning() << "[WARN] No path selected";
         popError(PET::NPS);
         return {};
     }
     ShowDupe dp;
-    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    query.exec("SELECT title, artist, album, year, fileName FROM musicInfo ORDER BY title");
+    MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    QList<QueryItem> items = ds.getAll({QueryRows::ALL});
+    const QueryItem* slow = &items.first();
+    const QueryItem* fast = nullptr;
     QStringList dupeList;
-    query.next();
-    QStringList slowList;
-    QStringList fastList;
-    for (int i = 0; i < 4; i++) {
-        slowList.append(query.value(i).toString());
-    }
-    QString slowFileName = query.value(4).toString();
-    while (query.next()) {
-        for (int i = 0; i < 4; i++) {
-            fastList.append(query.value(i).toString());
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        fast = &*it;
+        if (*slow == *fast) {
+            dupeList.append(slow->getFileName());
+            dupeList.append(fast->getFileName());
         }
-        QString fastFileName = query.value(4).toString();
-        for (int i = 0, dupeCount = 0; i < 4; i++) {
-            if (slowList.at(i) == fastList.at(i)) {
-                dupeCount++;
-            }
-            if (dupeCount >= 3 && slowList.at(0) == fastList.at(0)) {
-                dupeList.append(slowFileName);
-                dupeList.append(fastFileName);
-            }
-        }
-        slowList = fastList;
-        slowFileName = fastFileName;
+        slow = fast;
     }
     for (const auto& i : dupeList) {
         qDebug() << "[INFO] Found duplicated music named" << i << "at"
-                 << (path == PathType::LOCAL ? localPath : remotePath);
+                 << (path == PathType::LOCAL ? local.getPath() : remote.getPath());
         dp.add(i);
     }
     dp.exec();
@@ -478,27 +456,25 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
     }
     QStringList titleList;
     QStringList artistList;
+    QStringList albumList;
     for (const int& i : selectedRows) {
         titleList.append(table->item(i, 0)->text());
         artistList.append(table->item(i, 1)->text());
+        albumList.append(table->item(i, 2)->text());
     }
     if (selectedRows.empty()) {
         return {};
     }
-    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
-    auto fileList = QStringList();
-    for (const int& i : selectedRows) {
-        QString title = table->item(i, 0)->text();
-        QString artist = table->item(i, 1)->text();
-        query.prepare("SELECT fileName, ruleHit FROM musicInfo WHERE title = :title AND artist = :artist");
-        query.bindValue(":title", title);
-        query.bindValue(":artist", artist);
-        query.exec();
-        if (query.next()) {
-            fileList.append(query.value(0).toString() + ":" + query.value(1).toString());
-        }
+    MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    QList<QueryItem> items;
+    QueryItem item;
+    for (int i = 0; i < titleList.count(); i++) {
+        item.setTitle(titleList.at(i));
+        item.setArtist(artistList.at(i));
+        item.setAlbum(albumList.at(i));
+        items.append(item);
     }
-    return fileList;
+    return ds.getFileNameByMD(items);
 }
 
 /*
@@ -603,19 +579,19 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
     const QString tempTag = this->entity.favoriteTag;
     this->entity = entityParam;
     if (tempSort != entityParam.sortBy || tempOrder != entityParam.orderBy) {
-        if (localPath != "") {
+        if (local.getPath() != "") {
             getMusic(PathType::LOCAL, 1);
         }
-        if (remotePath != "") {
+        if (remote.getPath() != "") {
             getMusic(PathType::REMOTE, 1);
         }
     }
     if (tempRules != entity.rules || entityParam.favoriteTag != tempTag) {
         cleanLog();
-        if (localPath != "") {
+        if (local.getPath() != "") {
             getMusic(PathType::LOCAL, 1);
         }
-        if (remotePath != "") {
+        if (remote.getPath() != "") {
             getMusic(PathType::REMOTE, 1);
         }
     }
@@ -787,7 +763,7 @@ QString MusicSyncTool::getLanguage() const {
  */
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
     openFolder(PathType::REMOTE);
-    if (remotePath == "") {
+    if (remote.getPath() == "") {
         return;
     }
     getMusic(PathType::REMOTE, 1);
@@ -800,7 +776,7 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
  */
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
     openFolder(PathType::LOCAL);
-    if (localPath == "") {
+    if (local.getPath() == "") {
         return;
     }
     getMusic(PathType::LOCAL, 1);
@@ -826,7 +802,7 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
  * @brief Slots for copy to remote action
  */
 void MusicSyncTool::on_copyToRemote_clicked() {
-    if (localPath == "") {
+    if (local.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -835,14 +811,14 @@ void MusicSyncTool::on_copyToRemote_clicked() {
         popError(PET::NFS);
         return;
     }
-    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, localPath, fileList, remotePath);
+    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, local.getPath(), fileList, remote.getPath());
 }
 
 /*
  * @brief Slots for copy to local action
  */
 void MusicSyncTool::on_copyToLocal_clicked() {
-    if (remotePath == "") {
+    if (remote.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -851,7 +827,7 @@ void MusicSyncTool::on_copyToLocal_clicked() {
         popError(PET::NFS);
         return;
     }
-    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remotePath, fileList, localPath);
+    QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remote.getPath(), fileList, local.getPath());
 }
 
 /*
@@ -987,7 +963,7 @@ void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(PathType:
  * @brief Slots for last page switch(local)
  */
 void MusicSyncTool::on_lastPageLocal_clicked() {
-    if (localPath == "") {
+    if (local.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -1006,7 +982,7 @@ void MusicSyncTool::on_lastPageLocal_clicked() {
  * @brief Slots for next page switch(local)
  */
 void MusicSyncTool::on_nextPageLocal_clicked() {
-    if (localPath == "") {
+    if (local.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -1025,7 +1001,7 @@ void MusicSyncTool::on_nextPageLocal_clicked() {
  * @brief Slots for last page switch(remote)
  */
 void MusicSyncTool::on_lastPageRemote_clicked() {
-    if (remotePath == "") {
+    if (remote.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -1044,7 +1020,7 @@ void MusicSyncTool::on_lastPageRemote_clicked() {
  * @brief Slots for next page switch(remote)
  */
 void MusicSyncTool::on_nextPageRemote_clicked() {
-    if (remotePath == "") {
+    if (remote.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -1086,10 +1062,10 @@ void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
 void MusicSyncTool::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
 
 void MusicSyncTool::on_copyFinished(OperationType op) const {
-    if (localPath != "") {
+    if (local.getPath() != "") {
         setAvailableSpace(PathType::LOCAL);
     }
-    if (remotePath != "") {
+    if (remote.getPath() != "") {
         setAvailableSpace(PathType::REMOTE);
     }
 }
@@ -1110,7 +1086,7 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
     QList<QueryItem> file;
     file.append(*item);
     nowPlaying = ds.getFileNameByMD(file).at(0);
-    const QString filePath = (path == PathType::LOCAL ? localPath : remotePath) + "/" + nowPlaying;
+    const QString filePath = (path == PathType::LOCAL ? local.getPath() : remote.getPath()) + "/" + nowPlaying;
     player->setNowPlaying(filePath);
     TagLib::FileRef f;
 #if defined(_WIN64) or defined(_WIN32)
@@ -1136,11 +1112,11 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
  * @param Page number
  */
 void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short page) {
-    if (path == PathType::LOCAL && localPath == "") {
+    if (path == PathType::LOCAL && local.getPath() == "") {
         popError(PET::NPS);
         return;
     }
-    if (path == PathType::REMOTE && remotePath == "") {
+    if (path == PathType::REMOTE && remote.getPath() == "") {
         popError(PET::NPS);
         return;
     }
@@ -1150,7 +1126,6 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
     }
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
     const auto fileList = ds.getFavorite(page, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
-    QSqlQuery& query = path == PathType::LOCAL ? queryLocal : queryRemote;
     const qsizetype totalSize = fileList.size();
     totalPage[(path == PathType::LOCAL ? 0 : 1)] = static_cast<short>(totalSize / PAGESIZE) + 1;
     const qsizetype lastPageSize = totalSize % PAGESIZE;
@@ -1168,7 +1143,6 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
     }
     targetTable->setRowCount(static_cast<int>(rowSize));
     favoriteOnly[(path == PathType::LOCAL ? 0 : 1)] = true;
-    emit total(totalSize);
     for (int i = (page - 1) * PAGESIZE; i < rowSize; i++) {
         targetTable->setItem(i, 0, new QTableWidgetItem(fileList.at(i).getTitle()));
         targetTable->setItem(i, 1, new QTableWidgetItem(fileList.at(i).getArtist()));
@@ -1176,21 +1150,24 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
         targetTable->setItem(i, 3, new QTableWidgetItem(fileList.at(i).getGenre()));
         targetTable->setItem(i, 4, new QTableWidgetItem(fileList.at(i).getYear()));
         targetTable->setItem(i, 5, new QTableWidgetItem(fileList.at(i).getTrack()));
-        emit current(i);
     }
-    emit finished();
 }
 
 /*
  * @brief Connect slots for application
  */
 void MusicSyncTool::connectSlots() const {
-    connect(this, &MusicSyncTool::total, loading, &LoadingPage::setTotal);
-    connect(this, &MusicSyncTool::current, loading, &LoadingPage::setProgress);
-    connect(this, &MusicSyncTool::started, loading, &LoadingPage::showPage);
-    connect(this, &MusicSyncTool::finished, loading, &LoadingPage::stopPage);
+    connect(&local, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
+    connect(&remote, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
+    connect(&local, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
+    connect(&remote, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
+    connect(&local, &MSTDataSource::loadStarted, loading, &LoadingPage::showPage);
+    connect(&remote, &MSTDataSource::loadStarted, loading, &LoadingPage::showPage);
+    connect(&local, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
+    connect(&remote, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
     connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::showOperationResult);
-    connect(this, &MusicSyncTool::loadFinished, this, &MusicSyncTool::showOperationResult);
+    connect(&local, QOverload<OperationType>::of(&MSTDataSource::loadFinished), this, &MusicSyncTool::showOperationResult);
+    connect(&remote, QOverload<OperationType>::of(&MSTDataSource::loadFinished), this, &MusicSyncTool::showOperationResult);
     connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged, this, &MusicSyncTool::setSliderPosition);
     connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
     connect(this, &MusicSyncTool::addToErrorListConcurrent, this,
@@ -1203,7 +1180,7 @@ void MusicSyncTool::connectSlots() const {
  * @param Path type(local or remote)
  */
 void MusicSyncTool::setAvailableSpace(const PathType path) const {
-    const QStorageInfo storage(path == PathType::LOCAL ? localPath : remotePath);
+    const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
     const QString textBuilder = tr("可用空间：") +
         QString::number(static_cast<double>(storage.bytesAvailable()) / 1024.0 / 1024.0 / 1024.0, 10, 2) + "GB" +
         " / " + QString::number(static_cast<double>(storage.bytesTotal()) / 1024.0 / 1024.0 / 1024.0, 10, 2) + "GB";

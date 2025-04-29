@@ -12,7 +12,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     #[[ Replace this with your own Qt installation path
         If you are using distros with Qt6 library packages available(like openSUSE),
         Just install the package and ignore this set statement]]
-    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.2/gcc_64")
+    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.3/gcc_64")
 
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
@@ -39,6 +39,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Widgets/Settings/Settings.ui
             src/Widgets/ShowDupe/ShowDupe.cpp
             src/Widgets/ShowDupe/ShowDupe.ui
+            src/main.cpp
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

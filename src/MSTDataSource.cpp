@@ -1,6 +1,8 @@
 #include "MSTDataSource.h"
 
 #include <QFile>
+#include <QSqlError>
+#include <QRegularExpression>
 #include <taglib/fileref.h>
 #include <taglib/tpropertymap.h>
 #include "Logger.h"
@@ -71,13 +73,17 @@ void MSTDataSource::bindValue(const QString& key, const T& value) {
 void MSTDataSource::execQuery() { query.exec(); }
 
 void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog) {
+    emit loadStarted();
     prepareStatement("SELECT fileName FROM musicInfo");
     execQuery();
     QStringList fileName;
     while (query.next()) {
         fileName.append(query.value(0).toString());
     }
+    emit totalSize(fileName.count());
+    int i = 0;
     for (auto& file : fileName) {
+        emit currentProgress(i);
         if (QFile(path + "/" + file).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
             continue;
         }
@@ -94,10 +100,13 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog
         bindValue(":artist", QString::fromUtf8(f.tag()->artist().to8Bit(true)));
         bindValue(":album", QString::fromUtf8(f.tag()->album().to8Bit(true)));
         execQuery();
+        i++;
     }
+    emit loadFinished();
 }
 
 void MSTDataSource::setRuleHit(const QList<LyricIgnoreRule>& rules, const QDateTime& timeFromLog) {
+    emit loadStarted();
     QList<QueryItem> items = getAll({QueryRows::ALL});
     for (auto& item : items) {
         if (QFile(path + "/" + item.getFileName()).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
@@ -168,7 +177,7 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
         rowMap.insert(i, rows[i]);
     }
     sql.chop(2); // Remove the last comma and space
-    sql += " FROM musicInfo";
+    sql += " FROM musicInfo ORDER BY title ASC";
     prepareStatement(sql);
     execQuery();
     QList<QueryItem> items;
@@ -351,6 +360,12 @@ QStringList MSTDataSource::getFileNameByMD(const QList<QueryItem>& items) {
 
 QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const SortByEnum sortBy,
                                                 const OrderByEnum orderBy) {
+    emit loadStarted();
+    prepareStatement("SELECT COUNT(*) FROM musicInfo WHERE favorite = 1 LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize));
+    execQuery();
+    query.next();
+    int totalSize = query.value(0).toInt();
+    emit totalSize(totalSize);
     QString sql = "SELECT title, artist, album, genre, year, track FROM musicInfo WHERE favorite = 1 ORDER BY";
     switch (sortBy) {
     case SortByEnum::TITLE:
@@ -377,7 +392,9 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
     query.next();
     QList<QueryItem> items;
     QueryItem item;
+    int i = 0;
     while (query.next()) {
+        emit currentProgress(i);
         item.setTitle(query.value(0).toString());
         item.setArtist(query.value(1).toString());
         item.setAlbum(query.value(2).toString());
@@ -385,7 +402,9 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
         item.setYear(query.value(4).toInt());
         item.setTrack(query.value(5).toInt());
         items.append(item);
+        i++;
     }
+    emit loadFinished();
     return items;
 }
 

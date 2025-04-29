@@ -49,12 +49,6 @@ class MusicSyncTool final : public QMainWindow {
 
 	Ui::MusicSyncToolClass ui;
 	QTranslator* translator;
-	QString localPath;
-	QString remotePath;
-	QSqlDatabase dbLocal;
-	QSqlDatabase dbRemote;
-	QSqlQuery queryLocal;
-	QSqlQuery queryRemote;
 	MSTDataSource local;
 	MSTDataSource remote;
 	shared_ptr<MSTMediaPlayer> player;

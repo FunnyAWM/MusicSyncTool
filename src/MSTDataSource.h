@@ -1,11 +1,7 @@
 #pragma once
 
-#include <QRegularExpression>
 #include <QDateTime>
-#include <QSqlDatabase>
-#include <QSqlError>
 #include <QSqlQuery>
-#include <QSqlRecord>
 #include <QString>
 
 #include "LyricIgnoreRule.h"
