@@ -364,8 +364,8 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
     prepareStatement("SELECT COUNT(*) FROM musicInfo WHERE favorite = 1 LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize));
     execQuery();
     query.next();
-    int totalSize = query.value(0).toInt();
-    emit totalSize(totalSize);
+    const int size = query.value(0).toInt();
+    emit totalSize(size);
     QString sql = "SELECT title, artist, album, genre, year, track FROM musicInfo WHERE favorite = 1 ORDER BY";
     switch (sortBy) {
     case SortByEnum::TITLE:

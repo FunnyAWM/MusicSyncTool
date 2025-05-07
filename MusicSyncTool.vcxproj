@@ -149,6 +149,10 @@
     <QtTranslation>
       <BuildAction>lupdate_lrelease</BuildAction>
     </QtTranslation>
+    <ClCompile>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <CallingConvention>Cdecl</CallingConvention>
+    </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>true</VcpkgEnabled>
@@ -210,10 +214,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Widgets\AboutPage\AboutPage.h" />
-    <ClInclude Include="src\Widgets\OperationResult\OperationResult.h" />
-    <ClInclude Include="src\Widgets\Settings\Settings.h" />
-    <ClInclude Include="src\Widgets\ShowDupe\ShowDupe.h" />
+    <QtMoc Include="src\Widgets\AboutPage\AboutPage.h" />
+    <QtMoc Include="src\Widgets\OperationResult\OperationResult.h" />
+    <QtMoc Include="src\Widgets\Settings\Settings.h" />
+    <QtMoc Include="src\Widgets\ShowDupe\ShowDupe.h" />
     <QtMoc Include="src\Widgets\MusicSyncTool\MusicSyncTool.h" />
     <QtMoc Include="src\Widgets\LoadingPage\LoadingPage.h" />
     <QtMoc Include="src\Widgets\AddRuleWidget\AddRuleWidget.h" />

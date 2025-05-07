@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #if defined(_WIN32) or defined(_WIN64)
 #include <Windows.h>
-#else
+#elif defined(__linux)
 #include <QString>
 #include <fcntl.h>
 #include <sys/stat.h>
