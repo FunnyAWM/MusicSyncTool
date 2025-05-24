@@ -11,14 +11,14 @@ public:
 	~MSTMediaPlayer();
 	void setNowPlaying(const QString&);
     QMediaPlayer* getMediaPlayer();
-    qint64 getPosition() const;
-    qint64 getDuration() const;
+    [[nodiscard]] qint64 getPosition() const;
+    [[nodiscard]] qint64 getDuration() const;
 	void play();
 	void pause();
     void stop();
 	void setPosition(qint64);
 	void setVolume(float);
-    float getVolume() const;
-    QString getNowPlaying() const;
+    [[nodiscard]] float getVolume() const;
+    [[nodiscard]] QString getNowPlaying() const;
 	[[nodiscard]] bool isPlaying() const;
 };
