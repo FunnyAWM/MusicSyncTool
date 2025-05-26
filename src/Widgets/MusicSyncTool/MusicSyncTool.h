@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <QAudioOutput>
+#include <QAtomicInt>
+#include <QAtomicPointer>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
@@ -19,8 +21,9 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QStorageInfo>
 #include <QString>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 #include <QThread>
 #include <QThreadPool>
 #include <QTranslator>
@@ -47,7 +50,6 @@ using std::shared_ptr;
 
 class MusicSyncTool final : public QMainWindow {
 	Q_OBJECT
-
 	Ui::MusicSyncToolClass ui;
 	QTranslator* translator;
 	MSTDataSource local;
@@ -60,10 +62,9 @@ class MusicSyncTool final : public QMainWindow {
 	unsigned short currentPage[2] = {1, 1};
 	unsigned short totalPage[2]{};
 	bool favoriteOnly[2] = {false, false};
+    QAtomicPointer<bool> copyStats = new bool(false);
 	const short PAGESIZE = 200;
 	set entity;
-	shared_ptr<QMediaPlayer> mediaPlayer;
-	shared_ptr<QAudioOutput> audioOutput;
 	QString nowPlaying;
 	QStringList errorList;
 	const QStringList supportedFormat = {"mp3", "flac", "ape", "wav", "wma"};

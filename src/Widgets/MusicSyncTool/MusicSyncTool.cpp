@@ -38,6 +38,8 @@ MusicSyncTool::~MusicSyncTool() {
     if (remote.isOpen()) {
         remote.closeDB();
     }
+    delete copyStats;
+    delete player;
     delete loading;
 }
 
