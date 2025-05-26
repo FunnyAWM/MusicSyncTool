@@ -35,6 +35,7 @@
 #include "../Settings/Settings.h"
 #include "../ShowDupe/ShowDupe.h"
 #include "ui_MusicSyncTool.h"
+#include "src/MSTFileManager.h"
 
 using PROPERTIES::FileErrorType;
 using PROPERTIES::LoadErrorType;
@@ -51,6 +52,8 @@ class MusicSyncTool final : public QMainWindow {
 	QTranslator* translator;
 	MSTDataSource local;
 	MSTDataSource remote;
+	shared_ptr<MSTFileManager> localManager;
+	shared_ptr<MSTFileManager> remoteManager;
 	shared_ptr<MSTMediaPlayer> player;
 	LoadingPage* loading = new LoadingPage();
 	// 0: local, 1: remote
@@ -85,7 +88,6 @@ public:
 	void initUI();
 	[[nodiscard]] bool isFormatSupported(const QString&) const;
 	static bool isFull(const QString&, const QString&);
-	static bool isRuleHit(const LyricIgnoreRule&, const TagLib::Tag*);
 	void loadLanguage();
 	void loadSettings();
 	static void loadDefaultSettings();

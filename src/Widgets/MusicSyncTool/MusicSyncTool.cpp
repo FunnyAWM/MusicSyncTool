@@ -214,11 +214,13 @@ void MusicSyncTool::openFolder(const PathType path) {
     (path == PathType::LOCAL ? local.getPath() : remote.getPath()) = dir;
     if (path == PathType::LOCAL) {
         local.setPath(dir);
+        localManager = std::make_shared<MSTFileManager>(MSTFileManager(dir));
         if (!local.openDB()) {
             exit(EXIT_FAILURE);
         }
     } else {
         remote.setPath(dir);
+		remoteManager = std::make_shared<MSTFileManager>(MSTFileManager(dir));
         if (!remote.openDB()) {
             exit(EXIT_FAILURE);
         }
@@ -246,7 +248,8 @@ void MusicSyncTool::getMusic(PathType path, unsigned short page) {
  */
 void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short page) {
     const clock_t start = clock();
-    emit started();
+	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    emit ds.loadStarted();
     favoriteOnly[path == PathType::LOCAL ? 0 : 1] = false;
     QStringList pathForLog = (path == PathType::LOCAL ? local.getPath() : remote.getPath()).split("/");
     QString logFileNameBuilder = "lastScan";
@@ -262,7 +265,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
     QDateTime dateTime = getDateFromLog(logFileNameBuilder);
     const QDir dir(path == PathType::LOCAL ? local.getPath() : remote.getPath());
-    MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
+    
     ds.initTable();
     QStringList newFileList = dir.entryList(QDir::Files);
     for (const QString& file : newFileList) {
@@ -342,7 +345,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
                   QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
     dateTime = QDateTime::currentDateTime();
     writeLog(logFileNameBuilder, dateTime);
-    emit finished();
+    emit ds.loadFinished();
 }
 
 /*
@@ -417,7 +420,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
     }
     ShowDupe dp;
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
-    QList<QueryItem> items = ds.getAll({QueryRows::ALL});
+    QList<QueryItem> items = ds.getAll();
     const QueryItem* slow = &items.first();
     const QueryItem* fast = nullptr;
     QStringList dupeList;
@@ -1180,10 +1183,9 @@ void MusicSyncTool::connectSlots() const {
  * @param Path type(local or remote)
  */
 void MusicSyncTool::setAvailableSpace(const PathType path) const {
+	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
     const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
-    const QString textBuilder = tr("可用空间：") +
-        QString::number(static_cast<double>(storage.bytesAvailable()) / 1024.0 / 1024.0 / 1024.0, 10, 2) + "GB" +
-        " / " + QString::number(static_cast<double>(storage.bytesTotal()) / 1024.0 / 1024.0 / 1024.0, 10, 2) + "GB";
+    const QString textBuilder = tr("可用空间：") + manager->getSpaceInfo();
     (path == PathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(textBuilder);
 }
 
@@ -1212,24 +1214,6 @@ bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
         return true;
     }
     return false;
-}
-
-bool MusicSyncTool::isRuleHit(const LyricIgnoreRule& singleton, const TagLib::Tag* target) {
-    QString fieldStr;
-    switch (singleton.getRuleField()) {
-    case RuleField::TITLE:
-        fieldStr = QString::fromStdString(target->title().to8Bit(true));
-        break;
-    case RuleField::ARTIST:
-        fieldStr = QString::fromStdString(target->artist().to8Bit(true));
-        break;
-    case RuleField::ALBUM:
-        fieldStr = QString::fromStdString(target->album().to8Bit(true));
-        break;
-    }
-    const QRegularExpression regExp(singleton.getRuleName());
-    const bool hasMatch = regExp.match(fieldStr).hasMatch();
-    return (singleton.getRuleType() == RuleType::INCLUDES) ? hasMatch : !hasMatch;
 }
 
 bool MusicSyncTool::isFormatSupported(const QString& fileName) const {

@@ -223,6 +223,7 @@
     <QtMoc Include="src\Widgets\AddRuleWidget\AddRuleWidget.h" />
     <QtMoc Include="src\MSTDataSource.h" />
     <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\MSTFileManager.h" />
     <ClInclude Include="src\MSTMediaPlayer.h" />
     <ClInclude Include="src\QueryItem.h" />
     <ClInclude Include="src\SingleInstance.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="src\LyricIgnoreRule.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MSTDataSource.cpp" />
+    <ClCompile Include="src\MSTFileManager.cpp" />
     <ClCompile Include="src\MSTMediaPlayer.cpp" />
     <ClCompile Include="src\QueryItem.cpp" />
     <ClCompile Include="src\Widgets\AboutPage\AboutPage.cpp" />

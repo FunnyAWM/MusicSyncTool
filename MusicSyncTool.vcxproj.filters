@@ -38,6 +38,18 @@
     <QtMoc Include="src\Widgets\MusicSyncTool\MusicSyncTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\Widgets\AboutPage\AboutPage.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\OperationResult\OperationResult.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\Settings\Settings.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\ShowDupe\ShowDupe.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MusicProperties.h">
@@ -58,16 +70,7 @@
     <ClInclude Include="src\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Widgets\AboutPage\AboutPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Widgets\OperationResult\OperationResult.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Widgets\Settings\Settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Widgets\ShowDupe\ShowDupe.h">
+    <ClInclude Include="src\MSTFileManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -110,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="src\Widgets\ShowDupe\ShowDupe.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MSTFileManager.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

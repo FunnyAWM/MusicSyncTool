@@ -107,7 +107,7 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog
 
 void MSTDataSource::setRuleHit(const QList<LyricIgnoreRule>& rules, const QDateTime& timeFromLog) {
     emit loadStarted();
-    QList<QueryItem> items = getAll({QueryRows::ALL});
+    QList<QueryItem> items = getAll();
     for (auto& item : items) {
         if (QFile(path + "/" + item.getFileName()).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
             continue;

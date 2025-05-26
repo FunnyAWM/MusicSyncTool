@@ -37,7 +37,7 @@ public:
     void execQuery();
     void setFavorite(const QString&, const QDateTime&);
     void setRuleHit(const QList<LyricIgnoreRule>&, const QDateTime&);
-    QList<QueryItem> getAll(const QVector<QueryRows>&);
+    QList<QueryItem> getAll(const QVector<QueryRows>& rows = {QueryRows::ALL});
     QStringList addMusic(const QStringList&);
     [[nodiscard]] bool addMusic(const QString&);
     QList<QueryItem> searchMusic(const QString&);
