@@ -38,7 +38,7 @@
 #include "../Settings/Settings.h"
 #include "../ShowDupe/ShowDupe.h"
 #include "ui_MusicSyncTool.h"
-#include "src/MSTFileManager.h"
+#include "../../MSTFileManager.h"
 
 using PROPERTIES::FileErrorType;
 using PROPERTIES::LoadErrorType;

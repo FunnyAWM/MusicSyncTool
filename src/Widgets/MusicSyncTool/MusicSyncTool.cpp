@@ -1,7 +1,6 @@
 ﻿// ReSharper disable CppClangTidyConcurrencyMtUnsafe
 #pragma warning(disable : 6031)
 #include "MusicSyncTool.h"
-
 #include <algorithm>
 #include <iostream>
 #include <taglib/fileref.h>

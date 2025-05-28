@@ -39,6 +39,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Widgets/Settings/Settings.ui
             src/Widgets/ShowDupe/ShowDupe.cpp
             src/Widgets/ShowDupe/ShowDupe.ui
+            src/MSTFileManager.cpp
             src/main.cpp
     )
 
