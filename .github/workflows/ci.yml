@@ -1,0 +1,272 @@
+name: MusicSyncTool CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Linux 构建和测试
+  linux-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        qt-version: [6.5.0, 6.7.0]
+        build-type: [Debug, Release]
+    
+    steps:
+    - name: Checkout 代码
+      uses: actions/checkout@v4
+    
+    - name: 安装系统依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          libtag1-dev \
+          libgl1-mesa-dev \
+          libxkbcommon-x11-0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-randr0 \
+          libxcb-render-util0 \
+          libxcb-xinerama0 \
+          libxcb-xinput0 \
+          libxcb-xfixes0
+    
+    - name: 安装 Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ matrix.qt-version }}
+        modules: 'qtmultimedia qt5compat'
+        cache: true
+    
+    - name: 配置 CMake 缓存
+      uses: actions/cache@v4
+      with:
+        path: |
+          build-test-linux
+          ~/.cache/cmake
+        key: ${{ runner.os }}-cmake-${{ matrix.qt-version }}-${{ matrix.build-type }}-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-${{ matrix.qt-version }}-${{ matrix.build-type }}-
+          ${{ runner.os }}-cmake-${{ matrix.qt-version }}-
+          ${{ runner.os }}-cmake-
+    
+    - name: 构建单元测试
+      run: |
+        mkdir -p build-test-linux
+        cd build-test-linux
+        cmake ../UnitTest \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DCMAKE_PREFIX_PATH=$Qt6_DIR
+        make -j$(nproc)
+    
+    - name: 运行单元测试
+      run: |
+        cd build-test-linux
+        ctest --output-on-failure --verbose
+    
+    - name: 上传测试结果
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-results-linux-qt${{ matrix.qt-version }}-${{ matrix.build-type }}
+        path: |
+          build-test-linux/Testing/
+          build-test-linux/**/*.log
+  
+  # macOS 构建和测试
+  macos-test:
+    runs-on: macos-latest
+    
+    strategy:
+      matrix:
+        qt-version: [6.5.0, 6.7.0]
+    
+    steps:
+    - name: Checkout 代码
+      uses: actions/checkout@v4
+    
+    - name: 安装系统依赖
+      run: |
+        brew update
+        brew install taglib cmake pkg-config
+    
+    - name: 安装 Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ matrix.qt-version }}
+        modules: 'qtmultimedia qt5compat'
+        cache: true
+    
+    - name: 构建单元测试
+      run: |
+        mkdir -p build-test-macos
+        cd build-test-macos
+        cmake ../UnitTest \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH=$Qt6_DIR
+        make -j$(sysctl -n hw.ncpu)
+    
+    - name: 运行单元测试
+      run: |
+        cd build-test-macos
+        ctest --output-on-failure --verbose
+    
+    - name: 上传测试结果
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-results-macos-qt${{ matrix.qt-version }}
+        path: |
+          build-test-macos/Testing/
+          build-test-macos/**/*.log
+
+  # Windows 构建（仅验证编译，使用 MSVC）
+  windows-build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        qt-version: [6.5.0, 6.7.0]
+    
+    steps:
+    - name: Checkout 代码
+      uses: actions/checkout@v4
+    
+    - name: 安装 Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ matrix.qt-version }}
+        arch: win64_msvc2019_64
+        modules: 'qtmultimedia qt5compat'
+        cache: true
+    
+    - name: 安装 vcpkg 和依赖
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        .\vcpkg\bootstrap-vcpkg.bat
+        .\vcpkg\vcpkg.exe install taglib:x64-windows
+    
+    - name: 配置 MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+    
+    - name: 构建项目（仅验证编译）
+      run: |
+        mkdir build-windows
+        cd build-windows
+        cmake .. -G "Visual Studio 17 2022" -A x64 `
+          -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" `
+          -DCMAKE_TOOLCHAIN_FILE="..\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        cmake --build . --config Release
+    
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build-qt${{ matrix.qt-version }}
+        path: |
+          build-windows/Release/
+          !build-windows/**/*.pdb
+
+  # 代码质量检查
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout 代码
+      uses: actions/checkout@v4
+    
+    - name: 安装 clang-tidy 和 cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-tidy cppcheck
+    
+    - name: 运行 cppcheck
+      run: |
+        cppcheck --enable=all --xml --xml-version=2 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          src/ 2> cppcheck-report.xml || true
+    
+    - name: 上传代码质量报告
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: code-quality-reports
+        path: |
+          cppcheck-report.xml
+
+  # 测试覆盖率报告
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout 代码
+      uses: actions/checkout@v4
+    
+    - name: 安装依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          libtag1-dev \
+          lcov \
+          gcovr
+    
+    - name: 安装 Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 6.7.0
+        modules: 'qtmultimedia qt5compat'
+        cache: true
+    
+    - name: 构建带覆盖率的测试
+      run: |
+        mkdir -p build-coverage
+        cd build-coverage
+        cmake ../UnitTest \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+          -DCMAKE_EXE_LINKER_FLAGS="--coverage" \
+          -DCMAKE_PREFIX_PATH=$Qt6_DIR
+        make -j$(nproc)
+    
+    - name: 运行测试并生成覆盖率
+      run: |
+        cd build-coverage
+        ctest --output-on-failure
+        
+        # 生成覆盖率报告
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --remove coverage.info '**/build-coverage/**' --output-file coverage.info
+        lcov --remove coverage.info '**/UnitTest/**' --output-file coverage.info
+        lcov --remove coverage.info '**/Qt6/**' --output-file coverage.info
+        genhtml coverage.info --output-directory coverage-html
+    
+    - name: 上传覆盖率报告
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          build-coverage/coverage-html/
+          build-coverage/coverage.info
+    
+    - name: 上传到 Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: build-coverage/coverage.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false

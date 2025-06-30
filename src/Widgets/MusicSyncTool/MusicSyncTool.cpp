@@ -1,4 +1,15 @@
-﻿// ReSharper disable CppClangTidyConcurrencyMtUnsafe
+﻿/**
+ * @file MusicSyncTool.cpp
+ * @brief 音乐同步工具主窗口类的实现文件
+ * @details 实现音乐文件扫描、管理、播放和同步的核心功能，包括用户界面初始化、
+ *          数据库操作、文件处理、多线程扫描、媒体播放控制等功能
+ * @author FunnyAWM
+ * @version 2.3.0
+ * @date 2024
+ * @note 使用Qt框架和TagLib库进行音频文件元数据处理
+ */
+
+// ReSharper disable CppClangTidyConcurrencyMtUnsafe
 #pragma warning(disable : 6031)
 #include "MusicSyncTool.h"
 #include <algorithm>
@@ -13,8 +24,11 @@
 #include <unistd.h>
 #endif
 
-/*
- * @brief Default constructor
+/**
+ * @brief 音乐同步工具主窗口构造函数
+ * @param parent 父窗口部件指针，默认为nullptr
+ * @details 初始化音乐同步工具主窗口，包括数据库连接、设置加载、
+ *          用户界面初始化、语言加载、媒体播放器初始化和信号槽连接
  */
 MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init)
     QMainWindow(parent), translator(new QTranslator(this)), player(new MSTMediaPlayer(this)) {
@@ -27,8 +41,10 @@ MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init
     setMediaWidget(PlayState::STOPPED);
 }
 
-/*
- * @brief Destructor
+/**
+ * @brief 音乐同步工具主窗口析构函数
+ * @details 清理资源，包括关闭数据库连接、删除动态分配的对象，
+ *          确保程序正常退出时没有内存泄漏
  */
 MusicSyncTool::~MusicSyncTool() {
     if (local.isOpen()) {
@@ -38,20 +54,29 @@ MusicSyncTool::~MusicSyncTool() {
         remote.closeDB();
     }
     delete copyStats;
-    delete player;
+    player.reset();
     delete loading;
 }
 
-/*
- * @brief Initialize database
+/**
+ * @brief 初始化数据库连接
+ * @details 为本地和远程数据源设置不同的连接名称，用于区分不同的数据库实例
+ *          本地数据库用于存储本地路径的音乐文件信息，远程数据库用于存储远程路径的音乐文件信息
  */
 void MusicSyncTool::initDatabase() {
     local.setConnectionName("local");
     remote.setConnectionName("remote");
 }
 
-/*
- * @brief Load settings from settings file
+/**
+ * @brief 从设置文件加载用户配置
+ * @details 读取settings.json文件并解析其中的配置信息，包括：
+ *          - 是否忽略歌词
+ *          - 排序方式和排序顺序
+ *          - 界面语言设置
+ *          - 喜爱标签设置
+ *          - 歌词忽略规则列表
+ *          如果文件不存在或格式错误，将加载默认设置
  */
 void MusicSyncTool::loadSettings() {
     QFile file("settings.json");
@@ -86,8 +111,15 @@ void MusicSyncTool::loadSettings() {
     file.close();
 }
 
-/*
- * @brief Load default settings(if settings.json don't exists)
+/**
+ * @brief 加载默认设置（当settings.json文件不存在时）
+ * @details 创建默认的设置文件，包含以下默认值：
+ *          - ignoreLyric: false（不忽略歌词）
+ *          - sortBy: 按标题排序
+ *          - orderBy: 升序排列
+ *          - language: 空字符串（将使用中文作为默认语言）
+ *          - favoriteTag: 空字符串
+ *          - rules: 空的规则数组
  */
 void MusicSyncTool::loadDefaultSettings() {
     QFile file("settings.json");
@@ -103,13 +135,18 @@ void MusicSyncTool::loadDefaultSettings() {
     file.close();
 }
 
-/*
- * @brief Initialize media player module
+/**
+ * @brief 初始化媒体播放器模块
+ * @details 设置媒体播放器的初始音量为50%（0.5），
+ *          为后续的音频播放功能做准备
  */
 void MusicSyncTool::initMediaPlayer() const { player->setVolume(0.5); }
 
-/*
- * @brief Load language file by settings
+/**
+ * @brief 根据设置加载语言文件
+ * @details 读取translations/langinfo.json配置文件，根据用户设置的语言加载相应的翻译文件。
+ *          如果用户未设置语言，默认使用中文。加载翻译文件后，安装翻译器并重新翻译界面文本。
+ *          支持的语言包括中文、英文等多种语言。
  */
 void MusicSyncTool::loadLanguage() {
     QFile file(QApplication::applicationDirPath() + "/translations/langinfo.json");
@@ -125,7 +162,8 @@ void MusicSyncTool::loadLanguage() {
         if (entity.language == "") {
             entity.language = "中文";
         }
-        if (QJsonObject langObj = lang.toObject(); langObj["lang"].toString() == entity.language) {
+        QJsonObject langObj = lang.toObject();
+        if (langObj["lang"].toString() == entity.language) {
             // ReSharper disable once CppNoDiscardExpression
             translator->load("translations/" + langObj["fileName"].toString());
             break;
@@ -135,8 +173,14 @@ void MusicSyncTool::loadLanguage() {
     ui.retranslateUi(this);
 }
 
-/*
- * @brief Initialize UI components
+/**
+ * @brief 初始化用户界面组件
+ * @details 设置主窗口的用户界面，包括：
+ *          - 加载UI布局文件
+ *          - 设置窗口图标
+ *          - 配置表格控件的列宽自适应模式
+ *          - 初始化音量滑块和标签的默认值（50%）
+ *          - 设置播放状态显示文本
  */
 void MusicSyncTool::initUI() {
     ui.setupUi(this);
@@ -148,9 +192,19 @@ void MusicSyncTool::initUI() {
     ui.nowPlaying->setText(tr("播放已结束。"));
 }
 
-/*
- * @brief Pop up error windows according to error type
- * @param Error type
+/**
+ * @brief 根据错误类型弹出错误对话框
+ * @param type 错误类型枚举值
+ * @details 根据不同的错误类型显示相应的错误消息对话框：
+ *          - NOAUDIO: 没有选定音频文件
+ *          - NPS: 没有选定路径
+ *          - NFT: 没有设置喜爱标签
+ *          - NFS: 没有选定文件
+ *          - FIRST: 已经是第一页
+ *          - LAST: 已经是最后一页
+ *          - RUNNING: 程序已在运行
+ *          - NOLANG: 找不到语言配置文件
+ *          - DBERROR: 数据库操作错误
  */
 void MusicSyncTool::popError(const PET type) {
     switch (type) {
@@ -186,9 +240,14 @@ void MusicSyncTool::popError(const PET type) {
     }
 }
 
-/*
- * @brief Set up media player
- * @param Play state
+/**
+ * @brief 根据播放状态设置媒体播放器控件
+ * @param state 播放状态枚举值
+ * @details 根据播放状态更新用户界面的播放控制按钮和显示信息：
+ *          - PLAYING: 设置按钮文本为"暂停"，显示当前播放的歌曲信息
+ *          - PAUSED: 设置按钮文本为"播放"
+ *          - STOPPED: 设置按钮文本为"播放"，显示"播放已结束"
+ *          同时更新音量标签显示当前音量百分比
  */
 void MusicSyncTool::setMediaWidget(const PlayState state) const {
     if (state == PlayState::PLAYING) {
@@ -203,9 +262,14 @@ void MusicSyncTool::setMediaWidget(const PlayState state) const {
     ui.volumeLabel->setText(tr("音量：") + QString::number(ui.volumeSlider->value()) + "%");
 }
 
-/*
- * @brief Pop up open folder dialog and load path to database
- * @param Path type
+/**
+ * @brief 弹出文件夹选择对话框并将路径加载到数据库
+ * @param path 路径类型（本地或远程）
+ * @details 打开文件夹选择对话框让用户选择音乐文件夹路径。
+ *          根据路径类型创建相应的文件管理器和数据库连接：
+ *          - LOCAL: 设置本地路径，创建本地文件管理器，打开本地数据库
+ *          - REMOTE: 设置远程路径，创建远程文件管理器，打开远程数据库
+ *          如果数据库打开失败，程序将退出
  */
 void MusicSyncTool::openFolder(const PathType path) {
     const QString dir = QFileDialog::getExistingDirectory();
@@ -228,10 +292,13 @@ void MusicSyncTool::openFolder(const PathType path) {
     }
 }
 
-/*
- * @brief Get music files from selected path(multi-thread caller)
- * @param Path type
- * @param Page number
+/**
+ * @brief 从选定路径获取音乐文件（多线程调用入口）
+ * @param path 路径类型（本地或远程）
+ * @param page 页码
+ * @details 这是音乐文件扫描的多线程入口函数。检查是否已选择路径，
+ *          然后启动并发线程执行实际的音乐文件扫描和加载操作，
+ *          避免阻塞用户界面
  */
 void MusicSyncTool::getMusic(PathType path, unsigned short page) {
     Logger::Info("Scanning started");
@@ -242,10 +309,18 @@ void MusicSyncTool::getMusic(PathType path, unsigned short page) {
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path, page);
 }
 
-/*
- * @brief Get music files from selected path and load it to tables(main operation, concurrent)
- * @param Path type
- * @param Page number
+/**
+ * @brief 从选定路径获取音乐文件并加载到表格（主要操作，并发执行）
+ * @param path 路径类型（本地或远程）
+ * @param page 页码
+ * @details 核心的音乐文件扫描和处理函数，执行以下操作：
+ *          1. 初始化数据库表和日志文件名
+ *          2. 扫描目录获取新文件列表，过滤不支持的格式
+ *          3. 比较新旧文件列表，识别需要删除和添加的文件
+ *          4. 删除不存在的文件记录，添加新文件到数据库
+ *          5. 设置喜爱标签和规则匹配
+ *          6. 计算分页信息并加载数据到表格控件
+ *          7. 发出进度信号供UI更新
  */
 void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short page) {
     const clock_t start = clock();
@@ -270,7 +345,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     ds.initTable();
     QStringList newFileList = dir.entryList(QDir::Files);
     for (const QString& file : newFileList) {
-        if (!isFormatSupported(file)) { // Remove unsupported files
+        if (!MSTFileManager::isFormatSupported(file)) { // Remove unsupported files
             newFileList.removeOne(file);
         }
     }
@@ -290,7 +365,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
         }
     }
     for (int i = 0; i < newFileList.size(); i++) {
-        if (oldFileList.contains(newFileList.at(i)) || !isFormatSupported(newFileList.at(i))) {
+        if (oldFileList.contains(newFileList.at(i)) || !MSTFileManager::isFormatSupported(newFileList.at(i))) {
             newFileList.removeAt(i);
             i = i - 2 < 0 ? -1 : i - 2;
         }
@@ -306,11 +381,11 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     for (int i = 0; i < newFileList.size(); i++) {
         emit current(i);
         QString file = newFileList.at(i).toUtf8();
-        if (!isFormatSupported(file)) {
+        if (!MSTFileManager::isFormatSupported(file)) {
             continue;
         }
         if (!ds.addMusic(file)) {
-            qWarning() << "[WARN] Error adding music:" << file;
+            Logger::Warn("Error adding music: " + file);
             addToErrorList(file, LoadErrorType::FNS);
         }
     }
@@ -340,7 +415,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
         progress++;
     }
     const clock_t end = clock();
-    qDebug() << "[INFO] Scanning finished in" << static_cast<double>(end - start) / CLOCKS_PER_SEC << "seconds";
+    Logger::Info("Scanning finished in " + QString::number(static_cast<double>(end - start) / CLOCKS_PER_SEC) + " seconds");
     (path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
         ->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
                   QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
@@ -349,10 +424,14 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
     emit ds.loadFinished();
 }
 
-/*
- * @brief Search music files by text
- * @param Path type
- * @param Search text
+/**
+ * @brief 根据文本搜索音乐文件
+ * @param path 路径类型（本地或远程）
+ * @param text 搜索文本
+ * @details 在指定的数据源中搜索包含指定文本的音乐文件。
+ *          如果搜索文本为空，则重新加载所有音乐文件到第一页。
+ *          搜索结果将显示在相应的表格控件中，包括标题、艺术家、
+ *          专辑、流派、年份和音轨号等信息
  */
 void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
     if (text == "") {
@@ -374,10 +453,15 @@ void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
     }
 }
 
-/*
- * @brief Add file to error list
- * @param File name
- * @param Error type
+/**
+ * @brief 将文件添加到错误列表（文件操作错误）
+ * @param file 文件名
+ * @param error 文件错误类型
+ * @details 根据不同的文件操作错误类型生成相应的错误信息并添加到错误列表：
+ *          - DUPLICATE: 文件已存在
+ *          - LNF: 找不到歌词文件
+ *          - DISKFULL: 磁盘已满
+ *          错误信息将包含操作类型和具体的错误原因
  */
 void MusicSyncTool::addToErrorList(const QString& file, const FileErrorType error) {
     switch (error) {
@@ -393,10 +477,14 @@ void MusicSyncTool::addToErrorList(const QString& file, const FileErrorType erro
     }
 }
 
-/*
- * @brief Add file to error list
- * @param File name
- * @param Error type
+/**
+ * @brief 将文件添加到错误列表（加载错误）
+ * @param file 文件名
+ * @param error 加载错误类型
+ * @details 根据不同的文件加载错误类型生成相应的错误信息并添加到错误列表：
+ *          - FNS: 文件不可扫描
+ *          - TAGERR: 标签错误
+ *          错误信息将包含操作类型和具体的错误原因
  */
 void MusicSyncTool::addToErrorList(const QString& file, const LoadErrorType error) {
     switch (error) {
@@ -409,13 +497,18 @@ void MusicSyncTool::addToErrorList(const QString& file, const LoadErrorType erro
     }
 }
 
-/*
- * @brief Get duplicated music and show it
- * @param Path type(local or remote)
+/**
+ * @brief 获取重复的音乐文件并显示
+ * @param path 路径类型（本地或远程）
+ * @return 重复音乐文件的文件名列表
+ * @details 检查指定路径下的音乐文件，识别标题和艺术家相同的重复文件。
+ *          如果未选择路径，将显示错误提示。通过ShowDupe对话框展示
+ *          重复文件列表，让用户选择要删除的重复文件
  */
 QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
-    if (const QString selectedPath = path == PathType::LOCAL ? local.getPath() : remote.getPath(); selectedPath == "") {
-        qWarning() << "[WARN] No path selected";
+    const QString selectedPath = path == PathType::LOCAL ? local.getPath() : remote.getPath();
+    if (selectedPath == "") {
+        Logger::Warn("No path selected");
         popError(PET::NPS);
         return {};
     }
@@ -434,18 +527,21 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
         slow = fast;
     }
     for (const auto& i : dupeList) {
-        qDebug() << "[INFO] Found duplicated music named" << i << "at"
-                 << (path == PathType::LOCAL ? local.getPath() : remote.getPath());
+        Logger::Info("Found duplicated music named " + i + " at " + (path == PathType::LOCAL ? local.getPath() : remote.getPath()));
         dp.add(i);
     }
     dp.exec();
     return dupeList;
 }
 
-/*
- * @brief Get selected music files
- * @param Path type
- * @return Selected music files
+/**
+ * @brief 获取选中的音乐文件
+ * @param path 路径类型（本地或远程）
+ * @return 选中音乐文件的文件名列表
+ * @details 从指定的表格控件中获取用户选中的音乐文件行，
+ *          提取选中行的标题、艺术家和专辑信息，然后通过数据源
+ *          查询对应的文件名列表。如果没有选中任何行或表格为空，
+ *          返回空列表
  */
 QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
     QSet<int> selectedRows;
@@ -481,8 +577,11 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
     return ds.getFileNameByMD(items);
 }
 
-/*
- * @brief Show settings dialog
+/**
+ * @brief 显示设置对话框
+ * @details 创建并显示设置页面对话框，连接确认信号到保存设置的槽函数，
+ *          允许用户修改应用程序的各种配置选项，包括语言、喜爱标签、
+ *          排序方式和歌词忽略规则等
  */
 void MusicSyncTool::showSettings() const {
     const auto page = new Settings();
@@ -490,6 +589,15 @@ void MusicSyncTool::showSettings() const {
     page->show();
 }
 
+/**
+ * @brief 设置音乐文件的喜爱标签
+ * @param path 路径类型（本地或远程）
+ * @param key 喜爱标签的键值
+ * @param dateTime 扫描时间
+ * @details 如果用户在设置中指定了喜爱标签，则在对应的数据源中
+ *          设置包含该标签的音乐文件为喜爱状态。这个操作通常在
+ *          音乐文件扫描完成后执行
+ */
 void MusicSyncTool::setFavorite(const PathType path, const TagLib::String& key,
                                 const QDateTime& dateTime) {
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
@@ -498,6 +606,15 @@ void MusicSyncTool::setFavorite(const PathType path, const TagLib::String& key,
     }
 }
 
+/**
+ * @brief 设置规则命中状态
+ * @param path 路径类型（本地或远程）
+ * @param rules 歌词忽略规则列表
+ * @param dateTime 扫描时间
+ * @details 如果用户设置了歌词忽略规则，则在对应的数据源中
+ *          检查音乐文件是否匹配这些规则，并设置相应的命中状态。
+ *          这个操作通常在音乐文件扫描完成后执行
+ */
 void MusicSyncTool::setRuleHit(const PathType path, const QList<LyricIgnoreRule>& rules,
                                const QDateTime& dateTime) {
     MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
@@ -506,11 +623,20 @@ void MusicSyncTool::setRuleHit(const PathType path, const QList<LyricIgnoreRule>
     }
 }
 
+/**
+ * @brief 从日志文件获取上次扫描时间
+ * @param log 日志文件路径
+ * @return 上次扫描的时间，如果没有找到则返回1970年1月1日
+ * @details 读取指定的日志文件获取上次音乐文件扫描的时间戳。
+ *          如果日志目录不存在则创建目录。如果日志文件不存在或
+ *          时间格式无效，返回Unix时间戳起始时间，表示需要扫描所有文件
+ */
 QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
     QFile file(log);
     QDateTime dateTime;
     const QString logDir = QCoreApplication::applicationDirPath() + "/log";
-    if (const QDir dir(logDir); !dir.exists()) {
+    const QDir dir(logDir);
+    if (!dir.exists()) {
         // ReSharper disable once CppExpressionWithoutSideEffects
         dir.mkpath(logDir);
     }
@@ -518,18 +644,25 @@ QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
         QTextStream in(&file);
         dateTime = QDateTime::fromString(in.readLine());
         if (dateTime.isNull()) {
-            qWarning() << "[WARN] No last scan log found, scanning all files";
+            Logger::Warn("No last scan log found, scanning all files");
             dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
         }
     } else {
-        qWarning() << file.errorString();
-        qWarning() << "[WARN] No last scan log found, scanning all files";
+        Logger::Warn(file.errorString());
+        Logger::Warn("No last scan log found, scanning all files");
         // Set last scan time to 1970-01-01 00:00:00 if no log found
         dateTime = QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0));
     }
     return dateTime;
 }
 
+/**
+ * @brief 写入日志文件
+ * @param log 日志文件路径
+ * @param dateTime 要记录的时间
+ * @details 将当前扫描完成的时间写入指定的日志文件，
+ *          用于下次启动时判断哪些文件需要重新扫描
+ */
 void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime) {
     QFile file(log);
     QTextStream out(&file);
@@ -539,26 +672,21 @@ void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime) {
     file.close();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
-void MusicSyncTool::rollBackCopy(const QString& fileName) {
-    const auto list = fileName.split(".");
-    const auto lyric = list.at(0) + ".lrc";
-    if (QFile::exists(lyric)) {
-        QFile::remove(lyric);
-    }
-    if (QFile::exists(fileName)) {
-        QFile::remove(fileName);
-    }
-}
-
-/*
- * @brief Save settings to settings file
- * @param Entity
+/**
+ * @brief 保存设置到设置文件
+ * @param entityParam 设置实体对象
+ * @details 将用户修改的设置保存到settings.json文件中，包括：
+ *          - 歌词忽略设置
+ *          - 排序方式和顺序
+ *          - 界面语言
+ *          - 喜爱标签
+ *          - 歌词忽略规则列表
+ *          如果排序设置发生变化，会触发界面刷新以应用新的排序
  */
 void MusicSyncTool::saveSettings(const set& entityParam) {
     QFile file("settings.json");
     if (!file.open(QIODevice::WriteOnly)) {
-        qFatal() << "[FATAL] Error opening settings file";
+        Logger::Fatal("Error opening settings file");
         QMessageBox::critical(this, tr("错误"), tr("无法打开设置文件"));
         return;
     }
@@ -600,17 +728,17 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
         }
     }
     loadLanguage();
-    qDebug() << "[INFO] IgnoreLyric:" << this->entity.ignoreLyric;
-    qDebug() << "[INFO] SortBy:" << this->entity.sortBy;
-    qDebug() << "[INFO] OrderBy:" << this->entity.orderBy;
-    qDebug() << "[INFO] Language:" << this->entity.language;
-    qDebug() << "[INFO] FavoriteTag:" << this->entity.favoriteTag;
+    Logger::Info("IgnoreLyric: " + QString::number(this->entity.ignoreLyric));
+    Logger::Info("SortBy: " + QString::number(this->entity.sortBy));
+    Logger::Info("OrderBy: " + QString::number(this->entity.orderBy));
+    Logger::Info("Language: " + this->entity.language);
+    Logger::Info("FavoriteTag: " + this->entity.favoriteTag);
     int i = 1;
     for (const auto& rule : entityParam.rules) {
-        qDebug() << "[INFO] Rule No." << i++ << ":";
-        qDebug() << "[INFO] RuleTypeConverter:" << rule.getRuleTypeStr();
-        qDebug() << "[INFO] RuleFieldConverter:" << rule.getRuleFieldStr();
-        qDebug() << "[INFO] Rule:" << rule.getRuleName();
+        Logger::Info("Rule No." + QString::number(i++) + ":");
+        Logger::Info("RuleTypeConverter: " + rule.getRuleTypeStr());
+        Logger::Info("RuleFieldConverter: " + rule.getRuleFieldStr());
+        Logger::Info("Rule: " + rule.getRuleName());
     }
     QJsonDocument settings;
     settings.setObject(obj);
@@ -618,19 +746,28 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
     file.close();
 }
 
-/*
- * @brief Copy music files from source to target
- * @param Source path
- * @param File list
- * @param Target path
+/**
+ * @brief 复制音乐文件从源路径到目标路径
+ * @param source 源路径
+ * @param fileList 要复制的文件列表
+ * @param target 目标路径
+ * @details 执行音乐文件的复制操作，包括以下功能：
+ *          1. 创建目标目录（如果不存在）
+ *          2. 逐个复制文件列表中的音乐文件
+ *          3. 同时复制对应的歌词文件（.lrc）
+ *          4. 检查磁盘空间，处理磁盘满等错误情况
+ *          5. 根据设置决定是否忽略歌词文件
+ *          6. 发出进度信号更新UI
+ *          7. 处理文件已存在、找不到歌词等错误情况
  */
 void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList, const QString& target) {
     const TagLib::String key = "LYRICS";
     emit started();
     emit total(fileList.size());
-    if (const QDir dir(target); dir.isEmpty()) {
+    const QDir dir(target);
+    if (dir.isEmpty()) {
         if (!dir.mkpath(target)) {
-            qFatal() << "[FATAL] Error creating directory:" << target;
+            Logger::Fatal("Error creating directory: " + target);
             exit(EXIT_FAILURE);
         }
     }
@@ -645,7 +782,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
         }
         QString lyric;
         QString lyricTarget;
-        for (const QString& format : supportedFormat) {
+        for (const QString& format : MSTFileManager::supportedFormat) {
             if (sourceFile.contains(format)) {
                 QString temp = sourceFile;
                 QString tempTarget = targetFile;
@@ -655,7 +792,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
             }
         }
         if (QFile::exists(targetFile)) {
-            qWarning() << "[WARN] File existed, skipping" << targetFile;
+            Logger::Warn("File existed, skipping " + targetFile);
             addToErrorList(list.at(0), FileErrorType::DUPLICATE);
             continue;
         }
@@ -668,25 +805,26 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
                 f = TagLib::FileRef(sourceFile.toStdString().c_str());
 #endif
                 if (!f.isNull() && f.tag()) {
-                    if (const TagLib::Tag* tag = f.tag(); !tag->properties().contains(key)) {
-                        qWarning() << "[WARN] Lyric file not found, skipping" << lyric;
+                    const TagLib::Tag* tag = f.tag();
+                    if (!tag->properties().contains(key)) {
+                        Logger::Warn("Lyric file not found, skipping " + lyric);
                         addToErrorList(list.at(0), FileErrorType::LNF);
                         continue;
                     }
                 }
             } else {
-                diskFull = isFull(sourceFile, target);
+                diskFull = MSTFileManager::isFull(sourceFile, target);
                 if (diskFull) {
-                    rollBackCopy(targetFile);
+                    MSTFileManager::rollBackCopy(targetFile);
                     addToErrorList(list.at(0), FileErrorType::DISKFULL);
                     continue;
                 }
                 QFile::copy(lyric, lyricTarget);
             }
         }
-        diskFull = isFull(sourceFile, target);
+        diskFull = MSTFileManager::isFull(sourceFile, target);
         if (diskFull) {
-            rollBackCopy(targetFile);
+            MSTFileManager::rollBackCopy(targetFile);
             addToErrorList(list.at(0), FileErrorType::DISKFULL);
             continue;
         }
@@ -697,9 +835,14 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
     emit copyFinished(OperationType::COPY);
 }
 
-/*
- * @brief Show operation result
- * @param Operation type
+/**
+ * @brief 显示操作结果对话框
+ * @param type 操作类型（复制或加载）
+ * @details 根据操作类型显示相应的结果对话框：
+ *          - COPY: 显示复制操作的结果
+ *          - LOAD: 显示加载操作的结果
+ *          如果没有错误，直接刷新界面；如果有错误，显示错误详情。
+ *          操作完成后清空错误列表并刷新音乐列表显示
  */
 void MusicSyncTool::showOperationResult(const OperationType type) {
     const auto result = new OperationResult();
@@ -748,22 +891,32 @@ void MusicSyncTool::showOperationResult(const OperationType type) {
     }
 }
 
-/*
- * @brief Set now playing title
- * @param File name
+/**
+ * @brief 设置当前播放的音乐标题
+ * @param file 文件名
+ * @details 在用户界面上显示当前正在播放的音乐文件名，
+ *          更新播放状态标签的文本内容
  */
 void MusicSyncTool::setNowPlayingTitle(const QString& file) const { ui.nowPlaying->setText(tr("正在播放：") + file); }
-/*
- * @brief Get language
- * @return Language
+/**
+ * @brief 获取当前设置的语言
+ * @return 语言字符串
+ * @details 返回用户在设置中选择的界面语言，
+ *          用于语言切换和界面本地化
  */
 [[nodiscard]]
 QString MusicSyncTool::getLanguage() const {
     return entity.language;
 }
 
-/*
- * @brief Slots for remote open action
+/**
+ * @brief 远程打开操作的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 处理用户点击远程路径打开菜单的操作：
+ *          1. 打开文件夹选择对话框
+ *          2. 如果选择了路径，开始扫描音乐文件
+ *          3. 设置可用空间显示
+ *          4. 显示加载操作结果
  */
 void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
     openFolder(PathType::REMOTE);
@@ -775,8 +928,14 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
     showOperationResult(OperationType::LOAD);
 }
 
-/*
- * @brief Slots for local open action
+/**
+ * @brief 本地打开操作的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 处理用户点击本地路径打开菜单的操作：
+ *          1. 打开文件夹选择对话框
+ *          2. 如果选择了路径，开始扫描音乐文件
+ *          3. 设置可用空间显示
+ *          4. 显示加载操作结果
  */
 void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
     openFolder(PathType::LOCAL);
@@ -788,12 +947,18 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
     showOperationResult(OperationType::LOAD);
 }
 
-/*
- * @brief Slots for settings action
+/**
+ * @brief 设置操作的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击设置菜单，打开设置对话框
+ *          允许用户修改应用程序的各种配置选项
  */
 void MusicSyncTool::on_actionSettings_triggered(bool triggered) const { showSettings(); }
-/*
- * @brief Slots for about action
+/**
+ * @brief 关于操作的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击关于菜单，显示应用程序的关于信息对话框，
+ *          包括版本信息、开发者信息等内容
  */
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
@@ -802,8 +967,13 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
     about.exec();
 }
 
-/*
- * @brief Slots for copy to remote action
+/**
+ * @brief 复制到远程的槽函数
+ * @details 处理用户点击复制到远程按钮的操作：
+ *          1. 检查本地路径是否已选择
+ *          2. 获取用户在本地表格中选中的音乐文件
+ *          3. 检查是否有选中的文件
+ *          4. 启动并发线程执行复制操作
  */
 void MusicSyncTool::on_copyToRemote_clicked() {
     if (local.getPath() == "") {
@@ -818,8 +988,13 @@ void MusicSyncTool::on_copyToRemote_clicked() {
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, local.getPath(), fileList, remote.getPath());
 }
 
-/*
- * @brief Slots for copy to local action
+/**
+ * @brief 复制到本地的槽函数
+ * @details 处理用户点击复制到本地按钮的操作：
+ *          1. 检查远程路径是否已选择
+ *          2. 获取用户在远程表格中选中的音乐文件
+ *          3. 检查是否有选中的文件
+ *          4. 启动并发线程执行复制操作
  */
 void MusicSyncTool::on_copyToLocal_clicked() {
     if (remote.getPath() == "") {
@@ -834,54 +1009,81 @@ void MusicSyncTool::on_copyToLocal_clicked() {
     QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remote.getPath(), fileList, local.getPath());
 }
 
-/*
- * @brief Slots for duplicated music scanning(local)
+/**
+ * @brief 本地重复音乐扫描的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击本地重复音乐扫描菜单，
+ *          在本地路径中查找重复的音乐文件并显示结果
  */
 void MusicSyncTool::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(PathType::LOCAL); }
-/*
- * @brief Slots for duplicated music scanning(remote)
+/**
+ * @brief 远程重复音乐扫描的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击远程重复音乐扫描菜单，
+ *          在远程路径中查找重复的音乐文件并显示结果
  */
 void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) { getDuplicatedMusic(PathType::REMOTE); }
-/*
- * @brief Slots for refresh local action
+/**
+ * @brief 刷新本地音乐列表的槽函数
+ * @details 响应用户点击本地刷新按钮，重新扫描本地路径
+ *          并重新加载音乐列表到第一页
  */
 void MusicSyncTool::on_refreshLocal_clicked() { getMusic(PathType::LOCAL, 1); }
-/*
- * @brief Slots for refresh remote action
+/**
+ * @brief 刷新远程音乐列表的槽函数
+ * @details 响应用户点击远程刷新按钮，重新扫描远程路径
+ *          并重新加载音乐列表到第一页
  */
 void MusicSyncTool::on_refreshRemote_clicked() { getMusic(PathType::REMOTE, 1); }
-/*
- * @brief Slots for search local action
+/**
+ * @brief 本地搜索的槽函数
+ * @details 响应用户在本地搜索框中按下回车键，
+ *          根据输入的文本在本地音乐列表中进行搜索
  */
 void MusicSyncTool::on_searchLocal_returnPressed() { searchMusic(PathType::LOCAL, ui.searchLocal->text()); }
-/*
- * @brief Slots for search remote action
+/**
+ * @brief 远程搜索的槽函数
+ * @details 响应用户在远程搜索框中按下回车键，
+ *          根据输入的文本在远程音乐列表中进行搜索
  */
 void MusicSyncTool::on_searchRemote_returnPressed() { searchMusic(PathType::REMOTE, ui.searchRemote->text()); }
-/*
- * @brief Slots for preview(local)
+/**
+ * @brief 本地表格双击预览的槽函数
+ * @param row 双击的行号
+ * @param column 双击的列号（未使用）
+ * @details 响应用户双击本地音乐表格中的某一行，
+ *          设置该音乐文件的总时长并开始播放预览
  */
 void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) {
     setTotalLength(PathType::LOCAL, row);
 }
 
-/*
- * @brief Slots for preview(remote)
+/**
+ * @brief 远程表格双击预览的槽函数
+ * @param row 双击的行号
+ * @param column 双击的列号（未使用）
+ * @details 响应用户双击远程音乐表格中的某一行，
+ *          设置该音乐文件的总时长并开始播放预览
  */
 void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) {
     setTotalLength(PathType::REMOTE, row);
 }
 
-/*
- * @brief Slots for exiting the program
+/**
+ * @brief 退出程序的槽函数
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击退出菜单，正常退出应用程序
  */
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void MusicSyncTool::on_actionExit_triggered(bool triggered) {
     exit(EXIT_SUCCESS);
 } // NOLINT(*-convert-member-functions-to-static)
 
-/*
- * @brief Pop up window to ask if user want to delete all the log files
+/**
+ * @brief 弹出窗口询问用户是否要删除所有日志文件
+ * @param triggered 触发状态（未使用）
+ * @details 响应用户点击清除日志文件菜单，显示确认对话框，
+ *          如果用户确认则清除所有扫描日志文件，并显示完成提示
  */
 void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
     const QMessageBox::StandardButton reply =
@@ -893,8 +1095,12 @@ void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
     QMessageBox::information(this, tr("提示"), tr("日志文件已清除"));
 }
 
-/*
- * @brief Play or pause the music
+/**
+ * @brief 播放或暂停音乐
+ * @details 响应用户点击播放控制按钮：
+ *          - 如果没有选定音频文件，显示错误提示
+ *          - 如果正在播放，则暂停播放并更新界面状态
+ *          - 如果已暂停或停止，则开始播放并更新界面状态
  */
 void MusicSyncTool::on_playControl_clicked() {
     if (player->getNowPlaying().isEmpty()) {
@@ -910,8 +1116,11 @@ void MusicSyncTool::on_playControl_clicked() {
     }
 }
 
-/*
- * @brief Set slider position
+/**
+ * @brief 设置滑块位置
+ * @param position 播放位置（毫秒）
+ * @details 根据当前播放位置更新播放进度滑块和时间显示，
+ *          将播放时间格式化为分:秒的形式，同时显示当前时间和总时长
  */
 void MusicSyncTool::setSliderPosition(const qint64 position) const {
     ui.playSlider->setValue(static_cast<int>(position));
@@ -930,8 +1139,11 @@ void MusicSyncTool::setSliderPosition(const qint64 position) const {
     ui.playProgress->setText(progress);
 }
 
-/*
- * @brief Slots for play slider
+/**
+ * @brief 播放滑块移动的槽函数
+ * @param position 滑块位置
+ * @details 响应用户拖动播放进度滑块，设置播放器的播放位置
+ *          并更新时间显示
  */
 void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
     player->setPosition(position);
@@ -942,8 +1154,9 @@ void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
     }
 }
 
-/*
- * @brief Slots for play slider
+/**
+ * @brief 播放滑块按下的槽函数
+ * @details 响应用户按下播放进度滑块，立即设置播放器位置到滑块当前值
  */
 void MusicSyncTool::on_playSlider_sliderPressed() const { player->setPosition(ui.playSlider->value()); }
 /*
@@ -955,12 +1168,14 @@ void MusicSyncTool::on_volumeSlider_sliderPressed() const {
     ui.volumeLabel->setText(text);
 }
 
-/*
- * @brief Slots for favorite button(local)
+/**
+ * @brief 本地收藏按钮的槽函数
+ * @details 响应用户点击本地收藏按钮，显示第一页的收藏音乐列表
  */
 void MusicSyncTool::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(PathType::LOCAL, 1); }
-/*
- * @brief Slots for favorite button(remote)
+/**
+ * @brief 远程收藏按钮的槽函数
+ * @details 响应用户点击远程收藏按钮，显示第一页的收藏音乐列表
  */
 void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(PathType::REMOTE, 1); }
 /*
@@ -1074,8 +1289,13 @@ void MusicSyncTool::on_copyFinished(OperationType op) const {
     }
 }
 
-/*
- * @brief Set total length of play slider
+/**
+ * @brief 设置播放滑块的总长度
+ * @param path 路径类型（本地或远程）
+ * @param row 表格行号
+ * @details 根据用户选择的音乐文件设置播放器的总时长，
+ *          获取音频文件的时长信息并配置播放滑块的最大值，
+ *          开始播放选定的音乐文件
  */
 void MusicSyncTool::setTotalLength(const PathType path, const int row) {
     const QTableWidget& widget = path == PathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote;
@@ -1110,10 +1330,13 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
     }
 }
 
-/*
- * @brief Get favorite music files
- * @param Path type(local or remote)
- * @param Page number
+/**
+ * @brief 获取收藏的音乐文件
+ * @param path 路径类型（本地或远程）
+ * @param page 页码
+ * @details 从指定的数据源获取标记为收藏的音乐文件列表，
+ *          支持分页显示。如果没有设置收藏标签，显示错误提示。
+ *          更新表格显示和分页信息
  */
 void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short page) {
     if (path == PathType::LOCAL && local.getPath() == "") {
@@ -1157,8 +1380,14 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
     }
 }
 
-/*
- * @brief Connect slots for application
+/**
+ * @brief 连接应用程序的信号槽
+ * @details 建立各个组件之间的信号槽连接，包括：
+ *          - 数据源与加载页面的进度连接
+ *          - 复制操作和加载操作的完成信号
+ *          - 媒体播放器的位置和状态变化信号
+ *          - 错误处理的信号连接
+ *          确保各组件能够正确响应事件和更新状态
  */
 void MusicSyncTool::connectSlots() const {
     connect(&local, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
@@ -1179,9 +1408,12 @@ void MusicSyncTool::connectSlots() const {
     connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::on_copyFinished);
 }
 
-/*
- * @brief Get available space and show it on the top
- * @param Path type(local or remote)
+/**
+ * @brief 获取可用空间并显示在顶部
+ * @param path 路径类型（本地或远程）
+ * @details 通过文件管理器获取指定路径的存储空间信息，
+ *          并在用户界面上显示可用空间大小，帮助用户了解
+ *          磁盘使用情况
  */
 void MusicSyncTool::setAvailableSpace(const PathType path) const {
 	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
@@ -1190,6 +1422,12 @@ void MusicSyncTool::setAvailableSpace(const PathType path) const {
     (path == PathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(textBuilder);
 }
 
+/**
+ * @brief 清理日志文件
+ * @details 删除log目录下的所有扫描日志文件，清理历史记录。
+ *          如果日志目录不存在则直接返回。这个操作通常在用户
+ *          手动清理或需要重新完整扫描时执行
+ */
 void MusicSyncTool::cleanLog() {
     const QDir logDir("log");
     if (!logDir.exists()) {
@@ -1202,24 +1440,6 @@ void MusicSyncTool::cleanLog() {
     }
 }
 
-/*
- * @brief Check if disk is full
- * @param File path
- * @param Target path
- * @return True if disk is full
- */
-bool MusicSyncTool::isFull(const QString& filePath, const QString& target) {
-    const QFileInfo musicInfo(filePath);
-    const QDir targetInfo(target);
-    if (const QStorageInfo storage(targetInfo); musicInfo.size() > storage.bytesAvailable()) {
-        return true;
-    }
-    return false;
-}
 
-bool MusicSyncTool::isFormatSupported(const QString& fileName) const {
-    return std::any_of(supportedFormat.begin(), supportedFormat.end(), [&fileName](const QString& format) {
-        const QString extension = fileName.section('.', -1);
-        return extension.compare(format, Qt::CaseInsensitive) == 0;
-    });
-}
+
+

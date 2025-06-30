@@ -107,6 +107,35 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             "$<TARGET_FILE_DIR:MusicSyncTool>/translations"
             COMMENT "Copying translation files"
     )
+    
+    # 添加头文件包含路径
+    target_include_directories(MusicSyncTool PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AboutPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AddRuleWidget
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/LoadingPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/MusicSyncTool
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/OperationResult
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/Settings
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/ShowDupe
+    )
+    
+    # 添加编译选项以确保兼容性
+    target_compile_options(MusicSyncTool PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-fPIC>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+    )
+    
+    # 可选：添加单元测试支持
+    option(BUILD_TESTS "Build unit tests" OFF)
+    if(BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(UnitTest)
+        message(STATUS "Unit tests enabled. Use 'make test' or 'ctest' to run tests.")
+    endif()
+    
 else ()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
     message(SEND_ERROR "Or you can modify this file if you know what you are doing.")

@@ -1,21 +1,92 @@
 ﻿#include "MSTFileManager.h"
+#include <algorithm>
 
+// 支持的音频格式列表常量定义
+const QStringList MSTFileManager::supportedFormat = {
+    "mp3", "flac", "wav", "aac", "ogg", "wma", "m4a", "ape", "aiff", "opus"
+};
+
+/**
+ * @brief 构造函数，初始化存储信息
+ * @param path 存储路径
+ */
 MSTFileManager::MSTFileManager(QString path) {
 	storageInfo = QStorageInfo(path);
 }
 
+/**
+ * @brief 获取存储空间信息字符串
+ * @return 格式化的存储空间信息，根据大小自动选择MB或GB单位
+ */
 QString MSTFileManager::getSpaceInfo() const {
-	const qsizetype totalSpace = storageInfo.bytesTotal();
-	const qsizetype availableSpace = storageInfo.bytesAvailable();
+	const qsizetype totalSpace = storageInfo.bytesTotal();       // 总空间
+	const qsizetype availableSpace = storageInfo.bytesAvailable(); // 可用空间
+	
+	// 如果总空间小于1GB，使用MB单位显示
 	if (static_cast<double>(totalSpace) / 1024.0 / 1024.0 / 1024.0 < 1) {
 		return QString::number(static_cast<double>(availableSpace) / 1024.0 / 1024.0, 10, 2) + " MB / " + QString::number(
 			static_cast<double>(totalSpace) / 1024.0 / 1024.0, 10, 2) + " MB";
 	}
+	// 否则使用GB单位显示
 	return QString::number(static_cast<double>(availableSpace) / 1024.0 / 1024.0 / 1024.0, 10, 2) + " GB / " + QString::number(
 		totalSpace / 1024.0 / 1024.0 / 1024.0, 10, 2) + " GB";
 }
 
+/**
+ * @brief 检查文件是否可以复制（检查存储空间是否足够）
+ * @param filePath 要检查的文件路径
+ * @return 如果文件大小超过可用空间且是有效文件返回true，否则返回false
+ */
 bool MSTFileManager::copyable(const QString& filePath) const {
 	const QFileInfo fileInfo(filePath);
-	return fileInfo.size() > storageInfo.bytesAvailable() && fileInfo.isFile();
+	return fileInfo.size() <= storageInfo.bytesAvailable() && fileInfo.isFile();
+}
+
+/**
+ * @brief 检查文件格式是否受支持
+ * @param fileName 文件名
+ * @return 如果文件格式受支持返回true，否则返回false
+ * @details 检查文件扩展名是否在支持的音频格式列表中，
+ *          支持的格式包括常见的音频文件格式如mp3、flac、wav等
+ */
+bool MSTFileManager::isFormatSupported(const QString& fileName) {
+    return std::any_of(supportedFormat.begin(), supportedFormat.end(), [&fileName](const QString& format) {
+        const QString extension = fileName.section('.', -1);
+        return extension.compare(format, Qt::CaseInsensitive) == 0;
+    });
+}
+
+/**
+ * @brief 检查磁盘是否已满
+ * @param filePath 文件路径
+ * @param target 目标路径
+ * @return 如果磁盘空间不足返回true，否则返回false
+ * @details 比较要复制的文件大小与目标磁盘的可用空间，
+ *          判断是否有足够的空间进行文件复制操作
+ */
+bool MSTFileManager::isFull(const QString& filePath, const QString& target) {
+    const QFileInfo musicInfo(filePath);
+    const QDir targetInfo(target);const QStorageInfo storage(targetInfo);
+    if ( musicInfo.size() > storage.bytesAvailable()) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @brief 回滚复制操作
+ * @param fileName 要回滚的文件名
+ * @details 当文件复制失败时，清理已复制的文件，包括音乐文件本身
+ *          和对应的歌词文件（.lrc文件）。这确保了在出现错误时
+ *          不会留下不完整的文件副本
+ */
+void MSTFileManager::rollBackCopy(const QString& fileName) {
+    const auto list = fileName.split(".");
+    const auto lyric = list.at(0) + ".lrc";
+    if (QFile::exists(lyric)) {
+        QFile::remove(lyric);
+    }
+    if (QFile::exists(fileName)) {
+        QFile::remove(fileName);
+    }
 }

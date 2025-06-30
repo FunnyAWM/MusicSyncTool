@@ -34,6 +34,11 @@ bld/
 [Ll]ogs/
 build/
 cmake-build-*
+build-test/
+build-test-*/
+build-linux/
+build-test-linux/
+build-coverage/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
