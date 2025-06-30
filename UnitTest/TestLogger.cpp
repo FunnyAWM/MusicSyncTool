@@ -249,3 +249,5 @@ QString TestLogger::captureConsoleOutput(std::function<void(const QString&)> log
     // 返回模拟的输出（在实际实现中应该返回真实的捕获内容）
     return QString("Captured: %1").arg(message);
 }
+
+#include "TestLogger.moc"
