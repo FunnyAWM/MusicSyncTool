@@ -11,10 +11,44 @@ namespace PROPERTIES {
 	// FNS : File Not Scannable
 	enum class LoadErrorType { FNS, TAGERR };
 
-	enum SortByEnum { TITLE = 0x00000001, ARTIST, ALBUM };
+	enum class SortByEnum { TITLE, ARTIST, ALBUM };
 
-	enum OrderByEnum { ASC = 0x00000011, DESC };
+    inline SortByEnum toSortBy(const short num) {
+        switch (num) {
+            case 0x01: return SortByEnum::TITLE;
+            case 0x02: return SortByEnum::ARTIST;
+            case 0x03: return SortByEnum::ALBUM;
+            default: return SortByEnum::TITLE;
+            }
+    }
 
+    inline short toShort(const SortByEnum sortBy) {
+        switch (sortBy) {
+            case SortByEnum::TITLE: return 0x01;
+            case SortByEnum::ARTIST: return 0x02;
+            case SortByEnum::ALBUM: return 0x03;
+            default: return 0x01;
+        }
+    }
+
+	enum class OrderByEnum { ASC, DESC };
+
+
+    inline OrderByEnum toOrderBy(const short num) {
+        switch (num) {
+            case 0x11: return OrderByEnum::ASC;
+            case 0x12: return OrderByEnum::DESC;
+        default: return OrderByEnum::ASC;
+        }
+    }
+
+    inline short toShort(const OrderByEnum orderBy) {
+        switch (orderBy) {
+            case OrderByEnum::ASC: return 0x11;
+            case OrderByEnum::DESC: return 0x12;
+            default: return 0x11;
+        }
+    }
 	// PET : Program Error Type
 	// LNF : Lyric Not Found
 	// NPS : No Path Selected
@@ -23,7 +57,8 @@ namespace PROPERTIES {
 	// FIRST : First Page
 	// LAST : Last Page
 	// RUNNING : Program Already Running
-	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING, NOLANG };
+	// DOF : Directory open failed
+	enum class PET { NOAUDIO, NPS, NFT, NFS, FIRST, LAST, RUNNING, NOLANG, DBERROR, DOF };
 
 	enum class OperationType { COPY, LOAD };
 
@@ -31,5 +66,8 @@ namespace PROPERTIES {
 
 	enum class RuleType { INCLUDES, EXCLUDES };
 
+	enum class QueryRows { TITLE, ARTIST, ALBUM, GENRE, YEAR, TRACK, FILENAME, ALL };
+
+	enum class LogToFile { ENABLE, DISABLE };
 } // namespace PROPERTIES
 #endif // MUSICPROPERTIES_H

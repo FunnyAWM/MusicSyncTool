@@ -1,4 +1,4 @@
-﻿#include "MusicSyncTool.h"
+﻿#include "Widgets/MusicSyncTool/MusicSyncTool.h"
 #include "SingleInstance.h"
 
 int main(int argc, char* argv[]) {
@@ -8,7 +8,8 @@ int main(int argc, char* argv[]) {
 	HANDLE hMutex;
 	if (!singleInstance(hMutex)) {
 #else
-	if (!singleInstance()) {
+    const int fd = singleInstance();
+	if (fd == -1) {
 #endif
 		w.popError(PET::RUNNING);
 		return 1;
@@ -19,6 +20,8 @@ int main(int argc, char* argv[]) {
 	ReleaseMutex(hMutex);
 	CloseHandle(hMutex);
 	hMutex = nullptr;
+#elif defined(__linux)
+    close(fd);
 #endif
 	return 0;
 }

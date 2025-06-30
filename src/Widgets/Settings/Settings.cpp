@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 
-#include "AddRuleWidget.h"
+#include "../AddRuleWidget/AddRuleWidget.h"
 
 Settings::Settings(QWidget* parent) : QWidget(parent) {
     ui.setupUi(this);
@@ -43,16 +43,16 @@ set Settings::getSettings() {
     set target;
     target.ignoreLyric = ui.ignoreLyricBox->isChecked();
     if (ui.titleSelect->isChecked()) {
-        target.sortBy = TITLE;
+        target.sortBy = toShort(SortByEnum::TITLE);
     } else if (ui.artistSelect->isChecked()) {
-        target.sortBy = ARTIST;
+        target.sortBy = toShort(SortByEnum::ARTIST);
     } else if (ui.albumSelect->isChecked()) {
-        target.sortBy = ALBUM;
+        target.sortBy = toShort(SortByEnum::ALBUM);
     }
     if (ui.ascButton->isChecked()) {
-        target.orderBy = ASC;
+        target.orderBy = toShort(OrderByEnum::ASC);
     } else if (ui.descButton->isChecked()) {
-        target.orderBy = DESC;
+        target.orderBy = toShort(OrderByEnum::DESC);
     }
     target.language = ui.languageComboBox->currentText();
     target.favoriteTag = ui.favoriteTagEdit->text();
@@ -71,17 +71,17 @@ void Settings::setIgnoreLyricToUI(const bool ignoreLyric) {
 
 void Settings::setSortByToUI(short sortBy) {
     if (sortBy < 0 || sortBy > 2) {
-        sortBy = TITLE;
+        sortBy = toShort(SortByEnum::TITLE);
     }
     entity.sortBy = sortBy;
-    switch (sortBy) {
-    case TITLE:
+    switch (toSortBy(entity.sortBy)) {
+    case SortByEnum::TITLE:
         ui.titleSelect->setChecked(true);
         break;
-    case ARTIST:
+    case SortByEnum::ARTIST:
         ui.artistSelect->setChecked(true);
         break;
-    case ALBUM:
+    case SortByEnum::ALBUM:
         ui.albumSelect->setChecked(true);
         break;
     default:
@@ -121,14 +121,14 @@ void Settings::setFavoriteTagToUI(const QString& favorite) {
 
 void Settings::setOrderByToUI(short orderBy) {
     if (orderBy < 0 || orderBy > 1) {
-        orderBy = ASC;
+        orderBy = toShort(OrderByEnum::ASC);
     }
     entity.orderBy = orderBy;
-    switch (orderBy) {
-    case ASC:
+    switch (toOrderBy(entity.orderBy)) {
+    case OrderByEnum::ASC:
         ui.ascButton->setChecked(true);
         break;
-    case DESC:
+    case OrderByEnum::DESC:
         ui.descButton->setChecked(true);
         break;
     default:

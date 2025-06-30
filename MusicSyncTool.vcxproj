@@ -149,6 +149,10 @@
     <QtTranslation>
       <BuildAction>lupdate_lrelease</BuildAction>
     </QtTranslation>
+    <ClCompile>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <CallingConvention>Cdecl</CallingConvention>
+    </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>true</VcpkgEnabled>
@@ -210,38 +214,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <QtMoc Include="src\AboutPage.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="src\LoadingPage.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <QtMoc Include="src\Widgets\AboutPage\AboutPage.h" />
+    <QtMoc Include="src\Widgets\OperationResult\OperationResult.h" />
+    <QtMoc Include="src\Widgets\Settings\Settings.h" />
+    <QtMoc Include="src\Widgets\ShowDupe\ShowDupe.h" />
+    <QtMoc Include="src\Widgets\MusicSyncTool\MusicSyncTool.h" />
+    <QtMoc Include="src\Widgets\LoadingPage\LoadingPage.h" />
+    <QtMoc Include="src\Widgets\AddRuleWidget\AddRuleWidget.h" />
     <QtMoc Include="src\MSTDataSource.h" />
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\MSTFileManager.h" />
     <ClInclude Include="src\MSTMediaPlayer.h" />
     <ClInclude Include="src\QueryItem.h" />
     <ClInclude Include="src\SingleInstance.h" />
-    <QtMoc Include="src\AddRuleWidget.h" />
     <QtMoc Include="src\LyricIgnoreRule.h" />
     <ClInclude Include="src\MusicProperties.h" />
     <ClInclude Include="src\SettingEntity.h" />
-    <QtMoc Include="src\ShowDupe.h" />
-    <QtMoc Include="src\Settings.h" />
-    <QtMoc Include="src\OperationResult.h" />
-    <QtMoc Include="src\MusicSyncTool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AboutPage.cpp" />
-    <ClCompile Include="src\AddRuleWidget.cpp" />
-    <ClCompile Include="src\LoadingPage.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\LyricIgnoreRule.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MSTDataSource.cpp" />
+    <ClCompile Include="src\MSTFileManager.cpp" />
     <ClCompile Include="src\MSTMediaPlayer.cpp" />
-    <ClCompile Include="src\MusicSyncTool.cpp" />
-    <ClCompile Include="src\OperationResult.cpp" />
     <ClCompile Include="src\QueryItem.cpp" />
-    <ClCompile Include="src\Settings.cpp" />
-    <ClCompile Include="src\ShowDupe.cpp" />
+    <ClCompile Include="src\Widgets\AboutPage\AboutPage.cpp" />
+    <ClCompile Include="src\Widgets\AddRuleWidget\AddRuleWidget.cpp" />
+    <ClCompile Include="src\Widgets\LoadingPage\LoadingPage.cpp" />
+    <ClCompile Include="src\Widgets\MusicSyncTool\MusicSyncTool.cpp" />
+    <ClCompile Include="src\Widgets\OperationResult\OperationResult.cpp" />
+    <ClCompile Include="src\Widgets\Settings\Settings.cpp" />
+    <ClCompile Include="src\Widgets\ShowDupe\ShowDupe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\MusicSyncTool.ico" />
@@ -253,21 +257,21 @@
     <ResourceCompile Include="resources\MusicSyncTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="forms\AboutPage.ui" />
-    <QtUic Include="forms\AddRuleWidget.ui" />
-    <QtUic Include="forms\LoadingPage.ui" />
-    <QtUic Include="forms\MusicSyncTool.ui" />
-    <QtUic Include="forms\OperationResult.ui" />
-    <QtUic Include="forms\Settings.ui" />
-    <QtUic Include="forms\ShowDupe.ui" />
-  </ItemGroup>
-  <ItemGroup>
     <QtTranslation Include="translations\Translation_en_US.ts" />
     <QtTranslation Include="translations\Translation_Wenyan.ts" />
     <QtTranslation Include="translations\Translation_zh_Hans.ts" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\titles.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="src\Widgets\AboutPage\AboutPage.ui" />
+    <QtUic Include="src\Widgets\AddRuleWidget\AddRuleWidget.ui" />
+    <QtUic Include="src\Widgets\LoadingPage\LoadingPage.ui" />
+    <QtUic Include="src\Widgets\MusicSyncTool\MusicSyncTool.ui" />
+    <QtUic Include="src\Widgets\OperationResult\OperationResult.ui" />
+    <QtUic Include="src\Widgets\Settings\Settings.ui" />
+    <QtUic Include="src\Widgets\ShowDupe\ShowDupe.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
