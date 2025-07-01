@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include <QStorageInfo>
-#include <QStringList>
-#include <QFileInfo>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
+#include <QStorageInfo>
+#include <QStringList>
+#include <functional>
 
 /**
  * @brief 音乐同步工具文件管理器类
@@ -66,4 +67,26 @@ public:
 	 *          不会留下不完整的文件副本
 	 */
 	static void rollBackCopy(const QString& fileName);
+	
+	/**
+	 * @brief 复制音乐文件的核心逻辑（从MusicSyncTool分离出来）
+	 * @param source 源目录路径
+	 * @param fileList 要复制的文件列表（格式：文件名:规则命中状态）
+	 * @param target 目标目录路径
+	 * @param ignoreLyric 是否忽略歌词文件
+	 * @param onProgress 进度回调函数 std::function<void(int)>
+	 * @param onError 错误回调函数 std::function<void(const QString&, int)> (fileName, errorType)
+	 * @param onStart 开始复制回调函数 std::function<void()>
+	 * @param onFinish 完成复制回调函数 std::function<void()>
+	 * @param onTotal 设置总数回调函数 std::function<void(int)>
+	 * @details 这是从MusicSyncTool::copyMusic方法分离出来的核心逻辑，
+	 *          通过回调函数处理UI更新和错误报告，保持原有的功能不变
+	 */
+	static void copyMusicFiles(const QString& source, const QStringList& fileList, 
+	                          const QString& target, bool ignoreLyric,
+	                          const std::function<void(int)>& onProgress = nullptr,
+	                          const std::function<void(const QString&, int)>& onError = nullptr,
+	                          const std::function<void()>& onStart = nullptr,
+	                          const std::function<void()>& onFinish = nullptr,
+	                          const std::function<void(int)>& onTotal = nullptr);
 };

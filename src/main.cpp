@@ -8,8 +8,8 @@
  * @date 2024
  */
 
-#include "Widgets/MusicSyncTool/MusicSyncTool.h"
 #include "SingleInstance.h"
+#include "Widgets/MusicSyncTool/MusicSyncTool.h"
 
 /**
  * @brief 应用程序主函数

@@ -54,6 +54,13 @@
       </layout>
      </item>
      <item>
+      <widget class="QCheckBox" name="recursiveScan">
+       <property name="text">
+        <string>递归扫描</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Vertical</enum>
@@ -390,7 +397,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="sortByGroup"/>
   <buttongroup name="orderGroup"/>
+  <buttongroup name="sortByGroup"/>
  </buttongroups>
 </ui>

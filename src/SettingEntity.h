@@ -16,5 +16,6 @@ struct set {
 	QString language;                    // 界面语言设置
 	QString favoriteTag;                 // 收藏标签
 	QList<LyricIgnoreRule> rules;        // 歌词忽略规则列表
+	bool recursiveScan;				     // 是否递归扫描子目录
 };
 #endif // SETTINGENTITY_H

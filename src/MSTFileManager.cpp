@@ -1,5 +1,9 @@
 ﻿#include "MSTFileManager.h"
 #include <algorithm>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/tpropertymap.h>
+#include "Logger.h"
 
 // 支持的音频格式列表常量定义
 const QStringList MSTFileManager::supportedFormat = {
@@ -89,4 +93,97 @@ void MSTFileManager::rollBackCopy(const QString& fileName) {
     if (QFile::exists(fileName)) {
         QFile::remove(fileName);
     }
+}
+
+/**
+ * @brief 复制音乐文件的核心逻辑（从MusicSyncTool分离出来）
+ */
+void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fileList, 
+                                   const QString& target, bool ignoreLyric,
+                                   const std::function<void(int)>& onProgress,
+                                   const std::function<void(const QString&, int)>& onError,
+                                   const std::function<void()>& onStart,
+                                   const std::function<void()>& onFinish,
+                                   const std::function<void(int)>& onTotal) {
+    const TagLib::String key = "LYRICS";
+    
+    if (onStart) onStart();
+    if (onTotal) onTotal(fileList.size());
+    
+    const QDir dir(target);
+    if (dir.isEmpty()) {
+        if (!dir.mkpath(target)) {
+            Logger::Fatal("Error creating directory: " + target);
+            return;
+        }
+    }
+    
+    bool diskFull = false;
+    for (const QString& file : fileList) {
+        QStringList list = file.split(":");
+        QString sourceFile = source + "/" + list.at(0);
+        QString targetFile = target + "/" + list.at(0);
+        
+        if (diskFull) {
+            if (onError) onError(list.at(0), 2); // DISKFULL = 2
+            continue;
+        }
+        
+        QString lyric;
+        QString lyricTarget;
+        for (const QString& format : supportedFormat) {
+            if (sourceFile.contains(format)) {
+                QString temp = sourceFile;
+                QString tempTarget = targetFile;
+                lyric = temp.replace(format, "lrc");
+                lyricTarget = tempTarget.replace(format, "lrc");
+                break;
+            }
+        }
+        
+        if (QFile::exists(targetFile)) {
+            Logger::Warn("File existed, skipping " + targetFile);
+            if (onError) onError(list.at(0), 0); // DUPLICATE = 0
+            continue;
+        }
+        
+        if (!ignoreLyric && !static_cast<bool>(list.at(1).toInt())) {
+            if (!QFile::exists(lyric)) {
+                TagLib::FileRef f;
+#if defined(_WIN64) or defined(_WIN32)
+                f = TagLib::FileRef(sourceFile.toStdWString().c_str());
+#else
+                f = TagLib::FileRef(sourceFile.toStdString().c_str());
+#endif
+                if (!f.isNull() && f.tag()) {
+                    const TagLib::Tag* tag = f.tag();
+                    if (!tag->properties().contains(key)) {
+                        Logger::Warn("Lyric file not found, skipping " + lyric);
+                        if (onError) onError(list.at(0), 1); // LNF = 1
+                        continue;
+                    }
+                }
+            } else {
+                diskFull = isFull(sourceFile, target);
+                if (diskFull) {
+                    rollBackCopy(targetFile);
+                    if (onError) onError(list.at(0), 2); // DISKFULL = 2
+                    continue;
+                }
+                QFile::copy(lyric, lyricTarget);
+            }
+        }
+        
+        diskFull = isFull(sourceFile, target);
+        if (diskFull) {
+            rollBackCopy(targetFile);
+            if (onError) onError(list.at(0), 2); // DISKFULL = 2
+            continue;
+        }
+        
+        QFile::copy(sourceFile, targetFile);
+        if (onProgress) onProgress(fileList.indexOf(file));
+    }
+    
+    if (onFinish) onFinish();
 }

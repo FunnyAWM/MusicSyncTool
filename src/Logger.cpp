@@ -3,8 +3,10 @@
 //
 #include "Logger.h"
 #include <QDateTime>
+#include <QCoreApplication>
 
 PROPERTIES::LogToFile Logger::logToFile = PROPERTIES::LogToFile::DISABLE;
+const QString Logger::logFileName = QCoreApplication::applicationDirPath() + "/log/lastRun.log";
 
 /**
  * @brief 记录信息级别日志

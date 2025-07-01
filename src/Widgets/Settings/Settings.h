@@ -71,7 +71,8 @@ public:
 	 * @param rules 忽略规则列表
 	 */
 	void setIgnoreRulesToUI(QList<LyricIgnoreRule>& rules);
-	
+
+	void setRecursiveScanToUI(const bool recursiveScan);
 	/**
 	 * @brief 析构函数
 	 */

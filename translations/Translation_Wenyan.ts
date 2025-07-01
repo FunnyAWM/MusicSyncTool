@@ -103,27 +103,27 @@
 <context>
     <name>LyricIgnoreRule</name>
     <message>
-        <location filename="../src/LyricIgnoreRule.cpp" line="33"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="72"/>
         <source>名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRule.cpp" line="35"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="74"/>
         <source>艺术家</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRule.cpp" line="37"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="76"/>
         <source>专辑</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRule.cpp" line="46"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="90"/>
         <source>包含</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/LyricIgnoreRule.cpp" line="48"/>
+        <location filename="../src/LyricIgnoreRule.cpp" line="92"/>
         <source>排除</source>
         <translation type="unfinished"></translation>
     </message>
@@ -131,167 +131,167 @@
 <context>
     <name>MusicSyncTool</name>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="146"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="202"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="953"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1058"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="200"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="273"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1168"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1279"/>
         <source>音量：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="147"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="200"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1047"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="201"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="271"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1268"/>
         <source>播放已结束。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="157"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="160"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="163"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="166"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="175"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="178"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="181"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="561"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="221"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="224"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="227"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="230"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="239"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="242"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="245"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="712"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="157"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="221"/>
         <source>没有选定音频！（提示：可以通过双击表格中的歌曲来预览）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="160"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="224"/>
         <source>没有选定路径！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="163"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="227"/>
         <source>没有设置喜爱标签！请在设置中指定！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="166"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="230"/>
         <source>没有选定文件！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="169"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="172"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="887"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="892"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="233"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="236"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1087"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1092"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="169"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="233"/>
         <source>已经是第一页了！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="172"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="236"/>
         <source>已经是最后一页了！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="175"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="239"/>
         <source>程序已在运行！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="178"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="242"/>
         <source>找不到程序语言配置文件，程序即将退出！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="181"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="245"/>
         <source>操作数据库中数据时出现严重错误，程序即将退出！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="194"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="263"/>
         <source>暂停</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="197"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="199"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1046"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="267"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="270"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1267"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="384"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="387"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="390"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="488"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="491"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="494"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="384"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="488"/>
         <source>失败：文件已存在</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="387"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="491"/>
         <source>失败：找不到歌词文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="390"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="494"/>
         <source>失败：磁盘已满</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="403"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="406"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="511"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="514"/>
         <source>加载</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="403"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="511"/>
         <source>失败：文件不可扫描</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="406"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="514"/>
         <source>失败：标签错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="561"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="712"/>
         <source>无法打开设置文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="707"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="836"/>
         <source>复制结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="710"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="839"/>
         <source>加载结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="754"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="889"/>
         <source>正在播放：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="887"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1087"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="892"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1092"/>
         <source>日志文件已清除</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1188"/>
+        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1433"/>
         <source>可用空间：</source>
         <translation type="unfinished"></translation>
     </message>
@@ -481,12 +481,12 @@
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.cpp" line="96"/>
+        <location filename="../src/Widgets/Settings/Settings.cpp" line="124"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.cpp" line="96"/>
+        <location filename="../src/Widgets/Settings/Settings.cpp" line="124"/>
         <source>无法打开语言文件</source>
         <translation type="unfinished"></translation>
     </message>
@@ -504,97 +504,102 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="93"/>
-        <source>排序依据：</source>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="59"/>
+        <source>递归扫描</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/Widgets/Settings/Settings.ui" line="100"/>
+        <source>排序依据：</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="107"/>
         <source>标题</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="113"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="120"/>
         <source>艺术家</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="123"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="130"/>
         <source>专辑</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="140"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="147"/>
         <source>排序方式：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="147"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="154"/>
         <source>升序</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="160"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="167"/>
         <source>降序</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="192"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="199"/>
         <source>自定义“喜欢的音乐”标签：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="208"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="215"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用于指定由播放器定义的“我喜欢的音乐”的特殊音频标签。若无可不填写，但是会影响喜欢的音乐的筛选。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="237"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="244"/>
         <source>自定义歌词忽略规则：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="260"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="267"/>
         <source>添加</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="267"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="274"/>
         <source>删除选定规则</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="292"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="299"/>
         <source>字段</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="297"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="304"/>
         <source>条件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="302"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="309"/>
         <source>内容</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="327"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="334"/>
         <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="334"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="341"/>
         <source>取消</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="361"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="368"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;打开此选项将禁止程序检查外部lrc文件和歌词标签。如果您不需要程序复制歌词，请打开此选项。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/Settings/Settings.ui" line="364"/>
+        <location filename="../src/Widgets/Settings/Settings.ui" line="371"/>
         <source>忽略歌词</source>
         <translation type="unfinished"></translation>
     </message>

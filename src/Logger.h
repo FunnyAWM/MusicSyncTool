@@ -57,7 +57,4 @@ public:
     static void Fatal(const QString& message);
 };
 
-// 日志文件名常量定义
-const QString Logger::logFileName = QCoreApplication::applicationDirPath() + "/log/lastRun.log";
-
 #endif //LOGGER_H

@@ -115,7 +115,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MSTFileManager.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
