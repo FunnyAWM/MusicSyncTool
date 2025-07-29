@@ -23,31 +23,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\AboutPage.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\LoadingPage.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\MusicSyncTool.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\OperationResult.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\Settings.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\ShowDupe.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\AddRuleWidget.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="src\LyricIgnoreRule.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\MSTDataSource.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\AddRuleWidget\AddRuleWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\LoadingPage\LoadingPage.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\MusicSyncTool\MSTMainWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\AboutPage\AboutPage.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\OperationResult\OperationResult.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\Settings\Settings.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Widgets\ShowDupe\ShowDupe.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -67,30 +67,15 @@
     <ClInclude Include="src\QueryItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MSTFileManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AboutPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\LoadingPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MusicSyncTool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OperationResult.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ShowDupe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AddRuleWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\LyricIgnoreRule.cpp">
@@ -103,6 +88,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MSTDataSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\AboutPage\AboutPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\AddRuleWidget\AddRuleWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\LoadingPage\LoadingPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\MusicSyncTool\MSTMainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\OperationResult\OperationResult.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\Settings\Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Widgets\ShowDupe\ShowDupe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MSTFileManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -122,25 +134,25 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="forms\AboutPage.ui">
+    <QtUic Include="src\Widgets\AboutPage\AboutPage.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\LoadingPage.ui">
+    <QtUic Include="src\Widgets\AddRuleWidget\AddRuleWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\MusicSyncTool.ui">
+    <QtUic Include="src\Widgets\LoadingPage\LoadingPage.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\OperationResult.ui">
+    <QtUic Include="src\Widgets\MusicSyncTool\MSTMainWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\Settings.ui">
+    <QtUic Include="src\Widgets\OperationResult\OperationResult.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\ShowDupe.ui">
+    <QtUic Include="src\Widgets\Settings\Settings.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="forms\AddRuleWidget.ui">
+    <QtUic Include="src\Widgets\ShowDupe\ShowDupe.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

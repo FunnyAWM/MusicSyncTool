@@ -9,10 +9,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#[[ Replace this with your own Qt installation path
-    If you are using distros with Qt6 library packages available(like openSUSE),
-    Just install the package and ignore this set statement]]
-    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.2/gcc_64")
+    #[[ Replace this with your own Qt installation path
+        If you are using distros with Qt6 library packages available(like openSUSE),
+        Just install the package and ignore this set statement]]
+    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.3/gcc_64")
 
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
@@ -20,41 +20,27 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_package(TagLib REQUIRED)
     find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
     set(PROJECT_SOURCES
-            src/main.cpp
-            src/AboutPage.cpp
-            src/LoadingPage.cpp
-            src/MusicSyncTool.cpp
-            src/ShowDupe.cpp
-            src/Settings.cpp
-            src/OperationResult.cpp
-            src/AddRuleWidget.cpp
+            src/Logger.cpp
             src/LyricIgnoreRule.cpp
-            src/Settings.h
-            src/AboutPage.h
-            src/LoadingPage.h
-            src/MusicSyncTool.h
-            src/ShowDupe.h
-            src/OperationResult.h
-            src/MusicProperties.h
-            src/SettingEntity.h
-            src/AddRuleWidget.h
-            src/LyricIgnoreRule.h
-            src/AboutPage.ui
-            src/LoadingPage.ui
-            src/MusicSyncTool.ui
-            src/Settings.ui
-            src/ShowDupe.ui
-            src/OperationResult.ui
-            src/AddRuleWidget.ui
-            resources/MusicSyncTool.qrc
-            resources/MusicSyncTool.rc
-            src/SingleInstance.h
             src/MSTDataSource.cpp
-            src/MSTDataSource.h
             src/MSTMediaPlayer.cpp
-            src/MSTMediaPlayer.h
             src/QueryItem.cpp
-            src/QueryItem.h
+            src/Widgets/AboutPage/AboutPage.cpp
+            src/Widgets/AboutPage/AboutPage.ui
+            src/Widgets/AddRuleWidget/AddRuleWidget.cpp
+            src/Widgets/AddRuleWidget/AddRuleWidget.ui
+            src/Widgets/LoadingPage/LoadingPage.cpp
+            src/Widgets/LoadingPage/LoadingPage.ui
+            src/Widgets/MusicSyncTool/MSTMainWindow.cpp
+            src/Widgets/MusicSyncTool/MSTMainWindow.ui
+            src/Widgets/OperationResult/OperationResult.cpp
+            src/Widgets/OperationResult/OperationResult.ui
+            src/Widgets/Settings/Settings.cpp
+            src/Widgets/Settings/Settings.ui
+            src/Widgets/ShowDupe/ShowDupe.cpp
+            src/Widgets/ShowDupe/ShowDupe.ui
+            src/MSTFileManager.cpp
+            src/main.cpp
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -64,17 +50,17 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         )
 
         qt_add_translations(MusicSyncTool TS_FILES translations/Translation_en_US.ts translations/Translation_Wenyan.ts translations/Translation_zh_Hans.ts)
-#[[     Define target properties for Android with Qt 6 as:
-        set_property(TARGET MusicSyncTool APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-                     ${CMAKE_CURRENT_SOURCE_DIR}/android)
-        For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation]]
+        #[[     Define target properties for Android with Qt 6 as:
+                set_property(TARGET MusicSyncTool APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+                             ${CMAKE_CURRENT_SOURCE_DIR}/android)
+                For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation]]
     else ()
         if (ANDROID)
             add_library(MusicSyncTool SHARED
                     ${PROJECT_SOURCES}
             )
-#[[         Define properties for Android with Qt 5 after find_package() calls as:
-            set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")]]
+            #[[         Define properties for Android with Qt 5 after find_package() calls as:
+                        set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")]]
         else ()
             add_executable(MusicSyncTool
                     ${PROJECT_SOURCES}
@@ -85,9 +71,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_link_libraries(MusicSyncTool PRIVATE Qt6::Widgets Qt6::Sql Qt6::Multimedia Qt6::Concurrent)
     target_link_libraries(MusicSyncTool PRIVATE TagLib::tag)
 
-#[[  Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-     If you are developing for iOS or macOS you should consider setting an
-     explicit, fixed bundle identifier manually though.]]
+    #[[  Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+         If you are developing for iOS or macOS you should consider setting an
+         explicit, fixed bundle identifier manually though.]]
     if (${QT_VERSION} VERSION_LESS 6.1.0)
         set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.MusicSyncTool)
     endif ()
@@ -121,7 +107,36 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             "$<TARGET_FILE_DIR:MusicSyncTool>/translations"
             COMMENT "Copying translation files"
     )
-else()
+    
+    # 添加头文件包含路径
+    target_include_directories(MusicSyncTool PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AboutPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AddRuleWidget
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/LoadingPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/MusicSyncTool
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/OperationResult
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/Settings
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/ShowDupe
+    )
+    
+    # 添加编译选项以确保兼容性
+    target_compile_options(MusicSyncTool PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-fPIC>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+    )
+    
+    # 可选：添加单元测试支持
+    option(BUILD_TESTS "Build unit tests" OFF)
+    if(BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(UnitTest)
+        message(STATUS "Unit tests enabled. Use 'make test' or 'ctest' to run tests.")
+    endif()
+    
+else ()
     message(SEND_ERROR "This file is for Linux and MacOS only. For Windows please use Visual Studio.")
     message(SEND_ERROR "Or you can modify this file if you know what you are doing.")
-endif()
+endif ()
