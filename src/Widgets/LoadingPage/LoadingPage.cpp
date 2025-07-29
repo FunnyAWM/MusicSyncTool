@@ -1,5 +1,5 @@
 #include "LoadingPage.h"
-#include "../MusicSyncTool/MusicSyncTool.h"
+#include "../MusicSyncTool/MSTMainWindow.h"
 #include <cstdlib>
 #include <ctime>
 

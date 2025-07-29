@@ -1,5 +1,5 @@
 ﻿/**
- * @file MusicSyncTool.cpp
+ * @file MSTMainWindow.cpp
  * @brief 音乐同步工具主窗口类的实现文件
  * @details 实现音乐文件扫描、管理、播放和同步的核心功能，包括用户界面初始化、
  *          数据库操作、文件处理、多线程扫描、媒体播放控制等功能
@@ -11,7 +11,7 @@
 
 // ReSharper disable CppClangTidyConcurrencyMtUnsafe
 #pragma warning(disable : 6031)
-#include "MusicSyncTool.h"
+#include "MSTMainWindow.h"
 #include <algorithm>
 #include <iostream>
 #include <taglib/fileref.h>
@@ -30,17 +30,17 @@
  * @details 初始化音乐同步工具主窗口，包括数据库连接、设置加载、
  *          用户界面初始化、语言加载、媒体播放器初始化和信号槽连接
  */
-MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init)
-	QMainWindow(parent), translator(new QTranslator(this)), player(new MSTMediaPlayer(this)),
-	loading(new LoadingPage()) {
+MSTMainWindow::MSTMainWindow(QWidget* parent) : // NOLINT(*-pro-type-member-init)
+	QMainWindow(parent), translator(new QTranslator(this)), loading(new LoadingPage()),
+	player(new MSTMediaPlayer(this)) {
 	// 初始化页码相关变量
-	currentPage[0] = 1;  // 本地页码初始化为1
-	currentPage[1] = 1;  // 远程页码初始化为1
-	totalPage[0] = 1;    // 本地总页数初始化为1
-	totalPage[1] = 1;    // 远程总页数初始化为1
-	favoriteOnly[0] = false;  // 本地非收藏模式
-	favoriteOnly[1] = false;  // 远程非收藏模式
-	
+	currentPage[0] = 1; // 本地页码初始化为1
+	currentPage[1] = 1; // 远程页码初始化为1
+	totalPage[0] = 1; // 本地总页数初始化为1
+	totalPage[1] = 1; // 远程总页数初始化为1
+	favoriteOnly[0] = false; // 本地非收藏模式
+	favoriteOnly[1] = false; // 远程非收藏模式
+
 	initDatabase();
 	loadSettings();
 	initUI();
@@ -55,7 +55,7 @@ MusicSyncTool::MusicSyncTool(QWidget* parent) : // NOLINT(*-pro-type-member-init
  * @details 清理资源，包括关闭数据库连接、删除动态分配的对象，
  *          确保程序正常退出时没有内存泄漏
  */
-MusicSyncTool::~MusicSyncTool() {
+MSTMainWindow::~MSTMainWindow() {
 	if (local.isOpen()) {
 		local.closeDB();
 	}
@@ -72,7 +72,7 @@ MusicSyncTool::~MusicSyncTool() {
  * @details 为本地和远程数据源设置不同的连接名称，用于区分不同的数据库实例
  *          本地数据库用于存储本地路径的音乐文件信息，远程数据库用于存储远程路径的音乐文件信息
  */
-void MusicSyncTool::initDatabase() {
+void MSTMainWindow::initDatabase() {
 	local.setConnectionName("local");
 	remote.setConnectionName("remote");
 }
@@ -87,7 +87,7 @@ void MusicSyncTool::initDatabase() {
  *          - 歌词忽略规则列表
  *          如果文件不存在或格式错误，将加载默认设置
  */
-void MusicSyncTool::loadSettings() {
+void MSTMainWindow::loadSettings() {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
 		Logger::Warn("No settings file found, creating default setting file named settings.json");
@@ -131,7 +131,7 @@ void MusicSyncTool::loadSettings() {
  *          - favoriteTag: 空字符串
  *          - rules: 空的规则数组
  */
-void MusicSyncTool::loadDefaultSettings() {
+void MSTMainWindow::loadDefaultSettings() {
 	QFile file("settings.json");
 	file.open(QIODevice::WriteOnly);
 	QJsonObject obj;
@@ -151,7 +151,7 @@ void MusicSyncTool::loadDefaultSettings() {
  * @details 设置媒体播放器的初始音量为50%（0.5），
  *          为后续的音频播放功能做准备
  */
-void MusicSyncTool::initMediaPlayer() const { player->setVolume(0.5); }
+void MSTMainWindow::initMediaPlayer() const { player->setVolume(0.5); }
 
 /**
  * @brief 根据设置加载语言文件
@@ -159,7 +159,7 @@ void MusicSyncTool::initMediaPlayer() const { player->setVolume(0.5); }
  *          如果用户未设置语言，默认使用中文。加载翻译文件后，安装翻译器并重新翻译界面文本。
  *          支持的语言包括中文、英文等多种语言。
  */
-void MusicSyncTool::loadLanguage() {
+void MSTMainWindow::loadLanguage() {
 	QFile file(QApplication::applicationDirPath() + "/translations/langinfo.json");
 	if (!file.open(QIODevice::ReadOnly)) {
 		popError(PET::NOLANG);
@@ -193,9 +193,9 @@ void MusicSyncTool::loadLanguage() {
  *          - 初始化音量滑块和标签的默认值（50%）
  *          - 设置播放状态显示文本
  */
-void MusicSyncTool::initUI() {
+void MSTMainWindow::initUI() {
 	ui.setupUi(this);
-	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
+	this->setWindowIcon(QIcon(":/MSTMainWindow.ico"));
 	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.volumeSlider->setValue(50);
@@ -217,7 +217,7 @@ void MusicSyncTool::initUI() {
  *          - NOLANG: 找不到语言配置文件
  *          - DBERROR: 数据库操作错误
  */
-void MusicSyncTool::popError(const PET type) {
+void MSTMainWindow::popError(const PET type) {
 	switch (type) {
 	case PET::NOAUDIO:
 		QMessageBox::critical(this, tr("错误"), tr("没有选定音频！（提示：可以通过双击表格中的歌曲来预览）"));
@@ -260,7 +260,7 @@ void MusicSyncTool::popError(const PET type) {
  *          - STOPPED: 设置按钮文本为"播放"，显示"播放已结束"
  *          同时更新音量标签显示当前音量百分比
  */
-void MusicSyncTool::setMediaWidget(const PlayState state) const {
+void MSTMainWindow::setMediaWidget(const PlayState state) const {
 	if (state == PlayState::PLAYING) {
 		ui.playControl->setText(tr("暂停"));
 		setNowPlayingTitle(player->getNowPlaying());
@@ -284,7 +284,7 @@ void MusicSyncTool::setMediaWidget(const PlayState state) const {
  *          - REMOTE: 设置远程路径，创建远程文件管理器，打开远程数据库
  *          如果数据库打开失败，程序将退出
  */
-void MusicSyncTool::openFolder(const PathType path) {
+void MSTMainWindow::openFolder(const PathType path) {
 	const QString dir = QFileDialog::getExistingDirectory();
 	if (dir == "") {
 		return;
@@ -314,13 +314,12 @@ void MusicSyncTool::openFolder(const PathType path) {
  *          然后启动并发线程执行实际的音乐文件扫描和加载操作，
  *          避免阻塞用户界面
  */
-void MusicSyncTool::getMusic(PathType path, unsigned short page) {
-	Logger::Info("Scanning started");
+void MSTMainWindow::getMusic(PathType path, unsigned short page) {
 	if (local.getPath() == "" && remote.getPath() == "") {
 		Logger::Warn("No path selected");
 		return;
 	}
-	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::getMusicConcurrent, this, path, page);
+	QFuture<void> future = QtConcurrent::run(&MSTMainWindow::getMusicConcurrent, this, path, page);
 }
 
 /**
@@ -336,81 +335,99 @@ void MusicSyncTool::getMusic(PathType path, unsigned short page) {
  *          6. 计算分页信息并加载数据到表格控件
  *          7. 发出进度信号供UI更新
  */
-void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short page) {
+void MSTMainWindow::getMusicConcurrent(const PathType path, const unsigned short page) {
 	const clock_t start = clock();
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
-	emit ds.loadStarted();
-	
+	bool newFileFound = false;
+
 	// 设置当前页码
 	currentPage[path == PathType::LOCAL ? 0 : 1] = page;
 	favoriteOnly[path == PathType::LOCAL ? 0 : 1] = false;
-	QStringList pathForLog = (path == PathType::LOCAL ? local.getPath() : remote.getPath()).split("/");
-	QString logFileNameBuilder = "lastScan";
-	if (!pathForLog[0].isEmpty()) {
-		pathForLog[0].remove(":");
-	}
-	else {
-		pathForLog.removeFirst();
-	}
-	for (const QString& tempStr : pathForLog) {
-		logFileNameBuilder += " - " + tempStr;
-	}
-	logFileNameBuilder += ".log";
-	logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
-	QDateTime dateTime = getDateFromLog(logFileNameBuilder);
-	const QDir dir(path == PathType::LOCAL ? local.getPath() : remote.getPath());
+	if (page == 1) {
+		Logger::Info("Scanning started");
+		QStringList pathForLog = (path == PathType::LOCAL ? local.getPath() : remote.getPath()).split("/");
+		QString logFileNameBuilder = "lastScan";
+		if (!pathForLog[0].isEmpty()) {
+			pathForLog[0].remove(":");
+		}
+		else {
+			pathForLog.removeFirst();
+		}
+		for (const QString& tempStr : pathForLog) {
+			logFileNameBuilder += " - " + tempStr;
+		}
+		logFileNameBuilder += ".log";
+		logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
+		QDateTime dateTime = getDateFromLog(logFileNameBuilder);
+		const QDir dir(path == PathType::LOCAL ? local.getPath() : remote.getPath());
 
-	ds.initTable();
-	QStringList newFileList = dir.entryList(QDir::Files);
-	for (const QString& file : newFileList) {
-		if (!MSTFileManager::isFormatSupported(file)) {
-			// Remove unsupported files
-			newFileList.removeOne(file);
+		ds.initTable();
+		QStringList newFileList = dir.entryList(QDir::Files);
+		for (const QString& file : newFileList) {
+			if (!MSTFileManager::isFormatSupported(file)) {
+				// Remove unsupported files
+				newFileList.removeOne(file);
+			}
 		}
-	}
-	QList<QueryItem> tempList = ds.getAll({QueryRows::FILENAME});
-	QStringList oldFileList;
-	for (const QueryItem& item : tempList) {
-		oldFileList.append(item.getFileName());
-	}
-	newFileList.sort();
-	oldFileList.sort();
-	QStringList deleteList;
-	for (int i = 0; i < oldFileList.size(); i++) {
-		if (!newFileList.contains(oldFileList.at(i))) {
-			deleteList.append(oldFileList.at(i));
-			oldFileList.removeAt(i);
-			i = i - 2 < -1 ? -1 : i - 2;
+		if (!newFileList.isEmpty()) {
+			emit ds.loadStarted();
+			newFileFound = true;
 		}
-	}
-	for (int i = 0; i < newFileList.size(); i++) {
-		if (oldFileList.contains(newFileList.at(i)) || !MSTFileManager::isFormatSupported(newFileList.at(i))) {
-			newFileList.removeAt(i);
-			i = i - 2 < 0 ? -1 : i - 2;
+		QList<QueryItem> tempList = ds.getAll({QueryRows::FILENAME});
+		QStringList oldFileList;
+		for (const QueryItem& item : tempList) {
+			oldFileList.append(item.getFileName());
 		}
-	}
-	if (!ds.deleteMusic(deleteList)) {
-		popError(PET::DBERROR);
-		exit(EXIT_FAILURE);
-	}
-	newFileList.removeOne("musicInfo.db");
-	emit total(newFileList.size() + oldFileList.size());
-	emit current(0);
-	const TagLib::String key(entity.favoriteTag.toStdString());
-	for (int i = 0; i < newFileList.size(); i++) {
-		emit current(i);
-		QString file = newFileList.at(i).toUtf8();
-		if (!MSTFileManager::isFormatSupported(file)) {
-			continue;
+		newFileList.sort();
+		oldFileList.sort();
+		QStringList deleteList;
+		for (int i = 0; i < oldFileList.size(); i++) {
+			if (!newFileList.contains(oldFileList.at(i))) {
+				deleteList.append(oldFileList.at(i));
+				oldFileList.removeAt(i);
+				i = i - 2 < -1 ? -1 : i - 2;
+			}
 		}
-		if (!ds.addMusic(file)) {
-			Logger::Warn("Error adding music: " + file);
-			addToErrorList(file, LoadErrorType::FNS);
+		for (int i = 0; i < newFileList.size(); i++) {
+			if (oldFileList.contains(newFileList.at(i)) || !MSTFileManager::isFormatSupported(newFileList.at(i))) {
+				newFileList.removeAt(i);
+				i = i - 2 < 0 ? -1 : i - 2;
+			}
 		}
+		if (!ds.deleteMusic(deleteList)) {
+			popError(PET::DBERROR);
+			exit(EXIT_FAILURE);
+		}
+		newFileList.removeOne("musicInfo.db");
+		emit total(newFileList.size() + oldFileList.size());
+		emit current(0);
+		const TagLib::String key(entity.favoriteTag.toStdString());
+		for (int i = 0; i < newFileList.size(); i++) {
+			emit current(i);
+			QString file = newFileList.at(i).toUtf8();
+			if (!MSTFileManager::isFormatSupported(file)) {
+				continue;
+			}
+			if (!ds.addMusic(file)) {
+				Logger::Warn("Error adding music: " + file);
+				addToErrorList(file, LoadErrorType::FNS);
+			}
+		}
+		setFavorite(path, key, dateTime);
+		setRuleHit(path, entity.rules, dateTime);
+		dateTime = QDateTime::currentDateTime();
+		writeLog(logFileNameBuilder, dateTime);
+		if (newFileFound) {
+			emit ds.loadFinished();
+		}
+		const clock_t end = clock();
+		Logger::Info(
+			"Scanning finished in " + QString::number(static_cast<double>(end - start) / CLOCKS_PER_SEC) + " seconds");
 	}
-	setFavorite(path, key, dateTime);
-	setRuleHit(path, entity.rules, dateTime);
 	totalPage[path == PathType::LOCAL ? 0 : 1] = static_cast<short>(ds.getCount() / ds.getPageSize() + 1);
+	(path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
+		->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
+			QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
 	const auto lastPageSize = static_cast<short>(ds.getCount() % ds.getPageSize());
 	emit total(ds.getPageSize());
 	QList<QueryItem> items =
@@ -434,15 +451,6 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
 		targetTable->setItem(progress, 5, new QTableWidgetItem(QString::number(item.getTrack())));
 		progress++;
 	}
-	const clock_t end = clock();
-	Logger::Info(
-		"Scanning finished in " + QString::number(static_cast<double>(end - start) / CLOCKS_PER_SEC) + " seconds");
-	(path == PathType::LOCAL ? ui.pageLocal : ui.pageRemote)
-		->setText(QString::number(currentPage[(path == PathType::LOCAL ? 0 : 1)]) + "/" +
-			QString::number(totalPage[(path == PathType::LOCAL ? 0 : 1)]));
-	dateTime = QDateTime::currentDateTime();
-	writeLog(logFileNameBuilder, dateTime);
-	emit ds.loadFinished();
 }
 
 /**
@@ -454,7 +462,7 @@ void MusicSyncTool::getMusicConcurrent(const PathType path, const unsigned short
  *          搜索结果将显示在相应的表格控件中，包括标题、艺术家、
  *          专辑、流派、年份和音轨号等信息
  */
-void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
+void MSTMainWindow::searchMusic(const PathType path, const QString& text) {
 	if (text == "") {
 		getMusic(path, 1);
 		return;
@@ -484,7 +492,7 @@ void MusicSyncTool::searchMusic(const PathType path, const QString& text) {
  *          - DISKFULL: 磁盘已满
  *          错误信息将包含操作类型和具体的错误原因
  */
-void MusicSyncTool::addToErrorList(const QString& file, const FileErrorType error) {
+void MSTMainWindow::addToErrorList(const QString& file, const FileErrorType error) {
 	switch (error) {
 	case FileErrorType::DUPLICATE:
 		errorList.append(tr("复制") + file + tr("失败：文件已存在"));
@@ -507,7 +515,7 @@ void MusicSyncTool::addToErrorList(const QString& file, const FileErrorType erro
  *          - TAGERR: 标签错误
  *          错误信息将包含操作类型和具体的错误原因
  */
-void MusicSyncTool::addToErrorList(const QString& file, const LoadErrorType error) {
+void MSTMainWindow::addToErrorList(const QString& file, const LoadErrorType error) {
 	switch (error) {
 	case LoadErrorType::FNS:
 		errorList.append(tr("加载") + file + tr("失败：文件不可扫描"));
@@ -526,7 +534,7 @@ void MusicSyncTool::addToErrorList(const QString& file, const LoadErrorType erro
  *          如果未选择路径，将显示错误提示。通过ShowDupe对话框展示
  *          重复文件列表，让用户选择要删除的重复文件
  */
-QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
+QStringList MSTMainWindow::getDuplicatedMusic(const PathType path) {
 	const QString selectedPath = path == PathType::LOCAL ? local.getPath() : remote.getPath();
 	if (selectedPath == "") {
 		Logger::Warn("No path selected");
@@ -566,7 +574,7 @@ QStringList MusicSyncTool::getDuplicatedMusic(const PathType path) {
  *          查询对应的文件名列表。如果没有选中任何行或表格为空，
  *          返回空列表
  */
-QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
+QStringList MSTMainWindow::getSelectedMusic(const PathType path) {
 	QSet<int> selectedRows;
 	const QTableWidget* const table = path == PathType::LOCAL ? ui.tableWidgetLocal : ui.tableWidgetRemote;
 	if (table->rowCount() == 0) {
@@ -606,7 +614,7 @@ QStringList MusicSyncTool::getSelectedMusic(const PathType path) {
  *          允许用户修改应用程序的各种配置选项，包括语言、喜爱标签、
  *          排序方式和歌词忽略规则等
  */
-void MusicSyncTool::showSettings() const {
+void MSTMainWindow::showSettings() const {
 	const auto page = new Settings();
 	connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
 	page->show();
@@ -621,7 +629,7 @@ void MusicSyncTool::showSettings() const {
  *          设置包含该标签的音乐文件为喜爱状态。这个操作通常在
  *          音乐文件扫描完成后执行
  */
-void MusicSyncTool::setFavorite(const PathType path, const TagLib::String& key,
+void MSTMainWindow::setFavorite(const PathType path, const TagLib::String& key,
                                 const QDateTime& dateTime) {
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
 	if (entity.favoriteTag != "") {
@@ -638,7 +646,7 @@ void MusicSyncTool::setFavorite(const PathType path, const TagLib::String& key,
  *          检查音乐文件是否匹配这些规则，并设置相应的命中状态。
  *          这个操作通常在音乐文件扫描完成后执行
  */
-void MusicSyncTool::setRuleHit(const PathType path, const QList<LyricIgnoreRule>& rules,
+void MSTMainWindow::setRuleHit(const PathType path, const QList<LyricIgnoreRule>& rules,
                                const QDateTime& dateTime) {
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
 	if (!rules.isEmpty()) {
@@ -654,7 +662,7 @@ void MusicSyncTool::setRuleHit(const PathType path, const QList<LyricIgnoreRule>
  *          如果日志目录不存在则创建目录。如果日志文件不存在或
  *          时间格式无效，返回Unix时间戳起始时间，表示需要扫描所有文件
  */
-QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
+QDateTime MSTMainWindow::getDateFromLog(const QString& log) {
 	QFile file(log);
 	QDateTime dateTime;
 	const QString logDir = QCoreApplication::applicationDirPath() + "/log";
@@ -687,7 +695,7 @@ QDateTime MusicSyncTool::getDateFromLog(const QString& log) {
  * @details 将当前扫描完成的时间写入指定的日志文件，
  *          用于下次启动时判断哪些文件需要重新扫描
  */
-void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime) {
+void MSTMainWindow::writeLog(const QString& log, const QDateTime& dateTime) {
 	QFile file(log);
 	QTextStream out(&file);
 	if (file.open(QIODevice::WriteOnly)) {
@@ -707,7 +715,7 @@ void MusicSyncTool::writeLog(const QString& log, const QDateTime& dateTime) {
  *          - 歌词忽略规则列表
  *          如果排序设置发生变化，会触发界面刷新以应用新的排序
  */
-void MusicSyncTool::saveSettings(const set& entityParam) {
+void MSTMainWindow::saveSettings(const set& entityParam) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
 		Logger::Fatal("Error opening settings file");
@@ -786,39 +794,39 @@ void MusicSyncTool::saveSettings(const set& entityParam) {
  *          6. 发出进度信号更新UI
  *          7. 处理文件已存在、找不到歌词等错误情况
  */
-void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList, const QString& target) {
+void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList, const QString& target) {
 	// 使用MSTFileManager的新方法进行复制，保持原有的信号发射
 	MSTFileManager::copyMusicFiles(
 		source, fileList, target, entity.ignoreLyric,
 		// 进度回调
-		[this](int index) {
+		[this](const int index) {
 			emit current(index);
 		},
 		// 错误回调
-		[this](const QString& fileName, int errorType) {
+		[this](const QString& fileName, const int errorType) {
 			switch (errorType) {
-				case 0: // DUPLICATE
-					addToErrorList(fileName, FileErrorType::DUPLICATE);
-					break;
-				case 1: // LNF
-					addToErrorList(fileName, FileErrorType::LNF);
-					break;
-				case 2: // DISKFULL
-					addToErrorList(fileName, FileErrorType::DISKFULL);
-					break;
+			case 0: // DUPLICATE
+				addToErrorList(fileName, FileErrorType::DUPLICATE);
+				break;
+			case 1: // LNF
+				addToErrorList(fileName, FileErrorType::LNF);
+				break;
+			case 2: // DISKFULL
+				addToErrorList(fileName, FileErrorType::DISKFULL);
+				break;
 			}
 		},
 		// 开始回调
-		[this]() {
+		[this] {
 			emit started();
 		},
 		// 完成回调
-		[this]() {
+		[this] {
 			emit finished();
 			emit copyFinished(OperationType::COPY);
 		},
 		// 总数回调
-		[this](int total) {
+		[this](const int total) {
 			emit this->total(total);
 		}
 	);
@@ -833,7 +841,7 @@ void MusicSyncTool::copyMusic(const QString& source, const QStringList& fileList
  *          如果没有错误，直接刷新界面；如果有错误，显示错误详情。
  *          操作完成后清空错误列表并刷新音乐列表显示
  */
-void MusicSyncTool::showOperationResult(const OperationType type) {
+void MSTMainWindow::showOperationResult(const OperationType type) {
 	const auto result = new OperationResult();
 	switch (type) {
 	case OperationType::COPY:
@@ -890,7 +898,7 @@ void MusicSyncTool::showOperationResult(const OperationType type) {
  * @details 在用户界面上显示当前正在播放的音乐文件名，
  *          更新播放状态标签的文本内容
  */
-void MusicSyncTool::setNowPlayingTitle(const QString& file) const { ui.nowPlaying->setText(tr("正在播放：") + file); }
+void MSTMainWindow::setNowPlayingTitle(const QString& file) const { ui.nowPlaying->setText(tr("正在播放：") + file); }
 /**
  * @brief 获取当前设置的语言
  * @return 语言字符串
@@ -898,7 +906,7 @@ void MusicSyncTool::setNowPlayingTitle(const QString& file) const { ui.nowPlayin
  *          用于语言切换和界面本地化
  */
 [[nodiscard]]
-QString MusicSyncTool::getLanguage() const {
+QString MSTMainWindow::getLanguage() const {
 	return entity.language;
 }
 
@@ -911,7 +919,7 @@ QString MusicSyncTool::getLanguage() const {
  *          3. 设置可用空间显示
  *          4. 显示加载操作结果
  */
-void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
+void MSTMainWindow::on_actionRemote_triggered(bool triggered) {
 	openFolder(PathType::REMOTE);
 	if (remote.getPath() == "") {
 		return;
@@ -930,7 +938,7 @@ void MusicSyncTool::on_actionRemote_triggered(bool triggered) {
  *          3. 设置可用空间显示
  *          4. 显示加载操作结果
  */
-void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
+void MSTMainWindow::on_actionLocal_triggered(bool triggered) {
 	openFolder(PathType::LOCAL);
 	if (local.getPath() == "") {
 		return;
@@ -946,7 +954,7 @@ void MusicSyncTool::on_actionLocal_triggered(bool triggered) {
  * @details 响应用户点击设置菜单，打开设置对话框
  *          允许用户修改应用程序的各种配置选项
  */
-void MusicSyncTool::on_actionSettings_triggered(bool triggered) const { showSettings(); }
+void MSTMainWindow::on_actionSettings_triggered(bool triggered) const { showSettings(); }
 /**
  * @brief 关于操作的槽函数
  * @param triggered 触发状态（未使用）
@@ -954,7 +962,7 @@ void MusicSyncTool::on_actionSettings_triggered(bool triggered) const { showSett
  *          包括版本信息、开发者信息等内容
  */
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
+void MSTMainWindow::on_actionAbout_triggered(bool triggered) {
 	// NOLINT(*-convert-member-functions-to-static)
 	AboutPage about;
 	about.exec();
@@ -968,7 +976,7 @@ void MusicSyncTool::on_actionAbout_triggered(bool triggered) {
  *          3. 检查是否有选中的文件
  *          4. 启动并发线程执行复制操作
  */
-void MusicSyncTool::on_copyToRemote_clicked() {
+void MSTMainWindow::on_copyToRemote_clicked() {
 	if (local.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -981,7 +989,7 @@ void MusicSyncTool::on_copyToRemote_clicked() {
 	for (QString& file : fileList) {
 		file = file + ":" + (local.getRuleHit(file) ? "1" : "0"); // 添加规则命中状态
 	}
-	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, local.getPath(), fileList,
+	QFuture<void> future = QtConcurrent::run(&MSTMainWindow::copyMusic, this, local.getPath(), fileList,
 	                                         remote.getPath());
 }
 
@@ -993,7 +1001,7 @@ void MusicSyncTool::on_copyToRemote_clicked() {
  *          3. 检查是否有选中的文件
  *          4. 启动并发线程执行复制操作
  */
-void MusicSyncTool::on_copyToLocal_clicked() {
+void MSTMainWindow::on_copyToLocal_clicked() {
 	if (remote.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1006,7 +1014,7 @@ void MusicSyncTool::on_copyToLocal_clicked() {
 	for (QString& file : fileList) {
 		file = file + ":" + (remote.getRuleHit(file) ? "1" : "0"); // 添加规则命中状态
 	}
-	QFuture<void> future = QtConcurrent::run(&MusicSyncTool::copyMusic, this, remote.getPath(), fileList,
+	QFuture<void> future = QtConcurrent::run(&MSTMainWindow::copyMusic, this, remote.getPath(), fileList,
 	                                         local.getPath());
 }
 
@@ -1016,38 +1024,38 @@ void MusicSyncTool::on_copyToLocal_clicked() {
  * @details 响应用户点击本地重复音乐扫描菜单，
  *          在本地路径中查找重复的音乐文件并显示结果
  */
-void MusicSyncTool::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(PathType::LOCAL); }
+void MSTMainWindow::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(PathType::LOCAL); }
 /**
  * @brief 远程重复音乐扫描的槽函数
  * @param triggered 触发状态（未使用）
  * @details 响应用户点击远程重复音乐扫描菜单，
  *          在远程路径中查找重复的音乐文件并显示结果
  */
-void MusicSyncTool::on_actionDupeRemote_triggered(bool triggered) { getDuplicatedMusic(PathType::REMOTE); }
+void MSTMainWindow::on_actionDupeRemote_triggered(bool triggered) { getDuplicatedMusic(PathType::REMOTE); }
 /**
  * @brief 刷新本地音乐列表的槽函数
  * @details 响应用户点击本地刷新按钮，重新扫描本地路径
  *          并重新加载音乐列表到第一页
  */
-void MusicSyncTool::on_refreshLocal_clicked() { getMusic(PathType::LOCAL, 1); }
+void MSTMainWindow::on_refreshLocal_clicked() { getMusic(PathType::LOCAL, 1); }
 /**
  * @brief 刷新远程音乐列表的槽函数
  * @details 响应用户点击远程刷新按钮，重新扫描远程路径
  *          并重新加载音乐列表到第一页
  */
-void MusicSyncTool::on_refreshRemote_clicked() { getMusic(PathType::REMOTE, 1); }
+void MSTMainWindow::on_refreshRemote_clicked() { getMusic(PathType::REMOTE, 1); }
 /**
  * @brief 本地搜索的槽函数
  * @details 响应用户在本地搜索框中按下回车键，
  *          根据输入的文本在本地音乐列表中进行搜索
  */
-void MusicSyncTool::on_searchLocal_returnPressed() { searchMusic(PathType::LOCAL, ui.searchLocal->text()); }
+void MSTMainWindow::on_searchLocal_returnPressed() { searchMusic(PathType::LOCAL, ui.searchLocal->text()); }
 /**
  * @brief 远程搜索的槽函数
  * @details 响应用户在远程搜索框中按下回车键，
  *          根据输入的文本在远程音乐列表中进行搜索
  */
-void MusicSyncTool::on_searchRemote_returnPressed() { searchMusic(PathType::REMOTE, ui.searchRemote->text()); }
+void MSTMainWindow::on_searchRemote_returnPressed() { searchMusic(PathType::REMOTE, ui.searchRemote->text()); }
 /**
  * @brief 本地表格双击预览的槽函数
  * @param row 双击的行号
@@ -1055,7 +1063,7 @@ void MusicSyncTool::on_searchRemote_returnPressed() { searchMusic(PathType::REMO
  * @details 响应用户双击本地音乐表格中的某一行，
  *          设置该音乐文件的总时长并开始播放预览
  */
-void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) {
+void MSTMainWindow::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) {
 	setTotalLength(PathType::LOCAL, row);
 }
 
@@ -1066,7 +1074,7 @@ void MusicSyncTool::on_tableWidgetLocal_cellDoubleClicked(const int row, int col
  * @details 响应用户双击远程音乐表格中的某一行，
  *          设置该音乐文件的总时长并开始播放预览
  */
-void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) {
+void MSTMainWindow::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) {
 	setTotalLength(PathType::REMOTE, row);
 }
 
@@ -1076,7 +1084,7 @@ void MusicSyncTool::on_tableWidgetRemote_cellDoubleClicked(const int row, int co
  * @details 响应用户点击退出菜单，正常退出应用程序
  */
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void MusicSyncTool::on_actionExit_triggered(bool triggered) {
+void MSTMainWindow::on_actionExit_triggered(bool triggered) {
 	exit(EXIT_SUCCESS);
 } // NOLINT(*-convert-member-functions-to-static)
 
@@ -1086,7 +1094,7 @@ void MusicSyncTool::on_actionExit_triggered(bool triggered) {
  * @details 响应用户点击清除日志文件菜单，显示确认对话框，
  *          如果用户确认则清除所有扫描日志文件，并显示完成提示
  */
-void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
+void MSTMainWindow::on_actionClean_log_files_triggered(bool triggered) {
 	const QMessageBox::StandardButton reply =
 		QMessageBox::warning(this, tr("提示"), tr("确定要清除所有日志文件吗？"), QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::No) {
@@ -1103,7 +1111,7 @@ void MusicSyncTool::on_actionClean_log_files_triggered(bool triggered) {
  *          - 如果正在播放，则暂停播放并更新界面状态
  *          - 如果已暂停或停止，则开始播放并更新界面状态
  */
-void MusicSyncTool::on_playControl_clicked() {
+void MSTMainWindow::on_playControl_clicked() {
 	if (player->getNowPlaying().isEmpty()) {
 		popError(PET::NOAUDIO);
 		return;
@@ -1124,7 +1132,7 @@ void MusicSyncTool::on_playControl_clicked() {
  * @details 根据当前播放位置更新播放进度滑块和时间显示，
  *          将播放时间格式化为分:秒的形式，同时显示当前时间和总时长
  */
-void MusicSyncTool::setSliderPosition(const qint64 position) const {
+void MSTMainWindow::setSliderPosition(const qint64 position) const {
 	ui.playSlider->setValue(static_cast<int>(position));
 	QString progress;
 	if (position % 60000 / 1000 < 10) {
@@ -1149,7 +1157,7 @@ void MusicSyncTool::setSliderPosition(const qint64 position) const {
  * @details 响应用户拖动播放进度滑块，设置播放器的播放位置
  *          并更新时间显示
  */
-void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
+void MSTMainWindow::on_playSlider_sliderMoved(const int position) const {
 	player->setPosition(position);
 	if (position % 60000 / 1000 < 10) {
 		ui.playProgress->setText(QString::number(position / 60000) + ":0" + QString::number(position % 60000 / 1000));
@@ -1163,11 +1171,11 @@ void MusicSyncTool::on_playSlider_sliderMoved(const int position) const {
  * @brief 播放滑块按下的槽函数
  * @details 响应用户按下播放进度滑块，立即设置播放器位置到滑块当前值
  */
-void MusicSyncTool::on_playSlider_sliderPressed() const { player->setPosition(ui.playSlider->value()); }
+void MSTMainWindow::on_playSlider_sliderPressed() const { player->setPosition(ui.playSlider->value()); }
 /*
  * @brief Slots for volume slider
  */
-void MusicSyncTool::on_volumeSlider_sliderPressed() const {
+void MSTMainWindow::on_volumeSlider_sliderPressed() const {
 	player->setVolume(static_cast<float>(ui.volumeSlider->value() / 100.0));
 	const QString text = tr("音量：") + QString::number(ui.volumeSlider->value()) + "%";
 	ui.volumeLabel->setText(text);
@@ -1177,16 +1185,16 @@ void MusicSyncTool::on_volumeSlider_sliderPressed() const {
  * @brief 本地收藏按钮的槽函数
  * @details 响应用户点击本地收藏按钮，显示第一页的收藏音乐列表
  */
-void MusicSyncTool::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(PathType::LOCAL, 1); }
+void MSTMainWindow::on_favoriteOnlyLocal_clicked() { getFavoriteMusic(PathType::LOCAL, 1); }
 /**
  * @brief 远程收藏按钮的槽函数
  * @details 响应用户点击远程收藏按钮，显示第一页的收藏音乐列表
  */
-void MusicSyncTool::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(PathType::REMOTE, 1); }
+void MSTMainWindow::on_favoriteOnlyRemote_clicked() { getFavoriteMusic(PathType::REMOTE, 1); }
 /*
  * @brief Slots for last page switch(local)
  */
-void MusicSyncTool::on_lastPageLocal_clicked() {
+void MSTMainWindow::on_lastPageLocal_clicked() {
 	if (local.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1206,7 +1214,7 @@ void MusicSyncTool::on_lastPageLocal_clicked() {
 /*
  * @brief Slots for next page switch(local)
  */
-void MusicSyncTool::on_nextPageLocal_clicked() {
+void MSTMainWindow::on_nextPageLocal_clicked() {
 	if (local.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1226,7 +1234,7 @@ void MusicSyncTool::on_nextPageLocal_clicked() {
 /*
  * @brief Slots for last page switch(remote)
  */
-void MusicSyncTool::on_lastPageRemote_clicked() {
+void MSTMainWindow::on_lastPageRemote_clicked() {
 	if (remote.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1246,7 +1254,7 @@ void MusicSyncTool::on_lastPageRemote_clicked() {
 /*
  * @brief Slots for next page switch(remote)
  */
-void MusicSyncTool::on_nextPageRemote_clicked() {
+void MSTMainWindow::on_nextPageRemote_clicked() {
 	if (remote.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1266,7 +1274,7 @@ void MusicSyncTool::on_nextPageRemote_clicked() {
 /*
  * @brief End media playback
  */
-void MusicSyncTool::endMedia(const QMediaPlayer::PlaybackState state) const {
+void MSTMainWindow::endMedia(const QMediaPlayer::PlaybackState state) const {
 	if (state == QMediaPlayer::PlaybackState::StoppedState) {
 		ui.playControl->setText(tr("播放"));
 		ui.nowPlaying->setText(tr("播放已结束。"));
@@ -1278,7 +1286,7 @@ void MusicSyncTool::endMedia(const QMediaPlayer::PlaybackState state) const {
 /*
  * @brief Slots for volume slider
  */
-void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
+void MSTMainWindow::on_volumeSlider_sliderMoved(const int position) const {
 	player->setVolume(static_cast<float>(position / 100.0));
 	const QString text = tr("音量：") + QString::number(position) + "%";
 	ui.volumeLabel->setText(text);
@@ -1287,9 +1295,9 @@ void MusicSyncTool::on_volumeSlider_sliderMoved(const int position) const {
 /*
  * @brief Slots for volume slider
  */
-void MusicSyncTool::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
+void MSTMainWindow::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
 
-void MusicSyncTool::on_copyFinished(OperationType op) const {
+void MSTMainWindow::on_copyFinished(OperationType op) const {
 	if (local.getPath() != "") {
 		setAvailableSpace(PathType::LOCAL);
 	}
@@ -1306,7 +1314,7 @@ void MusicSyncTool::on_copyFinished(OperationType op) const {
  *          获取音频文件的时长信息并配置播放滑块的最大值，
  *          开始播放选定的音乐文件
  */
-void MusicSyncTool::setTotalLength(const PathType path, const int row) {
+void MSTMainWindow::setTotalLength(const PathType path, const int row) {
 	const QTableWidget& widget = path == PathType::LOCAL ? *ui.tableWidgetLocal : *ui.tableWidgetRemote;
 	auto& ds = path == PathType::LOCAL ? local : remote;
 	// QString sql = "SELECT fileName FROM musicInfo WHERE";
@@ -1347,7 +1355,7 @@ void MusicSyncTool::setTotalLength(const PathType path, const int row) {
  *          支持分页显示。如果没有设置收藏标签，显示错误提示。
  *          更新表格显示和分页信息
  */
-void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short page) {
+void MSTMainWindow::getFavoriteMusic(const PathType path, const unsigned short page) {
 	if (path == PathType::LOCAL && local.getPath() == "") {
 		popError(PET::NPS);
 		return;
@@ -1360,10 +1368,10 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
 		popError(PET::NFT);
 		return;
 	}
-	
+
 	// 设置当前页码
 	currentPage[path == PathType::LOCAL ? 0 : 1] = page;
-	
+
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
 	const auto fileList = ds.getFavorite(page, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
 	const qsizetype totalSize = fileList.size();
@@ -1403,7 +1411,7 @@ void MusicSyncTool::getFavoriteMusic(const PathType path, const unsigned short p
  *          - 错误处理的信号连接
  *          确保各组件能够正确响应事件和更新状态
  */
-void MusicSyncTool::connectSlots() const {
+void MSTMainWindow::connectSlots() const {
 	connect(&local, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
 	connect(&remote, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
 	connect(&local, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
@@ -1412,16 +1420,16 @@ void MusicSyncTool::connectSlots() const {
 	connect(&remote, &MSTDataSource::loadStarted, loading, &LoadingPage::showPage);
 	connect(&local, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
 	connect(&remote, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
-	connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::showOperationResult);
+	connect(this, &MSTMainWindow::copyFinished, this, &MSTMainWindow::showOperationResult);
 	connect(&local, QOverload<OperationType>::of(&MSTDataSource::loadFinished), this,
-	        &MusicSyncTool::showOperationResult);
+	        &MSTMainWindow::showOperationResult);
 	connect(&remote, QOverload<OperationType>::of(&MSTDataSource::loadFinished), this,
-	        &MusicSyncTool::showOperationResult);
-	connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged, this, &MusicSyncTool::setSliderPosition);
-	connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged, this, &MusicSyncTool::endMedia);
-	connect(this, &MusicSyncTool::addToErrorListConcurrent, this,
-	        QOverload<const QString&, LoadErrorType>::of(&MusicSyncTool::addToErrorList));
-	connect(this, &MusicSyncTool::copyFinished, this, &MusicSyncTool::on_copyFinished);
+	        &MSTMainWindow::showOperationResult);
+	connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged, this, &MSTMainWindow::setSliderPosition);
+	connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged, this, &MSTMainWindow::endMedia);
+	connect(this, &MSTMainWindow::addToErrorListConcurrent, this,
+	        QOverload<const QString&, LoadErrorType>::of(&MSTMainWindow::addToErrorList));
+	connect(this, &MSTMainWindow::copyFinished, this, &MSTMainWindow::on_copyFinished);
 }
 
 /**
@@ -1431,7 +1439,7 @@ void MusicSyncTool::connectSlots() const {
  *          并在用户界面上显示可用空间大小，帮助用户了解
  *          磁盘使用情况
  */
-void MusicSyncTool::setAvailableSpace(const PathType path) const {
+void MSTMainWindow::setAvailableSpace(const PathType path) const {
 	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
 	const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
 	const QString textBuilder = tr("可用空间：") + manager->getSpaceInfo();
@@ -1444,7 +1452,7 @@ void MusicSyncTool::setAvailableSpace(const PathType path) const {
  *          如果日志目录不存在则直接返回。这个操作通常在用户
  *          手动清理或需要重新完整扫描时执行
  */
-void MusicSyncTool::cleanLog() {
+void MSTMainWindow::cleanLog() {
 	const QDir logDir("log");
 	if (!logDir.exists()) {
 		return;

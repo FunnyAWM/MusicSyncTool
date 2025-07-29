@@ -35,7 +35,7 @@
     <QtMoc Include="src\Widgets\LoadingPage\LoadingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\Widgets\MusicSyncTool\MusicSyncTool.h">
+    <QtMoc Include="src\Widgets\MusicSyncTool\MSTMainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\Widgets\AboutPage\AboutPage.h">
@@ -102,7 +102,7 @@
     <ClCompile Include="src\Widgets\LoadingPage\LoadingPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Widgets\MusicSyncTool\MusicSyncTool.cpp">
+    <ClCompile Include="src\Widgets\MusicSyncTool\MSTMainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Widgets\OperationResult\OperationResult.cpp">
@@ -143,7 +143,7 @@
     <QtUic Include="src\Widgets\LoadingPage\LoadingPage.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="src\Widgets\MusicSyncTool\MusicSyncTool.ui">
+    <QtUic Include="src\Widgets\MusicSyncTool\MSTMainWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="src\Widgets\OperationResult\OperationResult.ui">

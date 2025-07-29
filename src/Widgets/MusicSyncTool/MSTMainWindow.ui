@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MusicSyncToolClass</class>
- <widget class="QMainWindow" name="MusicSyncToolClass">
+ <class>MSTMainWindowClass</class>
+ <widget class="QMainWindow" name="MSTMainWindowClass">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -492,13 +492,13 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources/MusicSyncTool.qrc"/>
+  <include location="../../../resources/MusicSyncTool.qrc"/>
  </resources>
  <connections>
   <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
-   <receiver>MusicSyncToolClass</receiver>
+   <receiver>MSTMainWindowClass</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

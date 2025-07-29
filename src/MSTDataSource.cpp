@@ -143,8 +143,8 @@ void MSTDataSource::execQuery() { query.exec(); }
  * @param timeFromLog 日志时间，仅处理此时间之后修改的文件
  */
 void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog) {
-	emit loadStarted(); // 发出加载开始信号
-
+	
+	QStringList newFileList;
 	// 获取所有音乐文件名
 	prepareStatement("SELECT fileName FROM musicInfo");
 	execQuery();
@@ -152,16 +152,25 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog
 	while (query.next()) {
 		fileName.append(query.value(0).toString());
 	}
-	emit totalSize(fileName.count()); // 发出总数量信号
+	if (fileName.isEmpty()) {
+		Logger::Info("No music files found in database.");
+		return; // 如果没有音乐文件，直接返回
+	}
+	for (const auto& file : fileName) {
+		if (QFile(path + "/" + file).fileTime(QFileDevice::FileModificationTime) > timeFromLog) {
+			newFileList.append(file); // 仅处理修改时间在日志之后的文件
+		}
+	}
+	if (newFileList.isEmpty()) {
+		Logger::Info("No new music files found since last log time.");
+		return; // 如果没有新文件，直接返回
+	}
+	emit loadStarted(); // 发出加载开始信号
+	emit totalSize(newFileList.count()); // 发出总数量信号
 
 	int i = 0;
-	for (auto& file : fileName) {
+	for (auto& file : newFileList) {
 		emit currentProgress(i); // 发出当前进度信号
-
-		// 检查文件修改时间，跳过旧文件
-		if (QFile(path + "/" + file).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
-			continue;
-		}
 
 		// 根据平台选择合适的字符编码读取文件
 		TagLib::FileRef f;
@@ -191,10 +200,24 @@ void MSTDataSource::setFavorite(const QString& tag, const QDateTime& timeFromLog
  * @param timeFromLog 日志时间，仅处理此时间之后修改的文件
  */
 void MSTDataSource::setRuleHit(const QList<LyricIgnoreRule>& rules, const QDateTime& timeFromLog) {
-	emit loadStarted(); // 发出加载开始信号
+	QList<QueryItem> newItems;
+	
 	QList<QueryItem> items = getAll(); // 获取所有音乐项
-
-	for (auto& item : items) {
+	if (items.isEmpty()) {
+		Logger::Info("No music items found in database.");
+		return; // 如果没有音乐项，直接返回
+	}
+	for (const auto& item : items) {
+		if (QFile(path + "/" + item.getFileName()).fileTime(QFileDevice::FileModificationTime) > timeFromLog) {
+			newItems.append(item); // 仅处理修改时间在日志之后的音乐项
+		}
+	}
+	if (newItems.isEmpty()) {
+		Logger::Info("No new music items found since last log time.");
+		return; // 如果没有新音乐项，直接返回
+	}
+	emit loadStarted(); // 发出加载开始信号
+	for (auto& item : newItems) {
 		// 检查文件修改时间，跳过旧文件
 		if (QFile(path + "/" + item.getFileName()).fileTime(QFileDevice::FileModificationTime) <= timeFromLog) {
 			continue;
@@ -540,7 +563,7 @@ QStringList MSTDataSource::getFileNameByMD(const QList<QueryItem>& items) {
  */
 QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const SortByEnum sortBy,
                                             const OrderByEnum orderBy) {
-	emit loadStarted(); // 发出加载开始信号
+	// emit loadStarted(); // 发出加载开始信号
 
 	// 先获取收藏音乐的总数
 	prepareStatement(
@@ -592,7 +615,7 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 		items.append(item);
 		i++;
 	}
-	emit loadFinished(); // 发出加载完成信号
+	// emit loadFinished(); // 发出加载完成信号
 	return items;
 }
 

@@ -129,338 +129,338 @@
     </message>
 </context>
 <context>
-    <name>MusicSyncTool</name>
+    <name>MSTMainWindow</name>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="202"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="275"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1196"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1307"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="202"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="275"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1180"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1291"/>
         <source>音量：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="203"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="273"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1296"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="203"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="273"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1280"/>
         <source>播放已结束。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="223"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="226"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="229"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="232"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="241"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="244"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="247"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="738"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="223"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="226"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="229"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="232"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="241"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="244"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="247"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="722"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="223"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="223"/>
         <source>没有选定音频！（提示：可以通过双击表格中的歌曲来预览）</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="226"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="226"/>
         <source>没有选定路径！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="229"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="229"/>
         <source>没有设置喜爱标签！请在设置中指定！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="232"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="232"/>
         <source>没有选定文件！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="235"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="238"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1115"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1120"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="235"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="238"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1099"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1104"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="235"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="235"/>
         <source>已经是第一页了！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="238"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="238"/>
         <source>已经是最后一页了！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="241"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="241"/>
         <source>程序已在运行！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="244"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="244"/>
         <source>找不到程序语言配置文件，程序即将退出！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="247"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="247"/>
         <source>操作数据库中数据时出现严重错误，程序即将退出！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="265"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="265"/>
         <source>暂停</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="269"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="272"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1295"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="269"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="272"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1279"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="490"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="493"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="496"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="498"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="501"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="504"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="490"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="498"/>
         <source>失败：文件已存在</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="493"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="501"/>
         <source>失败：找不到歌词文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="496"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="504"/>
         <source>失败：磁盘已满</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="513"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="516"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="521"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="524"/>
         <source>加载</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="513"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="521"/>
         <source>失败：文件不可扫描</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="516"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="524"/>
         <source>失败：标签错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="738"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="722"/>
         <source>无法打开设置文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="864"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="848"/>
         <source>复制结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="867"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="851"/>
         <source>加载结果</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="917"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="901"/>
         <source>正在播放：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1115"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1099"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1120"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1104"/>
         <source>日志文件已清除</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.cpp" line="1461"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.cpp" line="1445"/>
         <source>可用空间：</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>MusicSyncToolClass</name>
+    <name>MSTMainWindowClass</name>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="20"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="20"/>
         <source>音乐同步工具</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="29"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="29"/>
         <source>本地文件夹：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="62"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="103"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="62"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="103"/>
         <source>搜索</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="73"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="73"/>
         <source>设备文件夹：</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="122"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="159"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="122"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="159"/>
         <source>标题</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="127"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="164"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="127"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="164"/>
         <source>艺术家</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="132"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="169"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="132"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="169"/>
         <source>专辑</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="137"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="174"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="137"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="174"/>
         <source>流派</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="142"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="179"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="142"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="179"/>
         <source>年份</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="147"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="184"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="147"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="184"/>
         <source>音轨号</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="200"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="200"/>
         <source>复制选中的音乐到设备</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="207"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="272"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="207"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="272"/>
         <source>刷新列表</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="214"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="279"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="214"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="279"/>
         <source>仅显示喜爱的音乐</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="241"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="306"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="241"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="306"/>
         <source>上一页</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="248"/>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="313"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="248"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="313"/>
         <source>下一页</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="265"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="265"/>
         <source>复制选中的音乐到本地</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="326"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="326"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="377"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="377"/>
         <source>音量</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="414"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="414"/>
         <source>文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="418"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="418"/>
         <source>打开文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="430"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="430"/>
         <source>音乐</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="434"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="434"/>
         <source>扫描重复音乐</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="443"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="443"/>
         <source>日志</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="454"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="454"/>
         <source>退出</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="459"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="459"/>
         <source>本地文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="464"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="464"/>
         <source>设备文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="469"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="469"/>
         <source>关于</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="474"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="474"/>
         <source>本地</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="479"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="479"/>
         <source>设备</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="484"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="484"/>
         <source>设置</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Widgets/MusicSyncTool/MusicSyncTool.ui" line="489"/>
+        <location filename="../src/Widgets/MusicSyncTool/MSTMainWindow.ui" line="489"/>
         <source>清理日志文件</source>
         <translation type="unfinished"></translation>
     </message>

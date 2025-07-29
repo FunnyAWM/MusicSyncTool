@@ -31,8 +31,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Widgets/AddRuleWidget/AddRuleWidget.ui
             src/Widgets/LoadingPage/LoadingPage.cpp
             src/Widgets/LoadingPage/LoadingPage.ui
-            src/Widgets/MusicSyncTool/MusicSyncTool.cpp
-            src/Widgets/MusicSyncTool/MusicSyncTool.ui
+            src/Widgets/MusicSyncTool/MSTMainWindow.cpp
+            src/Widgets/MusicSyncTool/MSTMainWindow.ui
             src/Widgets/OperationResult/OperationResult.cpp
             src/Widgets/OperationResult/OperationResult.ui
             src/Widgets/Settings/Settings.cpp

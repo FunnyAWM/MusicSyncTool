@@ -218,7 +218,7 @@
     <QtMoc Include="src\Widgets\OperationResult\OperationResult.h" />
     <QtMoc Include="src\Widgets\Settings\Settings.h" />
     <QtMoc Include="src\Widgets\ShowDupe\ShowDupe.h" />
-    <QtMoc Include="src\Widgets\MusicSyncTool\MusicSyncTool.h" />
+    <QtMoc Include="src\Widgets\MusicSyncTool\MSTMainWindow.h" />
     <QtMoc Include="src\Widgets\LoadingPage\LoadingPage.h" />
     <QtMoc Include="src\Widgets\AddRuleWidget\AddRuleWidget.h" />
     <QtMoc Include="src\MSTDataSource.h" />
@@ -242,7 +242,7 @@
     <ClCompile Include="src\Widgets\AboutPage\AboutPage.cpp" />
     <ClCompile Include="src\Widgets\AddRuleWidget\AddRuleWidget.cpp" />
     <ClCompile Include="src\Widgets\LoadingPage\LoadingPage.cpp" />
-    <ClCompile Include="src\Widgets\MusicSyncTool\MusicSyncTool.cpp" />
+    <ClCompile Include="src\Widgets\MusicSyncTool\MSTMainWindow.cpp" />
     <ClCompile Include="src\Widgets\OperationResult\OperationResult.cpp" />
     <ClCompile Include="src\Widgets\Settings\Settings.cpp" />
     <ClCompile Include="src\Widgets\ShowDupe\ShowDupe.cpp" />
@@ -268,7 +268,7 @@
     <QtUic Include="src\Widgets\AboutPage\AboutPage.ui" />
     <QtUic Include="src\Widgets\AddRuleWidget\AddRuleWidget.ui" />
     <QtUic Include="src\Widgets\LoadingPage\LoadingPage.ui" />
-    <QtUic Include="src\Widgets\MusicSyncTool\MusicSyncTool.ui" />
+    <QtUic Include="src\Widgets\MusicSyncTool\MSTMainWindow.ui" />
     <QtUic Include="src\Widgets\OperationResult\OperationResult.ui" />
     <QtUic Include="src\Widgets\Settings\Settings.ui" />
     <QtUic Include="src\Widgets\ShowDupe\ShowDupe.ui" />

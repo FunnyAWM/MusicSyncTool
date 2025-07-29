@@ -9,7 +9,7 @@
  */
 
 #include "SingleInstance.h"
-#include "Widgets/MusicSyncTool/MusicSyncTool.h"
+#include "Widgets/MusicSyncTool/MSTMainWindow.h"
 
 /**
  * @brief 应用程序主函数
@@ -29,7 +29,7 @@
  */
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
-	MusicSyncTool w;
+	MSTMainWindow w;
 #if defined(_WIN64) or defined(_WIN32)
 	HANDLE hMutex;
 	if (!singleInstance(hMutex)) {

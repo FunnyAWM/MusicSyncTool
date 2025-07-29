@@ -83,12 +83,12 @@ using std::shared_ptr;
  * - 多线程文件操作和进度显示
  * - 用户设置管理和多语言支持
  */
-class MusicSyncTool final : public QMainWindow {
+class MSTMainWindow final : public QMainWindow {
 	Q_OBJECT
 	
 private:
 	// UI相关成员变量
-	Ui::MusicSyncToolClass ui;              ///< 主窗口UI对象
+	Ui::MSTMainWindowClass ui;              ///< 主窗口UI对象
 	QTranslator* translator;                ///< 翻译器，用于多语言支持
 	LoadingPage* loading;                   ///< 加载进度页面
 	
@@ -119,13 +119,13 @@ public:
 	 * 初始化主窗口，设置UI，加载配置和连接信号槽
 	 * @param parent 父窗口指针，默认为nullptr
 	 */
-	explicit MusicSyncTool(QWidget* parent = nullptr);
+	explicit MSTMainWindow(QWidget* parent = nullptr);
 	
 	/**
 	 * @brief 析构函数
 	 * 清理资源，关闭数据库连接，释放内存
 	 */
-	~MusicSyncTool() override;
+	~MSTMainWindow() override;
 	void addToErrorList(const QString&, FileErrorType);
 	void addToErrorList(const QString&, LoadErrorType);
 	static void cleanLog();
