@@ -19,28 +19,102 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_package(ZLIB)
     find_package(TagLib REQUIRED)
     find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
-    set(PROJECT_SOURCES
-            src/Logger.cpp
-            src/LyricIgnoreRule.cpp
-            src/MSTDataSource.cpp
-            src/MSTMediaPlayer.cpp
-            src/QueryItem.cpp
-            src/Widgets/AboutPage/AboutPage.cpp
-            src/Widgets/AboutPage/AboutPage.ui
-            src/Widgets/AddRuleWidget/AddRuleWidget.cpp
-            src/Widgets/AddRuleWidget/AddRuleWidget.ui
-            src/Widgets/LoadingPage/LoadingPage.cpp
-            src/Widgets/LoadingPage/LoadingPage.ui
-            src/Widgets/MusicSyncTool/MSTMainWindow.cpp
-            src/Widgets/MusicSyncTool/MSTMainWindow.ui
-            src/Widgets/OperationResult/OperationResult.cpp
-            src/Widgets/OperationResult/OperationResult.ui
-            src/Widgets/Settings/Settings.cpp
-            src/Widgets/Settings/Settings.ui
-            src/Widgets/ShowDupe/ShowDupe.cpp
-            src/Widgets/ShowDupe/ShowDupe.ui
-            src/MSTFileManager.cpp
+
+    # ==================== 项目源文件 ====================
+    # Core层 - 核心基础类型与工具
+    set(CORE_SOURCES
+            src/Core/StringSimilarity.cpp
+    )
+    set(CORE_HEADERS
+            src/Core/MusicProperties.h
+            src/Core/SettingEntity.h
+            src/Core/SingleInstance.h
+            src/Core/StringSimilarity.h
+            src/Core/MSTTagUtils.h
+    )
+
+    # Data层 - 数据模型
+    set(DATA_SOURCES
+            src/Data/QueryItem.cpp
+            src/Data/LyricIgnoreRule.cpp
+    )
+    set(DATA_HEADERS
+            src/Data/QueryItem.h
+            src/Data/LyricIgnoreRule.h
+    )
+
+    # Services层 - 业务逻辑
+    set(SERVICES_SOURCES
+            src/Services/Logger.cpp
+            src/Services/MSTDataSource.cpp
+            src/Services/MSTFileManager.cpp
+            src/Services/MSTMediaPlayer.cpp
+            src/Services/MSTScanController.cpp
+            src/Services/MSTSettingsManager.cpp
+            src/Services/MSTTagScanner.cpp
+    )
+    set(SERVICES_HEADERS
+            src/Services/Logger.h
+            src/Services/MSTDataSource.h
+            src/Services/MSTFileManager.h
+            src/Services/MSTMediaPlayer.h
+            src/Services/MSTScanController.h
+            src/Services/MSTSettingsManager.h
+            src/Services/MSTTagScanner.h
+    )
+
+    # UI层 - 用户界面组件
+    set(UI_SOURCES
+            src/UI/AboutPage/AboutPage.cpp
+            src/UI/AddRuleWidget/AddRuleWidget.cpp
+            src/UI/LoadingPage/LoadingPage.cpp
+            src/UI/MusicSyncTool/MSTErrorReporter.cpp
+            src/UI/MusicSyncTool/MSTMainWindow.cpp
+            src/UI/MusicSyncTool/MSTMediaController.cpp
+            src/UI/MusicSyncTool/MSTTableManager.cpp
+            src/UI/OperationResult/OperationResult.cpp
+            src/UI/Settings/Settings.cpp
+            src/UI/ShowDupe/ShowDupe.cpp
+    )
+    set(UI_HEADERS
+            src/UI/AboutPage/AboutPage.h
+            src/UI/AddRuleWidget/AddRuleWidget.h
+            src/UI/LoadingPage/LoadingPage.h
+            src/UI/MusicSyncTool/MSTErrorReporter.h
+            src/UI/MusicSyncTool/MSTMainWindow.h
+            src/UI/MusicSyncTool/MSTMediaController.h
+            src/UI/MusicSyncTool/MSTTableManager.h
+            src/UI/OperationResult/OperationResult.h
+            src/UI/Settings/Settings.h
+            src/UI/ShowDupe/ShowDupe.h
+    )
+    set(UI_FORMS
+            src/UI/AboutPage/AboutPage.ui
+            src/UI/AddRuleWidget/AddRuleWidget.ui
+            src/UI/LoadingPage/LoadingPage.ui
+            src/UI/MusicSyncTool/MSTMainWindow.ui
+            src/UI/OperationResult/OperationResult.ui
+            src/UI/Settings/Settings.ui
+            src/UI/ShowDupe/ShowDupe.ui
+    )
+
+    # 入口文件
+    set(ENTRY_SOURCES
             src/main.cpp
+    )
+
+    # 合并所有源文件
+    set(PROJECT_SOURCES
+            ${CORE_SOURCES}
+            ${CORE_HEADERS}
+            ${DATA_SOURCES}
+            ${DATA_HEADERS}
+            ${SERVICES_SOURCES}
+            ${SERVICES_HEADERS}
+            ${UI_SOURCES}
+            ${UI_HEADERS}
+            ${UI_FORMS}
+            ${ENTRY_SOURCES}
     )
 
     if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -108,17 +182,20 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             COMMENT "Copying translation files"
     )
     
-    # 添加头文件包含路径
+    # 添加头文件包含路径（按模块层级组织）
     target_include_directories(MusicSyncTool PRIVATE 
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AboutPage
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/AddRuleWidget
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/LoadingPage
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/MusicSyncTool
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/OperationResult
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/Settings
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Widgets/ShowDupe
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Core
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Data
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Services
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/AboutPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/AddRuleWidget
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/LoadingPage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/MusicSyncTool
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/OperationResult
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/Settings
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/ShowDupe
     )
     
     # 添加编译选项以确保兼容性

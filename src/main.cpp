@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file main.cpp
  * @brief 音乐同步工具应用程序的主入口文件
  * @details 包含应用程序的main函数，负责初始化Qt应用程序、
@@ -8,8 +8,8 @@
  * @date 2024
  */
 
-#include "SingleInstance.h"
-#include "Widgets/MusicSyncTool/MSTMainWindow.h"
+#include "Core/SingleInstance.h"
+#include "UI/MusicSyncTool/MSTMainWindow.h"
 
 /**
  * @brief 应用程序主函数
