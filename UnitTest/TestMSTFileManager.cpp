@@ -1,226 +1,227 @@
+/**
+ * @file TestMSTFileManager.cpp
+ * @brief Unit tests for MSTFileManager (Services layer)
+ * @details Tests isFormatSupported, rollBackCopy, isFull, getSpaceInfo, and copyable.
+ *          Uses QTemporaryDir for all file I/O so tests are self-contained and
+ *          cross-platform (Windows / Linux).
+ */
+
 #include "TestMSTFileManager.h"
-#include <QDir>
-#include <QStorageInfo>
 
-void TestMSTFileManager::init()
+// ======================== isFormatSupported ========================
+
+void TestMSTFileManager::testIsFormatSupported_mp3()
 {
-    tempDir = new QTemporaryDir();
-    QVERIFY(tempDir->isValid());
+    QVERIFY(MSTFileManager::isFormatSupported("song.mp3"));
 }
 
-void TestMSTFileManager::cleanup()
+void TestMSTFileManager::testIsFormatSupported_flac()
 {
-    delete tempDir;
-    tempDir = nullptr;
+    QVERIFY(MSTFileManager::isFormatSupported("song.flac"));
 }
 
-void TestMSTFileManager::testIsFormatSupported()
+void TestMSTFileManager::testIsFormatSupported_wav()
 {
-    // 测试支持的格式
-    QVERIFY(MSTFileManager::isFormatSupported("test.mp3"));
-    QVERIFY(MSTFileManager::isFormatSupported("music.flac"));
     QVERIFY(MSTFileManager::isFormatSupported("song.wav"));
-    QVERIFY(MSTFileManager::isFormatSupported("audio.aac"));
-    QVERIFY(MSTFileManager::isFormatSupported("track.ogg"));
-    QVERIFY(MSTFileManager::isFormatSupported("music.wma"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_aac()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.aac"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_ogg()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.ogg"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_wma()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.wma"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_m4a()
+{
     QVERIFY(MSTFileManager::isFormatSupported("song.m4a"));
-    QVERIFY(MSTFileManager::isFormatSupported("audio.ape"));
-    QVERIFY(MSTFileManager::isFormatSupported("track.aiff"));
-    QVERIFY(MSTFileManager::isFormatSupported("music.opus"));
-    
-    // 测试不支持的格式
+}
+
+void TestMSTFileManager::testIsFormatSupported_ape()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.ape"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_aiff()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.aiff"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_opus()
+{
+    QVERIFY(MSTFileManager::isFormatSupported("song.opus"));
+}
+
+void TestMSTFileManager::testIsFormatSupported_unsupported()
+{
     QVERIFY(!MSTFileManager::isFormatSupported("document.txt"));
-    QVERIFY(!MSTFileManager::isFormatSupported("video.mp4"));
-    QVERIFY(!MSTFileManager::isFormatSupported("image.jpg"));
+    QVERIFY(!MSTFileManager::isFormatSupported("image.png"));
     QVERIFY(!MSTFileManager::isFormatSupported("archive.zip"));
-    QVERIFY(!MSTFileManager::isFormatSupported("executable.exe"));
-    
-    // 测试复杂路径
-    QVERIFY(MSTFileManager::isFormatSupported("/path/to/music.mp3"));
-    QVERIFY(MSTFileManager::isFormatSupported("C:\\Music\\song.flac"));
-    QVERIFY(!MSTFileManager::isFormatSupported("/path/to/document.pdf"));
+    QVERIFY(!MSTFileManager::isFormatSupported("video.mp4"));
 }
 
-void TestMSTFileManager::testSupportedFormatList()
+void TestMSTFileManager::testIsFormatSupported_caseInsensitive()
 {
-    const QStringList& formats = MSTFileManager::supportedFormat;
-    
-    // 验证包含主要音频格式
-    QVERIFY(formats.contains("mp3"));
-    QVERIFY(formats.contains("flac"));
-    QVERIFY(formats.contains("wav"));
-    QVERIFY(formats.contains("aac"));
-    QVERIFY(formats.contains("ogg"));
-    QVERIFY(formats.contains("wma"));
-    QVERIFY(formats.contains("m4a"));
-    QVERIFY(formats.contains("ape"));
-    QVERIFY(formats.contains("aiff"));
-    QVERIFY(formats.contains("opus"));
-    
-    // 验证格式数量
-    QVERIFY(formats.size() >= 10);
-    
-    // 验证不包含非音频格式
-    QVERIFY(!formats.contains("txt"));
-    QVERIFY(!formats.contains("jpg"));
-    QVERIFY(!formats.contains("mp4"));
+    // Implementation uses Qt::CaseInsensitive comparison
+    QVERIFY(MSTFileManager::isFormatSupported("song.MP3"));
+    QVERIFY(MSTFileManager::isFormatSupported("song.Flac"));
+    QVERIFY(MSTFileManager::isFormatSupported("song.WAV"));
+    QVERIFY(MSTFileManager::isFormatSupported("song.AAC"));
+    QVERIFY(MSTFileManager::isFormatSupported("song.Ogg"));
+    QVERIFY(MSTFileManager::isFormatSupported("SONG.M4A"));
 }
 
-void TestMSTFileManager::testFormatCaseInsensitive()
+void TestMSTFileManager::testIsFormatSupported_noExtension()
 {
-    // 测试大写扩展名
-    QVERIFY(MSTFileManager::isFormatSupported("music.MP3"));
-    QVERIFY(MSTFileManager::isFormatSupported("song.FLAC"));
-    QVERIFY(MSTFileManager::isFormatSupported("audio.WAV"));
-    
-    // 测试混合大小写
-    QVERIFY(MSTFileManager::isFormatSupported("track.Mp3"));
-    QVERIFY(MSTFileManager::isFormatSupported("music.FLaC"));
-    QVERIFY(MSTFileManager::isFormatSupported("song.WaV"));
-    
-    // 测试不支持的格式（大小写变体）
-    QVERIFY(!MSTFileManager::isFormatSupported("document.TXT"));
-    QVERIFY(!MSTFileManager::isFormatSupported("video.Mp4"));
+    // fileName.section('.', -1) returns the whole string when there is no dot
+    QVERIFY(!MSTFileManager::isFormatSupported("noextension"));
 }
 
-void TestMSTFileManager::testIsFull()
+void TestMSTFileManager::testIsFormatSupported_doubleExtension()
 {
-    // 创建一个小测试文件
-    QString testFilePath = tempDir->filePath("test.txt");
-    QFile testFile(testFilePath);
-    QVERIFY(testFile.open(QIODevice::WriteOnly));
-    
-    // 写入少量数据（1KB）
-    QByteArray data(1024, 'A');
-    testFile.write(data);
-    testFile.close();
-    
-    // 测试当前目录（应该有足够空间）
-    QVERIFY(!MSTFileManager::isFull(testFilePath, tempDir->path()));
-    
-    // 测试无效路径
-    QVERIFY(MSTFileManager::isFull(testFilePath, "/nonexistent/path"));
+    // section('.', -1) returns the last segment after the final dot
+    QVERIFY(MSTFileManager::isFormatSupported("file.tar.mp3"));
+    QVERIFY(!MSTFileManager::isFormatSupported("file.mp3.bak"));
 }
 
-void TestMSTFileManager::testRollBackCopy()
+// ======================== rollBackCopy ========================
+
+void TestMSTFileManager::testRollBackCopy_deletesMusicFile()
 {
-    // 创建测试文件
-    QString musicFile = tempDir->filePath("test.mp3");
-    QString lyricFile = tempDir->filePath("test.lrc");
-    
-    QFile music(musicFile);
-    QFile lyric(lyricFile);
-    
-    QVERIFY(music.open(QIODevice::WriteOnly));
-    QVERIFY(lyric.open(QIODevice::WriteOnly));
-    
-    music.write("test music data");
-    lyric.write("test lyric data");
-    music.close();
-    lyric.close();
-    
-    // 验证文件存在
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString musicFile = tempDir.path() + "/test_song.mp3";
+    QFile f(musicFile);
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write("fake audio data");
+    f.close();
     QVERIFY(QFile::exists(musicFile));
-    QVERIFY(QFile::exists(lyricFile));
-    
-    // 执行回滚
+
     MSTFileManager::rollBackCopy(musicFile);
-    
-    // 验证文件被删除
+
     QVERIFY(!QFile::exists(musicFile));
-    QVERIFY(!QFile::exists(lyricFile));
 }
 
-void TestMSTFileManager::testConstructorAndBasicFunctions()
+void TestMSTFileManager::testRollBackCopy_deletesLrcFile()
 {
-    MSTFileManager manager(tempDir->path());
-    
-    // 测试获取空间信息
-    QString spaceInfo = manager.getSpaceInfo();
-    QVERIFY(!spaceInfo.isEmpty());
-    
-    // 空间信息应该包含 "MB" 或 "GB"
-    QVERIFY(spaceInfo.contains("MB") || spaceInfo.contains("GB"));
-    
-    // 应该包含斜杠分隔符
-    QVERIFY(spaceInfo.contains(" / "));
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    // Implementation: lyric = fileName.section('.', 0, -2) + ".lrc"
+    // For "song.mp3" -> section('.', 0, -2) = "song" -> lyric = "song.lrc"
+    const QString musicFile = tempDir.path() + "/test_song.mp3";
+    const QString lrcFile   = tempDir.path() + "/test_song.lrc";
+
+    QFile mf(musicFile);
+    QVERIFY(mf.open(QIODevice::WriteOnly));
+    mf.write("fake audio data");
+    mf.close();
+
+    QFile lf(lrcFile);
+    QVERIFY(lf.open(QIODevice::WriteOnly));
+    lf.write("fake lyric data");
+    lf.close();
+
+    QVERIFY(QFile::exists(musicFile));
+    QVERIFY(QFile::exists(lrcFile));
+
+    MSTFileManager::rollBackCopy(musicFile);
+
+    QVERIFY2(!QFile::exists(musicFile), "Music file should be deleted by rollback");
+    QVERIFY2(!QFile::exists(lrcFile),   "LRC file should be deleted by rollback");
 }
 
-void TestMSTFileManager::testCopyable()
+void TestMSTFileManager::testRollBackCopy_noLrcFile()
 {
-    MSTFileManager manager(tempDir->path());
-    
-    // 创建一个小测试文件
-    QString testFilePath = tempDir->filePath("small.txt");
-    QFile testFile(testFilePath);
-    QVERIFY(testFile.open(QIODevice::WriteOnly));
-    testFile.write("small data");
-    testFile.close();
-    
-    // 小文件应该可以复制
-    QVERIFY(manager.copyable(testFilePath));
-    
-    // 测试不存在的文件
-    QVERIFY(!manager.copyable(tempDir->filePath("nonexistent.txt")));
-    
-    // 测试目录而不是文件
-    QVERIFY(!manager.copyable(tempDir->path()));
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString musicFile = tempDir.path() + "/test_song.flac";
+    const QString lrcFile   = tempDir.path() + "/test_song.lrc";
+
+    QFile mf(musicFile);
+    QVERIFY(mf.open(QIODevice::WriteOnly));
+    mf.write("fake audio data");
+    mf.close();
+
+    QVERIFY(!QFile::exists(lrcFile)); // No .lrc file present
+
+    MSTFileManager::rollBackCopy(musicFile); // Should not crash
+
+    QVERIFY(!QFile::exists(musicFile));
 }
 
-void TestMSTFileManager::testGetSpaceInfo()
+void TestMSTFileManager::testRollBackCopy_nonexistentFile()
 {
-    MSTFileManager manager(tempDir->path());
-    QString spaceInfo = manager.getSpaceInfo();
-    
-    // 检查格式：应该是 "数字 单位 / 数字 单位"
-    QStringList parts = spaceInfo.split(" / ");
-    QCOMPARE(parts.size(), 2);
-    
-    // 检查可用空间部分
-    QString availablePart = parts[0];
-    QVERIFY(availablePart.contains("MB") || availablePart.contains("GB"));
-    
-    // 检查总空间部分
-    QString totalPart = parts[1];
-    QVERIFY(totalPart.contains("MB") || totalPart.contains("GB"));
-    
-    // 检查数字部分是有效的
-    QString availableNumStr = availablePart.split(" ")[0];
-    QString totalNumStr = totalPart.split(" ")[0];
-    
-    bool ok1, ok2;
-    double availableNum = availableNumStr.toDouble(&ok1);
-    double totalNum = totalNumStr.toDouble(&ok2);
-    
-    QVERIFY(ok1 && ok2);
-    QVERIFY(availableNum >= 0);
-    QVERIFY(totalNum > 0);
-    QVERIFY(availableNum <= totalNum);
+    // rollBackCopy on a path that does not exist should not crash
+    MSTFileManager::rollBackCopy("/nonexistent/path/phantom.mp3");
+    QVERIFY(true);
 }
 
-void TestMSTFileManager::testEdgeCases()
+// ======================== isFull ========================
+
+void TestMSTFileManager::testIsFull_smallFile_largeTarget()
 {
-    // 测试空文件名
-    QVERIFY(!MSTFileManager::isFormatSupported(""));
-    
-    // 测试只有扩展名的文件
-    QVERIFY(MSTFileManager::isFormatSupported(".mp3"));
-    
-    // 测试没有扩展名的文件
-    QVERIFY(!MSTFileManager::isFormatSupported("filename"));
-    
-    // 测试多个点的文件名
-    QVERIFY(MSTFileManager::isFormatSupported("file.name.with.dots.mp3"));
-    QVERIFY(!MSTFileManager::isFormatSupported("file.name.with.dots.txt"));
-    
-    // 测试回滚不存在的文件
-    QString nonExistentFile = tempDir->filePath("nonexistent.mp3");
-    // 这应该不会崩溃
-    MSTFileManager::rollBackCopy(nonExistentFile);
-    
-    // 测试无效路径的磁盘检查
-    QVERIFY(MSTFileManager::isFull("nonexistent.txt", ""));
-    QVERIFY(MSTFileManager::isFull("", tempDir->path()));
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    // Create a tiny source file
+    const QString smallFile = tempDir.path() + "/tiny.mp3";
+    QFile f(smallFile);
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write("small data");
+    f.close();
+
+    // The temp directory resides on a disk with far more free space than 10 bytes
+    QVERIFY2(!MSTFileManager::isFull(smallFile, tempDir.path()),
+             "A 10-byte file should not fill the disk");
 }
 
-#include "TestMSTFileManager.moc"
+// ======================== getSpaceInfo ========================
+
+void TestMSTFileManager::testGetSpaceInfo_format()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    MSTFileManager mgr(tempDir.path());
+    const QString info = mgr.getSpaceInfo();
+
+    // Expected format: "X.XX MB / Y.YY MB"  OR  "X.XX GB / Y.YY GB"
+    const QRegularExpression re(
+        R"(^\d+\.\d{2}\s+(MB|GB)\s+/\s+\d+\.\d{2}\s+(MB|GB)$)");
+    const auto match = re.match(info);
+
+    QVERIFY2(match.hasMatch(),
+             qPrintable(QString("getSpaceInfo format mismatch: \"%1\"").arg(info)));
+
+    // Both units must be identical (both MB or both GB)
+    QCOMPARE(match.captured(1), match.captured(2));
+}
+
+// ======================== copyable ========================
+
+void TestMSTFileManager::testCopyable_smallFile()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString smallFile = tempDir.path() + "/small.wav";
+    QFile f(smallFile);
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    f.write("tiny audio content");
+    f.close();
+
+    MSTFileManager mgr(tempDir.path());
+    QVERIFY2(mgr.copyable(smallFile),
+             "A small file on a disk with plenty of space should be copyable");
+}

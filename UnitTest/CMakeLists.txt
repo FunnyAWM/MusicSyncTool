@@ -1,163 +1,164 @@
-# MusicSyncTool Unit Tests CMakeLists.txt
-# Based on main project configuration for consistency
-
+# Unit test CMakeLists.txt for MusicSyncTool
+# This file is for Linux and macOS only (matching parent CMakeLists.txt).
+# Build with: cmake -DBUILD_TESTS=ON .. && make
+# Run with:   ctest
 cmake_minimum_required(VERSION 3.16)
-project(MusicSyncToolTests VERSION 2.2.3 LANGUAGES CXX)
 
-# Check if this is being run on supported systems
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message(STATUS "Supported system detected for unit tests. Applying settings.")
-    
-    # Set Qt automation (same as main project)
-    set(CMAKE_AUTOUIC ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
-    # Set C++ standard (same as main project)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    
-    # Enable testing
-    enable_testing()
-    
-    # Qt installation path - try to detect or use environment variable
-    # This should match the main project configuration
-    if(DEFINED ENV{Qt6_DIR})
-        set(CMAKE_PREFIX_PATH $ENV{Qt6_DIR})
-        message(STATUS "Using Qt6_DIR from environment: $ENV{Qt6_DIR}")
-    elseif(EXISTS "/home/funnyawm/Qt/6.8.3/gcc_64")
-        set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.3/gcc_64")
-        message(STATUS "Using default Qt path: /home/funnyawm/Qt/6.8.3/gcc_64")
-    else()
-        message(STATUS "Using system Qt installation")
-    endif()
+    set(CMAKE_AUTOMOC ON)
 
-    # Find packages (same pattern as main project)
-    find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Sql Multimedia Test)
+    # Qt modules: Widgets (for QApplication in test runner), Test, Sql, Multimedia
     find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql Multimedia Test)
-    find_package(ZLIB)
     find_package(TagLib REQUIRED)
 
-    # Source files from main project (relative to parent directory)
-    set(MAIN_PROJECT_SOURCES
-        ../src/Logger.cpp
-        ../src/LyricIgnoreRule.cpp
-        ../src/MSTDataSource.cpp
-        ../src/MSTFileManager.cpp
-        ../src/QueryItem.cpp
-        ../src/MSTMediaPlayer.cpp
+    # ==================== Main project sources (compiled into test binary) ====================
+
+    # Core layer
+    set(MAIN_CORE_SOURCES
+        ../src/Core/StringSimilarity.cpp
+    )
+    set(MAIN_CORE_HEADERS
+        ../src/Core/MusicProperties.h
+        ../src/Core/SettingEntity.h
+        ../src/Core/SingleInstance.h
+        ../src/Core/StringSimilarity.h
+        ../src/Core/MSTTagUtils.h
     )
 
-    # Test source files
-    set(TEST_SOURCES
-        TestMSTFileManager.cpp
-        TestMSTDataSource.cpp
+    # Data layer
+    set(MAIN_DATA_SOURCES
+        ../src/Data/QueryItem.cpp
+        ../src/Data/LyricIgnoreRule.cpp
+    )
+    set(MAIN_DATA_HEADERS
+        ../src/Data/QueryItem.h
+        ../src/Data/LyricIgnoreRule.h
+    )
+
+    # Services layer
+    set(MAIN_SERVICES_SOURCES
+        ../src/Services/Logger.cpp
+        ../src/Services/MSTDataSource.cpp
+        ../src/Services/MSTFileManager.cpp
+        ../src/Services/MSTMediaPlayer.cpp
+        ../src/Services/MSTScanController.cpp
+        ../src/Services/MSTSettingsManager.cpp
+        ../src/Services/MSTTagScanner.cpp
+    )
+    set(MAIN_SERVICES_HEADERS
+        ../src/Services/Logger.h
+        ../src/Services/MSTDataSource.h
+        ../src/Services/MSTFileManager.h
+        ../src/Services/MSTMediaPlayer.h
+        ../src/Services/MSTScanController.h
+        ../src/Services/MSTSettingsManager.h
+        ../src/Services/MSTTagScanner.h
+    )
+
+    # All main project sources (excluding UI layer - requires Qt widget instantiation)
+    set(MAIN_PROJECT_SOURCES
+        ${MAIN_CORE_SOURCES}
+        ${MAIN_CORE_HEADERS}
+        ${MAIN_DATA_SOURCES}
+        ${MAIN_DATA_HEADERS}
+        ${MAIN_SERVICES_SOURCES}
+        ${MAIN_SERVICES_HEADERS}
+    )
+
+    # ==================== Test sources ====================
+
+    # Test headers (listed for AUTOMOC Q_OBJECT detection via main.cpp direct includes)
+    set(TEST_HEADERS
+        TestMusicProperties.h
+        TestStringSimilarity.h
+        TestQueryItem.h
+        TestLyricIgnoreRule.h
+        TestMSTFileManager.h
+        TestMSTDataSource.h
+        TestMSTSettingsManager.h
+        TestBlackBox.h
+    )
+
+    # Test implementation files.
+    # These are #included by main.cpp (not compiled as separate translation units).
+    # They are listed here solely for IDE visibility.
+    # AUTOMOC must NOT process them individually (would cause duplicate symbols
+    # with main.cpp which includes them directly).
+    set(TEST_IMPL_SOURCES
+        TestMusicProperties.cpp
+        TestStringSimilarity.cpp
         TestQueryItem.cpp
         TestLyricIgnoreRule.cpp
-        TestLogger.cpp
+        TestMSTFileManager.cpp
+        TestMSTDataSource.cpp
+        TestMSTSettingsManager.cpp
+        TestBlackBox.cpp
+    )
+
+    # ==================== Build test executable ====================
+
+    # main.cpp is the only compiled source. It #includes all Test*.cpp files directly.
+    # AUTOMOC processes main.cpp, detects Q_OBJECT in the directly-included test
+    # headers, and generates main.moc with all Q_OBJECT implementations.
+    # The test impl files are added with SKIP_AUTOMOC to prevent AUTOMOC from
+    # processing them (which would cause duplicate symbol errors).
+    set_source_files_properties(${TEST_IMPL_SOURCES} PROPERTIES SKIP_AUTOMOC TRUE)
+
+    qt_add_executable(MusicSyncToolTests
         main.cpp
+        ${TEST_HEADERS}
+        ${TEST_IMPL_SOURCES}
+        ${MAIN_PROJECT_SOURCES}
     )
 
-    # Create test executable (following main project pattern)
-    if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-        qt_add_executable(MusicSyncToolTests
-            MANUAL_FINALIZATION
-            ${TEST_SOURCES}
-            ${MAIN_PROJECT_SOURCES}
-        )
-    else()
-        add_executable(MusicSyncToolTests
-            ${TEST_SOURCES}
-            ${MAIN_PROJECT_SOURCES}
-        )
-    endif()
-
-    # Link libraries (same pattern as main project)
-    target_link_libraries(MusicSyncToolTests PRIVATE 
-        Qt6::Core 
-        Qt6::Widgets 
-        Qt6::Sql 
-        Qt6::Multimedia 
-        Qt6::Test
-    )
-    target_link_libraries(MusicSyncToolTests PRIVATE TagLib::tag)
-
-    # Set target properties (similar to main project)
-    set_target_properties(MusicSyncToolTests PROPERTIES
-        MACOSX_BUNDLE FALSE
-        WIN32_EXECUTABLE FALSE
-    )
-
-    # Include directories (same structure as main project)
-    target_include_directories(MusicSyncToolTests PRIVATE 
+    # Include directories:
+    #   - CMAKE_CURRENT_SOURCE_DIR for test headers (TestXxx.h)
+    #   - ../src and subdirectories for project headers using short includes
+    #   - ../src/UI/MusicSyncTool for MSTTableManager.h (included by MSTScanController.cpp)
+    target_include_directories(MusicSyncToolTests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../src
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/AboutPage
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/AddRuleWidget
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/LoadingPage
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/MusicSyncTool
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/OperationResult
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/Settings
-        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Widgets/ShowDupe
+        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Core
+        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Data
+        ${CMAKE_CURRENT_SOURCE_DIR}/../src/Services
+        ${CMAKE_CURRENT_SOURCE_DIR}/../src/UI/MusicSyncTool
     )
 
-    # Compile options (same as main project)
+    target_link_libraries(MusicSyncToolTests PRIVATE
+        Qt6::Core
+        Qt6::Widgets
+        Qt6::Sql
+        Qt6::Multimedia
+        Qt6::Test
+        TagLib::tag
+    )
+
     target_compile_options(MusicSyncToolTests PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-fPIC>
         $<$<COMPILE_LANGUAGE:CXX>:-Wall>
         $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
     )
 
-    # Add definitions for proper compilation
-    target_compile_definitions(MusicSyncToolTests PRIVATE
-        QT_NO_KEYWORDS
-        QT_TESTCASE_BUILDDIR="${CMAKE_CURRENT_BINARY_DIR}"
-    )
+    # ==================== CTest integration ====================
+    add_test(NAME MusicSyncToolTests COMMAND MusicSyncToolTests)
 
-    # Qt finalization (if Qt6)
-    if (QT_VERSION_MAJOR EQUAL 6)
-        qt_finalize_executable(MusicSyncToolTests)
-    endif()
-
-    # Add tests to CTest
-    add_test(NAME UnitTests COMMAND MusicSyncToolTests)
-    add_test(NAME UnitTests_Verbose COMMAND MusicSyncToolTests -v2)
-
-    # Set test properties
-    set_tests_properties(UnitTests UnitTests_Verbose PROPERTIES
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
-        TIMEOUT 300
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-
-    # Optional: Add coverage support
-    option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+    # ==================== Optional: Code coverage ====================
+    option(ENABLE_COVERAGE "Enable code coverage reporting" OFF)
     if(ENABLE_COVERAGE)
-        target_compile_options(MusicSyncToolTests PRIVATE
-            --coverage
-            -fprofile-arcs
-            -ftest-coverage
-        )
+        target_compile_options(MusicSyncToolTests PRIVATE --coverage -fprofile-arcs -ftest-coverage)
         target_link_options(MusicSyncToolTests PRIVATE --coverage)
-        message(STATUS "Coverage reporting enabled for tests")
+        message(STATUS "Code coverage enabled for unit tests.")
     endif()
 
-    # Optional: Add sanitizer support
-    option(ENABLE_SANITIZER "Enable address sanitizer" OFF)
+    # ==================== Optional: Address sanitizer ====================
+    option(ENABLE_SANITIZER "Enable AddressSanitizer" OFF)
     if(ENABLE_SANITIZER)
-        target_compile_options(MusicSyncToolTests PRIVATE
-            -fsanitize=address
-            -fno-omit-frame-pointer
-        )
+        target_compile_options(MusicSyncToolTests PRIVATE -fsanitize=address -fno-omit-frame-pointer)
         target_link_options(MusicSyncToolTests PRIVATE -fsanitize=address)
-        message(STATUS "Address sanitizer enabled for tests")
+        message(STATUS "AddressSanitizer enabled for unit tests.")
     endif()
 
-    message(STATUS "Unit tests configured successfully")
-    message(STATUS "Run 'make test' or 'ctest' to execute tests")
-
-else()
-    message(SEND_ERROR "Unit tests are for Linux and MacOS only. For Windows please use Visual Studio.")
-    message(SEND_ERROR "Or you can modify this file if you know what you are doing.")
 endif()

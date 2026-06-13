@@ -8,9 +8,8 @@
  */
 
 #include "LoadingPage.h"
-#include "../MusicSyncTool/MSTMainWindow.h"
-#include <cstdlib>
 #include <ctime>
+#include "../MusicSyncTool/MSTMainWindow.h"
 
 /**
  * @brief 加载页面构造函数
@@ -38,7 +37,7 @@ void LoadingPage::setTitle(const QString& title) const {
  */
 void LoadingPage::setRandomTitle() const {
 	srand(static_cast<unsigned>(time(nullptr))); // 初始化随机数种子
-	QFile file(QCoreApplication::applicationDirPath() + "/resources/titles.txt"); // 打开标题文件
+	QFile file(":/MusicSyncTool/titles.txt"); // 从Qt资源系统读取标题文件
 	if (file.open(QIODevice::ReadOnly)) {
 		QTextStream stream(&file);
 		const int totalTitle = stream.readLine().toInt(); // 读取标题总数
@@ -76,13 +75,13 @@ void LoadingPage::stopPage() {
  * @param value 当前进度值
  */
 void LoadingPage::setProgress(const qsizetype value) const {
-	ui.progressBar->setValue(static_cast<double>(value) / total * 100); // 计算并设置百分比进度
+	ui.progressBar->setValue(static_cast<int>(std::round(static_cast<double>(value) / static_cast<double>(total) * 100.0))); // 计算并设置百分比进度
 }
 
 /**
  * @brief 设置总数量
- * @param total 总数量，用于计算进度百分比
+ * @param total_ 总数量，用于计算进度百分比
  */
-void LoadingPage::setTotal(const qsizetype total) {
-	this->total = total;
+void LoadingPage::setTotal(const qsizetype total_) {
+	this->total = total_;
 }

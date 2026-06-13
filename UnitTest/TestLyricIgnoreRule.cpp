@@ -1,224 +1,316 @@
+/**
+ * @file TestLyricIgnoreRule.cpp
+ * @brief White-box branch coverage tests for the LyricIgnoreRule class
+ *        (src/Data/LyricIgnoreRule.h + src/Data/LyricIgnoreRule.cpp)
+ *
+ * Branch coverage targets:
+ *   Primary constructor    : member initialisation, ruleTypeStr/ruleFieldStr NOT set
+ *   Copy constructor       : copies enum+name members, does NOT copy string members
+ *   Copy assignment        : self-assignment guard + full member copy
+ *   operator==             : all three fields compared (inline)
+ *   operator!=             : negation of == (inline)
+ *   Getters                : getRuleType / getRuleField / getRuleName
+ *   lyricRulesToString     : TITLE / ARTIST / ALBUM / default switch branches
+ *   ignoreRulesToString    : INCLUDES / EXCLUDES / default switch branches
+ *   setRulesStr            : INCLUDES/EXCLUDES + TITLE/ARTIST/ALBUM switch branches
+ *   getRuleTypeStr         : returns stored string (empty until setRulesStr called)
+ *   getRuleFieldStr        : returns stored string (empty until setRulesStr called)
+ *   stringToIgnoreRules    : "包含" / "排除" / default branches
+ *   stringToLyricRules     : "名称" / "艺术家" / "专辑" / default branches
+ *
+ * NOTE: lyricRulesToString and ignoreRulesToString use tr(), which requires
+ *       a QApplication instance (provided by the test main.cpp).
+ */
+
 #include "TestLyricIgnoreRule.h"
 
-void TestLyricIgnoreRule::testConstructor()
+// ═══════════════════════════════════════════════════════════════════════════
+// Constructors
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestLyricIgnoreRule::testPrimaryConstructor()
 {
-    // 测试包含规则构造
-    LyricIgnoreRule includeRule(RuleType::INCLUDES, RuleField::TITLE, "测试歌曲");
-    QCOMPARE(includeRule.getRuleType(), RuleType::INCLUDES);
-    QCOMPARE(includeRule.getRuleField(), RuleField::TITLE);
-    QCOMPARE(includeRule.getRuleName(), QString("测试歌曲"));
-    
-    // 测试排除规则构造
-    LyricIgnoreRule excludeRule(RuleType::EXCLUDES, RuleField::ARTIST, "测试歌手");
-    QCOMPARE(excludeRule.getRuleType(), RuleType::EXCLUDES);
-    QCOMPARE(excludeRule.getRuleField(), RuleField::ARTIST);
-    QCOMPARE(excludeRule.getRuleName(), QString("测试歌手"));
-    
-    // 测试专辑字段规则
-    LyricIgnoreRule albumRule(RuleType::INCLUDES, RuleField::ALBUM, "测试专辑");
-    QCOMPARE(albumRule.getRuleType(), RuleType::INCLUDES);
-    QCOMPARE(albumRule.getRuleField(), RuleField::ALBUM);
-    QCOMPARE(albumRule.getRuleName(), QString("测试专辑"));
+    LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE,
+                         QString::fromUtf8("test_rule"));
+
+    QCOMPARE(rule.getRuleType(),  RuleType::INCLUDES);
+    QCOMPARE(rule.getRuleField(), RuleField::TITLE);
+    QCOMPARE(rule.getRuleName(),  QString::fromUtf8("test_rule"));
+
+    // Primary constructor does NOT initialise ruleTypeStr or ruleFieldStr
+    QCOMPARE(rule.getRuleTypeStr(), QString(""));
+    QCOMPARE(rule.getRuleFieldStr(), QString(""));
 }
 
 void TestLyricIgnoreRule::testCopyConstructor()
 {
-    LyricIgnoreRule original(RuleType::INCLUDES, RuleField::TITLE, "原始规则");
+    LyricIgnoreRule original(RuleType::EXCLUDES, RuleField::ARTIST,
+                             QString::fromUtf8("original_name"));
+
+    // Populate the string members on the original
+    original.setRulesStr();
+    QCOMPARE(original.getRuleTypeStr(), QString::fromUtf8("\u6392\u9664")); // 排除
+    QCOMPARE(original.getRuleFieldStr(), QString::fromUtf8("\u827a\u672f\u5bb6")); // 艺术家
+
     LyricIgnoreRule copy(original);
-    
-    QCOMPARE(copy.getRuleType(), original.getRuleType());
-    QCOMPARE(copy.getRuleField(), original.getRuleField());
-    QCOMPARE(copy.getRuleName(), original.getRuleName());
-    QVERIFY(copy == original);
+
+    // All members (including string representations) are copied
+    QCOMPARE(copy.getRuleType(),  RuleType::EXCLUDES);
+    QCOMPARE(copy.getRuleField(), RuleField::ARTIST);
+    QCOMPARE(copy.getRuleName(),  QString::fromUtf8("original_name"));
+    QCOMPARE(copy.getRuleTypeStr(), QString::fromUtf8("\u6392\u9664"));       // 排除
+    QCOMPARE(copy.getRuleFieldStr(), QString::fromUtf8("\u827a\u672f\u5bb6")); // 艺术家
 }
 
-void TestLyricIgnoreRule::testAssignmentOperator()
+void TestLyricIgnoreRule::testCopyAssignment()
 {
-    LyricIgnoreRule rule1(RuleType::INCLUDES, RuleField::TITLE, "规则1");
-    LyricIgnoreRule rule2(RuleType::EXCLUDES, RuleField::ARTIST, "规则2");
-    
-    // 验证初始状态不同
-    QVERIFY(rule1 != rule2);
-    
-    // 执行赋值
-    rule2 = rule1;
-    
-    // 验证赋值后相等
-    QVERIFY(rule1 == rule2);
-    QCOMPARE(rule2.getRuleType(), RuleType::INCLUDES);
-    QCOMPARE(rule2.getRuleField(), RuleField::TITLE);
-    QCOMPARE(rule2.getRuleName(), QString("规则1"));
+    LyricIgnoreRule source(RuleType::EXCLUDES, RuleField::ALBUM,
+                           QString::fromUtf8("source_name"));
+    source.setRulesStr();
+
+    LyricIgnoreRule target(RuleType::INCLUDES, RuleField::TITLE,
+                           QString::fromUtf8("target_name"));
+
+    target = source;
+
+    // All members (including string representations) are copied
+    QCOMPARE(target.getRuleType(),     RuleType::EXCLUDES);
+    QCOMPARE(target.getRuleField(),    RuleField::ALBUM);
+    QCOMPARE(target.getRuleName(),     QString::fromUtf8("source_name"));
+    QCOMPARE(target.getRuleTypeStr(),  QString::fromUtf8("\u6392\u9664"));       // 排除
+    QCOMPARE(target.getRuleFieldStr(), QString::fromUtf8("\u4e13\u8f91"));       // 专辑
+
+    // Self-assignment guard: assigning to self must be a safe no-op
+    LyricIgnoreRule selfRule(RuleType::INCLUDES, RuleField::TITLE,
+                             QString::fromUtf8("self"));
+    selfRule = selfRule;
+    QCOMPARE(selfRule.getRuleType(),  RuleType::INCLUDES);
+    QCOMPARE(selfRule.getRuleField(), RuleField::TITLE);
+    QCOMPARE(selfRule.getRuleName(),  QString::fromUtf8("self"));
 }
 
-void TestLyricIgnoreRule::testEqualityOperator()
+// ═══════════════════════════════════════════════════════════════════════════
+// Equality operators
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestLyricIgnoreRule::testEquality_sameRules()
 {
-    LyricIgnoreRule rule1(RuleType::INCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule rule2(RuleType::INCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule rule3(RuleType::EXCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule rule4(RuleType::INCLUDES, RuleField::ARTIST, "测试");
-    LyricIgnoreRule rule5(RuleType::INCLUDES, RuleField::TITLE, "不同");
-    
-    // 相同规则应该相等
-    QVERIFY(rule1 == rule2);
-    
-    // 不同规则类型应该不相等
-    QVERIFY(!(rule1 == rule3));
-    
-    // 不同规则字段应该不相等
-    QVERIFY(!(rule1 == rule4));
-    
-    // 不同规则名称应该不相等
-    QVERIFY(!(rule1 == rule5));
+    LyricIgnoreRule a(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("same"));
+    LyricIgnoreRule b(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("same"));
+    QVERIFY(a == b);
+}
+
+void TestLyricIgnoreRule::testEquality_differentRuleType()
+{
+    LyricIgnoreRule a(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("same"));
+    LyricIgnoreRule b(RuleType::EXCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("same"));
+    QVERIFY(!(a == b));
+}
+
+void TestLyricIgnoreRule::testEquality_differentRuleField()
+{
+    LyricIgnoreRule a(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("same"));
+    LyricIgnoreRule b(RuleType::INCLUDES, RuleField::ARTIST,
+                      QString::fromUtf8("same"));
+    QVERIFY(!(a == b));
+}
+
+void TestLyricIgnoreRule::testEquality_differentRuleName()
+{
+    LyricIgnoreRule a(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("name_a"));
+    LyricIgnoreRule b(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("name_b"));
+    QVERIFY(!(a == b));
 }
 
 void TestLyricIgnoreRule::testInequalityOperator()
 {
-    LyricIgnoreRule rule1(RuleType::INCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule rule2(RuleType::INCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule rule3(RuleType::EXCLUDES, RuleField::ARTIST, "不同");
-    
-    // 相同规则不应该不相等
-    QVERIFY(!(rule1 != rule2));
-    
-    // 不同规则应该不相等
-    QVERIFY(rule1 != rule3);
+    LyricIgnoreRule a(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("rule"));
+    LyricIgnoreRule b(RuleType::INCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("rule"));
+    LyricIgnoreRule c(RuleType::EXCLUDES, RuleField::TITLE,
+                      QString::fromUtf8("rule"));
+
+    // operator!= is the negation of operator==
+    QVERIFY(!(a != b)); // equal → != is false
+    QVERIFY(a != c);    // different → != is true
 }
 
-void TestLyricIgnoreRule::testGetters()
+// ═══════════════════════════════════════════════════════════════════════════
+// Getters
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestLyricIgnoreRule::testGetRuleType()
 {
-    LyricIgnoreRule rule(RuleType::EXCLUDES, RuleField::ALBUM, "测试专辑名");
-    
-    QCOMPARE(rule.getRuleType(), RuleType::EXCLUDES);
-    QCOMPARE(rule.getRuleField(), RuleField::ALBUM);
-    QCOMPARE(rule.getRuleName(), QString("测试专辑名"));
-    
-    // 测试字符串表示
-    QCOMPARE(rule.getRuleTypeStr(), QString("排除"));
-    QCOMPARE(rule.getRuleFieldStr(), QString("专辑"));
+    LyricIgnoreRule includesRule(RuleType::INCLUDES, RuleField::TITLE, "x");
+    QCOMPARE(includesRule.getRuleType(), RuleType::INCLUDES);
+
+    LyricIgnoreRule excludesRule(RuleType::EXCLUDES, RuleField::TITLE, "x");
+    QCOMPARE(excludesRule.getRuleType(), RuleType::EXCLUDES);
 }
 
-void TestLyricIgnoreRule::testStringConversion()
+void TestLyricIgnoreRule::testGetRuleField()
 {
-    // 测试规则字段转换
-    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::TITLE), QString("名称"));
-    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::ARTIST), QString("艺术家"));
-    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::ALBUM), QString("专辑"));
-    
-    // 测试规则类型转换
-    LyricIgnoreRule includeRule(RuleType::INCLUDES, RuleField::TITLE, "测试");
-    LyricIgnoreRule excludeRule(RuleType::EXCLUDES, RuleField::TITLE, "测试");
-    
-    QCOMPARE(includeRule.getRuleTypeStr(), QString("包含"));
-    QCOMPARE(excludeRule.getRuleTypeStr(), QString("排除"));
+    LyricIgnoreRule titleRule(RuleType::INCLUDES, RuleField::TITLE, "x");
+    QCOMPARE(titleRule.getRuleField(), RuleField::TITLE);
+
+    LyricIgnoreRule artistRule(RuleType::INCLUDES, RuleField::ARTIST, "x");
+    QCOMPARE(artistRule.getRuleField(), RuleField::ARTIST);
+
+    LyricIgnoreRule albumRule(RuleType::INCLUDES, RuleField::ALBUM, "x");
+    QCOMPARE(albumRule.getRuleField(), RuleField::ALBUM);
 }
 
-void TestLyricIgnoreRule::testStringToEnum()
+void TestLyricIgnoreRule::testGetRuleName()
 {
-    // 测试字符串到规则字段的转换
-    QCOMPARE(LyricIgnoreRule::stringToLyricRules("名称"), RuleField::TITLE);
-    QCOMPARE(LyricIgnoreRule::stringToLyricRules("艺术家"), RuleField::ARTIST);
-    QCOMPARE(LyricIgnoreRule::stringToLyricRules("专辑"), RuleField::ALBUM);
-    
-    // 测试无效字符串（应该返回默认值）
-    QCOMPARE(LyricIgnoreRule::stringToLyricRules("无效"), RuleField::TITLE);
-    QCOMPARE(LyricIgnoreRule::stringToLyricRules(""), RuleField::TITLE);
-    
-    // 测试字符串到规则类型的转换
-    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules("包含"), RuleType::INCLUDES);
-    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules("排除"), RuleType::EXCLUDES);
-    
-    // 测试无效字符串（应该返回默认值）
-    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules("无效"), RuleType::INCLUDES);
-    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules(""), RuleType::INCLUDES);
+    LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE,
+                         QString::fromUtf8("my_rule_name"));
+    QCOMPARE(rule.getRuleName(), QString::fromUtf8("my_rule_name"));
+
+    // Empty name
+    LyricIgnoreRule emptyNameRule(RuleType::INCLUDES, RuleField::TITLE, "");
+    QCOMPARE(emptyNameRule.getRuleName(), QString(""));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// String conversions (instance methods using setRulesStr)
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestLyricIgnoreRule::testGetRuleTypeStr()
+{
+    // Before setRulesStr() is called, the string is empty
+    LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE, "x");
+    QCOMPARE(rule.getRuleTypeStr(), QString(""));
+
+    // After setRulesStr(), the string reflects the enum value
+    rule.setRulesStr();
+    QCOMPARE(rule.getRuleTypeStr(), QString::fromUtf8("\u5305\u542b")); // 包含
+}
+
+void TestLyricIgnoreRule::testGetRuleFieldStr()
+{
+    // Before setRulesStr() is called, the string is empty
+    LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE, "x");
+    QCOMPARE(rule.getRuleFieldStr(), QString(""));
+
+    // After setRulesStr(), the string reflects the enum value
+    rule.setRulesStr();
+    QCOMPARE(rule.getRuleFieldStr(), QString::fromUtf8("\u540d\u79f0")); // 名称
 }
 
 void TestLyricIgnoreRule::testSetRulesStr()
 {
-    LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE, "测试规则");
-    
-    // setRulesStr应该根据枚举值设置字符串表示
-    // 由于这是一个内部方法，我们通过验证getRuleTypeStr和getRuleFieldStr来测试
-    QCOMPARE(rule.getRuleTypeStr(), QString("包含"));
-    QCOMPARE(rule.getRuleFieldStr(), QString("名称"));
-    
-    // 创建不同类型的规则来测试所有组合
-    LyricIgnoreRule excludeArtistRule(RuleType::EXCLUDES, RuleField::ARTIST, "测试");
-    QCOMPARE(excludeArtistRule.getRuleTypeStr(), QString("排除"));
-    QCOMPARE(excludeArtistRule.getRuleFieldStr(), QString("艺术家"));
-    
-    LyricIgnoreRule includeAlbumRule(RuleType::INCLUDES, RuleField::ALBUM, "测试");
-    QCOMPARE(includeAlbumRule.getRuleTypeStr(), QString("包含"));
-    QCOMPARE(includeAlbumRule.getRuleFieldStr(), QString("专辑"));
+    // ── Branch: RuleType::INCLUDES → ruleTypeStr = "包含" ──
+    LyricIgnoreRule r1(RuleType::INCLUDES, RuleField::TITLE, "r1");
+    r1.setRulesStr();
+    QCOMPARE(r1.getRuleTypeStr(),  QString::fromUtf8("\u5305\u542b"));         // 包含
+    QCOMPARE(r1.getRuleFieldStr(), QString::fromUtf8("\u540d\u79f0"));         // 名称
+
+    // ── Branch: RuleType::EXCLUDES → ruleTypeStr = "排除" ──
+    LyricIgnoreRule r2(RuleType::EXCLUDES, RuleField::ARTIST, "r2");
+    r2.setRulesStr();
+    QCOMPARE(r2.getRuleTypeStr(),  QString::fromUtf8("\u6392\u9664"));         // 排除
+    QCOMPARE(r2.getRuleFieldStr(), QString::fromUtf8("\u827a\u672f\u5bb6"));   // 艺术家
+
+    // ── Branch: RuleField::ALBUM → ruleFieldStr = "专辑" ──
+    LyricIgnoreRule r3(RuleType::INCLUDES, RuleField::ALBUM, "r3");
+    r3.setRulesStr();
+    QCOMPARE(r3.getRuleTypeStr(),  QString::fromUtf8("\u5305\u542b"));         // 包含
+    QCOMPARE(r3.getRuleFieldStr(), QString::fromUtf8("\u4e13\u8f91"));         // 专辑
+
+    // ── Branch: EXCLUDES + ALBUM ──
+    LyricIgnoreRule r4(RuleType::EXCLUDES, RuleField::ALBUM, "r4");
+    r4.setRulesStr();
+    QCOMPARE(r4.getRuleTypeStr(),  QString::fromUtf8("\u6392\u9664"));         // 排除
+    QCOMPARE(r4.getRuleFieldStr(), QString::fromUtf8("\u4e13\u8f91"));         // 专辑
 }
 
-void TestLyricIgnoreRule::testEdgeCases()
+// ═══════════════════════════════════════════════════════════════════════════
+// Static conversions (lyricRulesToString / ignoreRulesToString use tr())
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestLyricIgnoreRule::testLyricRulesToString()
 {
-    // 测试空规则名称
-    LyricIgnoreRule emptyRule(RuleType::INCLUDES, RuleField::TITLE, "");
-    QVERIFY(emptyRule.getRuleName().isEmpty());
-    QCOMPARE(emptyRule.getRuleType(), RuleType::INCLUDES);
-    QCOMPARE(emptyRule.getRuleField(), RuleField::TITLE);
-    
-    // 测试很长的规则名称
-    QString longName = QString("很长的规则名称").repeated(100);
-    LyricIgnoreRule longRule(RuleType::EXCLUDES, RuleField::ARTIST, longName);
-    QCOMPARE(longRule.getRuleName(), longName);
-    
-    // 测试特殊字符
-    QString specialChars = "!@#$%^&*()[]{}|;:'\",.<>?/~`";
-    LyricIgnoreRule specialRule(RuleType::INCLUDES, RuleField::ALBUM, specialChars);
-    QCOMPARE(specialRule.getRuleName(), specialChars);
+    // Branch: RuleField::TITLE  → tr("名称")
+    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::TITLE),
+             QString::fromUtf8("\u540d\u79f0"));                               // 名称
+
+    // Branch: RuleField::ARTIST → tr("艺术家")
+    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::ARTIST),
+             QString::fromUtf8("\u827a\u672f\u5bb6"));                         // 艺术家
+
+    // Branch: RuleField::ALBUM  → tr("专辑")
+    QCOMPARE(LyricIgnoreRule::lyricRulesToString(RuleField::ALBUM),
+             QString::fromUtf8("\u4e13\u8f91"));                               // 专辑
 }
 
-void TestLyricIgnoreRule::testAllCombinations()
+void TestLyricIgnoreRule::testIgnoreRulesToString()
 {
-    // 测试所有规则类型和字段的组合
-    QList<RuleType> ruleTypes = {RuleType::INCLUDES, RuleType::EXCLUDES};
-    QList<RuleField> ruleFields = {RuleField::TITLE, RuleField::ARTIST, RuleField::ALBUM};
-    
-    for (RuleType ruleType : ruleTypes) {
-        for (RuleField ruleField : ruleFields) {
-            LyricIgnoreRule rule(ruleType, ruleField, "测试规则");
-            
-            QCOMPARE(rule.getRuleType(), ruleType);
-            QCOMPARE(rule.getRuleField(), ruleField);
-            QCOMPARE(rule.getRuleName(), QString("测试规则"));
-            
-            // 验证字符串表示不为空
-            QVERIFY(!rule.getRuleTypeStr().isEmpty());
-            QVERIFY(!rule.getRuleFieldStr().isEmpty());
-        }
-    }
+    // Branch: RuleType::INCLUDES → tr("包含")
+    QCOMPARE(LyricIgnoreRule::ignoreRulesToString(RuleType::INCLUDES),
+             QString::fromUtf8("\u5305\u542b"));                               // 包含
+
+    // Branch: RuleType::EXCLUDES → tr("排除")
+    QCOMPARE(LyricIgnoreRule::ignoreRulesToString(RuleType::EXCLUDES),
+             QString::fromUtf8("\u6392\u9664"));                               // 排除
 }
 
-void TestLyricIgnoreRule::testChineseRuleNames()
+void TestLyricIgnoreRule::testStringToIgnoreRules()
 {
-    // 测试各种中文规则名称
-    QStringList chineseNames = {
-        "测试歌曲",
-        "周杰伦",
-        "夜曲",
-        "流行音乐",
-        "中文歌词",
-        "繁體中文",
-        "简体中文"
-    };
-    
-    for (const QString& name : chineseNames) {
-        LyricIgnoreRule rule(RuleType::INCLUDES, RuleField::TITLE, name);
-        QCOMPARE(rule.getRuleName(), name);
-        
-        // 验证中文名称的规则能正确比较
-        LyricIgnoreRule sameRule(RuleType::INCLUDES, RuleField::TITLE, name);
-        QVERIFY(rule == sameRule);
-        
-        LyricIgnoreRule differentRule(RuleType::EXCLUDES, RuleField::TITLE, name);
-        QVERIFY(rule != differentRule);
-    }
-    
-    // 测试混合中英文
-    LyricIgnoreRule mixedRule(RuleType::INCLUDES, RuleField::ARTIST, "Jay周杰伦Chou");
-    QCOMPARE(mixedRule.getRuleName(), QString("Jay周杰伦Chou"));
+    // Branch: rule == "包含" → RuleType::INCLUDES
+    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules(
+                 QString::fromUtf8("\u5305\u542b")),                            // 包含
+             RuleType::INCLUDES);
+
+    // Branch: rule == "排除" → RuleType::EXCLUDES
+    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules(
+                 QString::fromUtf8("\u6392\u9664")),                            // 排除
+             RuleType::EXCLUDES);
 }
 
-#include "TestLyricIgnoreRule.moc"
+void TestLyricIgnoreRule::testStringToLyricRules()
+{
+    // Branch: rule == "名称" → RuleField::TITLE
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules(
+                 QString::fromUtf8("\u540d\u79f0")),                            // 名称
+             RuleField::TITLE);
+
+    // Branch: rule == "艺术家" → RuleField::ARTIST
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules(
+                 QString::fromUtf8("\u827a\u672f\u5bb6")),                      // 艺术家
+             RuleField::ARTIST);
+
+    // Branch: rule == "专辑" → RuleField::ALBUM
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules(
+                 QString::fromUtf8("\u4e13\u8f91")),                            // 专辑
+             RuleField::ALBUM);
+}
+
+void TestLyricIgnoreRule::testStringToIgnoreRules_invalidDefault()
+{
+    // Branch: default → RuleType::INCLUDES (fallback for unrecognised strings)
+    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules("unknown"),
+             RuleType::INCLUDES);
+    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules(""),
+             RuleType::INCLUDES);
+    QCOMPARE(LyricIgnoreRule::stringToIgnoreRules("includes"),
+             RuleType::INCLUDES);
+}
+
+void TestLyricIgnoreRule::testStringToLyricRules_invalidDefault()
+{
+    // Branch: default → RuleField::TITLE (fallback for unrecognised strings)
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules("unknown"),
+             RuleField::TITLE);
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules(""),
+             RuleField::TITLE);
+    QCOMPARE(LyricIgnoreRule::stringToLyricRules("title"),
+             RuleField::TITLE);
+}

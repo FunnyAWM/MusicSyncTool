@@ -23,7 +23,7 @@ using PROPERTIES::FileErrorType;
 using PROPERTIES::LoadErrorType;
 using PROPERTIES::OperationType;
 using PROPERTIES::PathType;
-using PROPERTIES::PET;
+using PROPERTIES::AppErrorType;
 
 /**
  * @brief 错误报告器
@@ -36,40 +36,15 @@ class MSTErrorReporter : public QObject {
 	Q_OBJECT
 
 public:
-	/**
-	 * @brief 构造函数
-	 * @param parentWidget 父窗口部件（用于QMessageBox）
-	 * @param tableManager 表格管理器指针
-	 * @param parent 父对象指针
-	 */
 	explicit MSTErrorReporter(QWidget* parentWidget, MSTTableManager* tableManager,
 	                         QObject* parent = nullptr);
 
-	/**
-	 * @brief 根据错误类型弹出错误对话框
-	 * @param type 错误类型枚举值
-	 */
-	void popError(PET type) const;
+	void popError(AppErrorType type) const;
 
-	/**
-	 * @brief 添加文件操作错误到错误列表
-	 * @param file 文件名
-	 * @param error 文件错误类型
-	 */
 	void addToErrorList(const QString& file, FileErrorType error);
 
-	/**
-	 * @brief 添加加载错误到错误列表
-	 * @param file 文件名
-	 * @param error 加载错误类型
-	 */
 	void addToErrorList(const QString& file, LoadErrorType error);
 
-	/**
-	 * @brief 显示操作结果对话框
-	 * @param type 操作类型（复制或加载）
-	 * @details 如果没有错误直接刷新表格；如果有错误显示详情后刷新
-	 */
 	void showOperationResult(OperationType type);
 
 signals:

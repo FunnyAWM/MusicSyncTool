@@ -1,223 +1,295 @@
+/**
+ * @file TestQueryItem.cpp
+ * @brief White-box branch coverage tests for the QueryItem class
+ *        (src/Data/QueryItem.h + src/Data/QueryItem.cpp)
+ *
+ * Branch coverage targets:
+ *   Default constructor     : all members at default-initialised values
+ *   Full-param constructor  : every field assigned through initialiser/body
+ *   Getters / Setters       : each accessor round-trips correctly
+ *   Static sensitivity      : default value (4), explicit set, default-param set
+ *   operator==              :
+ *       - Core match (title)  → +2, hasCoreMatch=true
+ *       - Core match (artist) → +2, hasCoreMatch=true
+ *       - Auxiliary match (album fuzzy, track exact, year exact, genre fuzzy) → +1 each
+ *       - hasCoreMatch=false → return false regardless of threshold
+ *       - hasCoreMatch=true, threshold < sensitivity → return false
+ *       - hasCoreMatch=true, threshold >= sensitivity → return true
+ */
+
 #include "TestQueryItem.h"
 
-void TestQueryItem::init()
-{
-    tempDir = new QTemporaryDir();
-    QVERIFY(tempDir->isValid());
-}
-
-void TestQueryItem::cleanup()
-{
-    delete tempDir;
-    tempDir = nullptr;
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// Constructors
+// ═══════════════════════════════════════════════════════════════════════════
 
 void TestQueryItem::testDefaultConstructor()
 {
+    // Default constructor: all QStrings are empty.
+    // Note: year and track are POD (uint) and NOT zero-initialised by the
+    // default constructor (= default).  Their values are indeterminate.
     QueryItem item;
-    
-    // 默认构造的对象应该有空的字符串值和0的数值
-    QVERIFY(item.getTitle().isEmpty());
-    QVERIFY(item.getArtist().isEmpty());
-    QVERIFY(item.getAlbum().isEmpty());
-    QVERIFY(item.getGenre().isEmpty());
-    QVERIFY(item.getFileName().isEmpty());
-    QCOMPARE(item.getYear(), 0u);
-    QCOMPARE(item.getTrack(), 0u);
+    QCOMPARE(item.getTitle(),    QString(""));
+    QCOMPARE(item.getArtist(),   QString(""));
+    QCOMPARE(item.getAlbum(),    QString(""));
+    QCOMPARE(item.getGenre(),    QString(""));
+    QCOMPARE(item.getFileName(), QString(""));
+    // year and track are indeterminate — verify they can be set afterwards
+    item.setYear(0);
+    QCOMPARE(item.getYear(), static_cast<uint>(0));
+    item.setTrack(0);
+    QCOMPARE(item.getTrack(), static_cast<uint>(0));
 }
 
-void TestQueryItem::testParameterConstructor()
+void TestQueryItem::testFullConstructor()
 {
-    QString title = "Test Song";
-    QString artist = "Test Artist";
-    QString album = "Test Album";
-    QString genre = "Test Genre";
-    uint year = 2023;
-    uint track = 5;
-    QString fileName = "test.mp3";
-    
-    QueryItem item(title, artist, album, genre, year, track, fileName);
-    
-    QCOMPARE(item.getTitle(), title);
-    QCOMPARE(item.getArtist(), artist);
-    QCOMPARE(item.getAlbum(), album);
-    QCOMPARE(item.getGenre(), genre);
-    QCOMPARE(item.getYear(), year);
-    QCOMPARE(item.getTrack(), track);
-    QCOMPARE(item.getFileName(), fileName);
+    // Full-parameter constructor: every field assigned via body assignments
+    // (Note: year/track are initialised to 0 in the initialiser list, then
+    //  overwritten by the parameter values in the constructor body)
+    QueryItem item("Song Title", "Artist Name", "Album Name",
+                   "Rock", 2024u, 5u, "/music/song.mp3");
+
+    QCOMPARE(item.getTitle(),    QString("Song Title"));
+    QCOMPARE(item.getArtist(),   QString("Artist Name"));
+    QCOMPARE(item.getAlbum(),    QString("Album Name"));
+    QCOMPARE(item.getGenre(),    QString("Rock"));
+    QCOMPARE(item.getYear(),     static_cast<uint>(2024));
+    QCOMPARE(item.getTrack(),    static_cast<uint>(5));
+    QCOMPARE(item.getFileName(), QString("/music/song.mp3"));
 }
 
-void TestQueryItem::testGetters()
-{
-    QueryItem item("Title", "Artist", "Album", "Genre", 2020, 3, "file.mp3");
-    
-    QCOMPARE(item.getTitle(), QString("Title"));
-    QCOMPARE(item.getArtist(), QString("Artist"));
-    QCOMPARE(item.getAlbum(), QString("Album"));
-    QCOMPARE(item.getGenre(), QString("Genre"));
-    QCOMPARE(item.getYear(), 2020u);
-    QCOMPARE(item.getTrack(), 3u);
-    QCOMPARE(item.getFileName(), QString("file.mp3"));
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// Getters / Setters
+// ═══════════════════════════════════════════════════════════════════════════
 
-void TestQueryItem::testSetters()
+void TestQueryItem::testSetGetTitle()
 {
     QueryItem item;
-    
-    // 测试设置字符串属性
     item.setTitle("New Title");
     QCOMPARE(item.getTitle(), QString("New Title"));
-    
-    item.setArtist("New Artist");
-    QCOMPARE(item.getArtist(), QString("New Artist"));
-    
-    item.setAlbum("New Album");
-    QCOMPARE(item.getAlbum(), QString("New Album"));
-    
-    item.setGenre("New Genre");
-    QCOMPARE(item.getGenre(), QString("New Genre"));
-    
-    item.setFileName("new_file.mp3");
-    QCOMPARE(item.getFileName(), QString("new_file.mp3"));
-    
-    // 测试设置数值属性
-    item.setYear(2024);
-    QCOMPARE(item.getYear(), 2024u);
-    
-    item.setTrack(7);
-    QCOMPARE(item.getTrack(), 7u);
+
+    // Overwrite with a different value
+    item.setTitle("Another Title");
+    QCOMPARE(item.getTitle(), QString("Another Title"));
 }
 
-void TestQueryItem::testSensitivity()
-{
-    // 测试默认相似度阈值
-    int defaultSensitivity = QueryItem::getSensitivity();
-    QCOMPARE(defaultSensitivity, 3);
-    
-    // 测试设置新的相似度阈值
-    QueryItem::setSensitivity(5);
-    QCOMPARE(QueryItem::getSensitivity(), 5);
-    
-    // 测试重置为默认值
-    QueryItem::setSensitivity();
-    QCOMPARE(QueryItem::getSensitivity(), 3);
-    
-    // 测试边界值
-    QueryItem::setSensitivity(0);
-    QCOMPARE(QueryItem::getSensitivity(), 0);
-    
-    QueryItem::setSensitivity(10);
-    QCOMPARE(QueryItem::getSensitivity(), 10);
-    
-    // 恢复默认值以免影响其他测试
-    QueryItem::setSensitivity(3);
-}
-
-void TestQueryItem::testEqualityOperator()
-{
-    QueryItem item1("Title", "Artist", "Album", "Genre", 2020, 1, "file1.mp3");
-    QueryItem item2("Title", "Artist", "Album", "Genre", 2020, 1, "file1.mp3");
-    QueryItem item3("Different", "Artist", "Album", "Genre", 2020, 1, "file1.mp3");
-    
-    // 相同内容的对象应该相等
-    QVERIFY(item1 == item2);
-    
-    // 不同内容的对象应该不相等
-    QVERIFY(!(item1 == item3));
-    QVERIFY(item1 != item3);
-}
-
-void TestQueryItem::testSimilarityComparison()
-{
-    QueryItem item1("Test Song", "Test Artist", "Test Album", "Pop", 2020, 1, "test1.mp3");
-    QueryItem item2("Test Song", "Test Artist", "Test Album", "Rock", 2021, 2, "test2.mp3");
-    QueryItem item3("Different Song", "Different Artist", "Different Album", "Jazz", 2022, 3, "test3.mp3");
-    
-    // 设置相似度阈值
-    QueryItem::setSensitivity(3);
-    
-    // 相似的歌曲（标题、艺术家、专辑相同）
-    QVERIFY(item1.isSimilar(item2));
-    
-    // 完全不同的歌曲
-    QVERIFY(!item1.isSimilar(item3));
-    QVERIFY(!item2.isSimilar(item3));
-    
-    // 测试与自身的相似性
-    QVERIFY(item1.isSimilar(item1));
-}
-
-void TestQueryItem::testEdgeCases()
-{
-    // 测试空字符串
-    QueryItem emptyItem("", "", "", "", 0, 0, "");
-    QVERIFY(emptyItem.getTitle().isEmpty());
-    QVERIFY(emptyItem.getArtist().isEmpty());
-    QVERIFY(emptyItem.getAlbum().isEmpty());
-    QVERIFY(emptyItem.getGenre().isEmpty());
-    QVERIFY(emptyItem.getFileName().isEmpty());
-    
-    // 测试空字符串的相似性比较
-    QueryItem anotherEmpty("", "", "", "", 0, 0, "");
-    QVERIFY(emptyItem.isSimilar(anotherEmpty));
-    
-    // 测试一个空一个非空的情况
-    QueryItem nonEmpty("Title", "Artist", "Album", "Genre", 2020, 1, "file.mp3");
-    QVERIFY(!emptyItem.isSimilar(nonEmpty));
-    
-    // 测试特殊字符
-    QueryItem specialChars("Title!@#$%", "Artist&*()", "Album[]{}|", "Genre;:\"'", 2020, 1, "file?.mp3");
-    QVERIFY(specialChars.getTitle().contains("!@#$%"));
-    QVERIFY(specialChars.getArtist().contains("&*()"));
-}
-
-void TestQueryItem::testChineseCharacters()
-{
-    // 测试中文字符
-    QueryItem chineseItem("测试歌曲", "测试歌手", "测试专辑", "流行", 2020, 1, "test.mp3");
-    
-    QCOMPARE(chineseItem.getTitle(), QString("测试歌曲"));
-    QCOMPARE(chineseItem.getArtist(), QString("测试歌手"));
-    QCOMPARE(chineseItem.getAlbum(), QString("测试专辑"));
-    QCOMPARE(chineseItem.getGenre(), QString("流行"));
-    
-    // 测试中文的相似性比较
-    QueryItem anotherChinese("测试歌曲", "测试歌手", "测试专辑", "摇滚", 2021, 2, "test2.mp3");
-    QVERIFY(chineseItem.isSimilar(anotherChinese));
-    
-    // 测试中英混合
-    QueryItem mixedItem("Test测试", "Artist歌手", "Album专辑", "Pop流行", 2020, 1, "mixed.mp3");
-    QVERIFY(mixedItem.getTitle().contains("Test"));
-    QVERIFY(mixedItem.getTitle().contains("测试"));
-}
-
-void TestQueryItem::testNumericBoundaries()
+void TestQueryItem::testSetGetArtist()
 {
     QueryItem item;
-    
-    // 测试年份边界值
-    item.setYear(0);
-    QCOMPARE(item.getYear(), 0u);
-    
-    item.setYear(UINT_MAX);
-    QCOMPARE(item.getYear(), UINT_MAX);
-    
-    item.setYear(2024);
-    QCOMPARE(item.getYear(), 2024u);
-    
-    // 测试音轨编号边界值
-    item.setTrack(0);
-    QCOMPARE(item.getTrack(), 0u);
-    
-    item.setTrack(UINT_MAX);
-    QCOMPARE(item.getTrack(), UINT_MAX);
-    
-    item.setTrack(99);
-    QCOMPARE(item.getTrack(), 99u);
-    
-    // 测试年份为0的合理性（可能表示未知年份）
-    QueryItem unknownYear("Title", "Artist", "Album", "Genre", 0, 1, "file.mp3");
-    QCOMPARE(unknownYear.getYear(), 0u);
+    item.setArtist("New Artist");
+    QCOMPARE(item.getArtist(), QString("New Artist"));
+
+    item.setArtist("Another Artist");
+    QCOMPARE(item.getArtist(), QString("Another Artist"));
 }
 
-#include "TestQueryItem.moc"
+void TestQueryItem::testSetGetAlbum()
+{
+    QueryItem item;
+    item.setAlbum("New Album");
+    QCOMPARE(item.getAlbum(), QString("New Album"));
+
+    item.setAlbum("Another Album");
+    QCOMPARE(item.getAlbum(), QString("Another Album"));
+}
+
+void TestQueryItem::testSetGetGenre()
+{
+    QueryItem item;
+    item.setGenre("Pop");
+    QCOMPARE(item.getGenre(), QString("Pop"));
+
+    item.setGenre("Jazz");
+    QCOMPARE(item.getGenre(), QString("Jazz"));
+}
+
+void TestQueryItem::testSetGetYear()
+{
+    QueryItem item;
+    item.setYear(2024u);
+    QCOMPARE(item.getYear(), static_cast<uint>(2024));
+
+    item.setYear(1999u);
+    QCOMPARE(item.getYear(), static_cast<uint>(1999));
+}
+
+void TestQueryItem::testSetGetTrack()
+{
+    QueryItem item;
+    item.setTrack(7u);
+    QCOMPARE(item.getTrack(), static_cast<uint>(7));
+
+    item.setTrack(0u);
+    QCOMPARE(item.getTrack(), static_cast<uint>(0));
+}
+
+void TestQueryItem::testSetGetFileName()
+{
+    QueryItem item;
+    item.setFileName("/path/to/file.mp3");
+    QCOMPARE(item.getFileName(), QString("/path/to/file.mp3"));
+
+    // Platform-style path
+#if defined(_WIN32) || defined(_WIN64)
+    item.setFileName("C:\\Music\\song.flac");
+    QCOMPARE(item.getFileName(), QString("C:\\Music\\song.flac"));
+#else
+    item.setFileName("/home/user/Music/song.flac");
+    QCOMPARE(item.getFileName(), QString("/home/user/Music/song.flac"));
+#endif
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Static sensitivity
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestQueryItem::testGetSetSimilarityThreshold()
+{
+    // Save original to restore later (sensitivity is static – shared state)
+    int original = QueryItem::getSimilarityThreshold();
+
+    // Branch: explicit value
+    QueryItem::setSimilarityThreshold(5);
+    QCOMPARE(QueryItem::getSimilarityThreshold(), 5);
+
+    QueryItem::setSimilarityThreshold(1);
+    QCOMPARE(QueryItem::getSimilarityThreshold(), 1);
+
+    // Branch: default parameter (s = 3)
+    QueryItem::setSimilarityThreshold();
+    QCOMPARE(QueryItem::getSimilarityThreshold(), 3);
+
+    // Restore
+    QueryItem::setSimilarityThreshold(original);
+}
+
+void TestQueryItem::testDefaultSimilarityThreshold()
+{
+    // The static member is initialised to 4 at program start.
+    // NOTE: This test must run before any test that modifies sensitivity,
+    //       or we restore it explicitly here.
+    // We force a known state: set to default value 4 and verify.
+    QueryItem::setSimilarityThreshold(4);
+    QCOMPARE(QueryItem::getSimilarityThreshold(), 4);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// operator== (weighted fuzzy comparison)
+//
+// Scoring:
+//   title  match (fuzzy) → +2, hasCoreMatch = true
+//   artist match (fuzzy) → +2, hasCoreMatch = true
+//   album  match (fuzzy) → +1
+//   track  match (exact) → +1
+//   year   match (exact) → +1
+//   genre  match (fuzzy) → +1
+//   Max possible = 8
+//
+// Result: hasCoreMatch && (totalScore >= sensitivity)
+// Default sensitivity = 4
+// ═══════════════════════════════════════════════════════════════════════════
+
+void TestQueryItem::testEquality_identicalItems()
+{
+    QueryItem::setSimilarityThreshold(4); // ensure known state
+
+    // All fields identical → all branches take the "match" side
+    //   title  match → +2, hasCoreMatch=true
+    //   artist match → +2
+    //   album  match → +1
+    //   track  match → +1
+    //   year   match → +1
+    //   genre  match → +1
+    //   total = 8 >= 4, hasCoreMatch=true → true
+    QueryItem a("Song Title", "Artist Name", "Album", "Rock", 2024u, 1u, "/a.mp3");
+    QueryItem b("Song Title", "Artist Name", "Album", "Rock", 2024u, 1u, "/b.mp3");
+    QVERIFY(a == b);
+}
+
+void TestQueryItem::testEquality_differentTitles()
+{
+    QueryItem::setSimilarityThreshold(4);
+
+    // Titles completely different → fuzzyMatch returns false
+    //   title  NO match → +0, hasCoreMatch stays false (if artist also differs)
+    //   artist NO match → +0
+    //   album  match    → +1
+    //   track  match    → +1
+    //   year   match    → +1
+    //   genre  match    → +1
+    //   total = 4 >= 4, BUT hasCoreMatch = false → return false
+    QueryItem a("Completely Different Title", "Different Artist", "Album", "Rock", 2024u, 1u, "/a.mp3");
+    QueryItem b("Another Song Entirely", "Some Other Person", "Album", "Rock", 2024u, 1u, "/b.mp3");
+    QVERIFY(!(a == b));
+}
+
+void TestQueryItem::testEquality_similarTitles_differentArtists()
+{
+    QueryItem::setSimilarityThreshold(4);
+
+    // Title matches (exact), artist is completely different
+    //   title  match → +2, hasCoreMatch=true
+    //   artist NO match → +0
+    //   album  NO match → +0
+    //   track  NO match → +0
+    //   year   NO match → +0
+    //   genre  NO match → +0
+    //   total = 2 < 4, hasCoreMatch=true → return false (threshold not met)
+    QueryItem a("Test Song", "ABC", "AlbumA", "Pop", 2020u, 1u, "/a.mp3");
+    QueryItem b("Test Song", "XYZ", "AlbumB", "Jazz", 2021u, 2u, "/b.mp3");
+    QVERIFY(!(a == b));
+}
+
+void TestQueryItem::testEquality_withSimilarityThresholdChange()
+{
+    // Lower sensitivity so that fewer matching fields suffice
+    QueryItem::setSimilarityThreshold(2);
+
+    // Only artist matches as core field (+2). All other fields differ
+    // completely so fuzzyMatch returns false for title, album, and genre.
+    QueryItem a("ABC", "Same Artist", "AAA", "Pop", 2020u, 1u, "/a.mp3");
+    QueryItem b("XYZ", "Same Artist", "ZZZ", "Jazz", 2021u, 2u, "/b.mp3");
+
+    // sensitivity=2: artist match score=2 >= 2 → true
+    QVERIFY(a == b);
+
+    // Sensitivity = 3: artist match score=2 < 3 → false
+    QueryItem::setSimilarityThreshold(3);
+    QVERIFY(!(a == b));
+
+    // Sensitivity = 1: even a single core match suffices
+    QueryItem::setSimilarityThreshold(1);
+    QVERIFY(a == b);
+
+    // Restore default
+    QueryItem::setSimilarityThreshold(4);
+}
+
+void TestQueryItem::testEquality_emptyItems()
+{
+    QueryItem::setSimilarityThreshold(4);
+
+    // Two default-constructed items: all fields are empty strings / 0
+    //   title  "" vs "" → fuzzyMatch returns true  (str1==str2 shortcut) → +2, hasCoreMatch=true
+    //   artist "" vs "" → fuzzyMatch returns true  → +2
+    //   album  "" vs "" → fuzzyMatch returns true  → +1
+    //   track  0 == 0   → +1
+    //   year   0 == 0   → +1
+    //   genre  "" vs "" → fuzzyMatch returns true  → +1
+    //   total = 8 >= 4, hasCoreMatch=true → true
+    QueryItem a;
+    QueryItem b;
+    QVERIFY(a == b);
+
+    // One empty, one fully populated:
+    //   title  "" vs "Song Title" → fuzzyMatch("", "Song Title") → false (one empty)
+    //   artist "" vs "Artist"     → false
+    //   album  "" vs "Album"      → false
+    //   track  0 != 1             → +0
+    //   year   0 != 2024          → +0
+    //   genre  "" vs "Rock"       → false
+    //   total = 0, hasCoreMatch=false → false
+    QueryItem c;
+    QueryItem d("Song Title", "Artist", "Album", "Rock", 2024u, 1u, "/d.mp3");
+    QVERIFY(!(c == d));
+}

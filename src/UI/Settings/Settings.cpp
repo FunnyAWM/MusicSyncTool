@@ -8,8 +8,9 @@
  */
 
 #include "Settings.h"
-#include "../../Services/Logger.h"
+#include <QJsonArray>
 #include <QMessageBox>
+#include "../../Services/Logger.h"
 
 #include "../AddRuleWidget/AddRuleWidget.h"
 
@@ -19,7 +20,7 @@
  * @param entity 已加载的设置实体
  * @param parent 父窗口指针
  */
-Settings::Settings(const set& entity, QWidget* parent) : QWidget(parent) {
+Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent) {
 	ui.setupUi(this); // 设置UI界面
 	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); // 设置表格头部自动拉伸
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico")); // 设置窗口图标
@@ -43,8 +44,8 @@ Settings::Settings(const set& entity, QWidget* parent) : QWidget(parent) {
  * @brief 获取当前UI中的所有设置
  * @return 包含所有设置的结构体
  */
-set Settings::getSettings() {
-	set target;
+SettingsData Settings::getSettings() {
+	SettingsData target;
 	target.ignoreLyric = ui.ignoreLyricBox->isChecked(); // 获取是否忽略歌词设置
 
 	// 获取排序字段设置
@@ -152,24 +153,24 @@ void Settings::setOrderByToUI(short orderBy) {
 	}
 }
 
+void Settings::setRecursiveScanToUI(const bool recursiveScan) {
+	entity.recursiveScan = recursiveScan;
+	ui.recursiveScan->setChecked(recursiveScan);
+}
+
 void Settings::setIgnoreRulesToUI(QList<LyricIgnoreRule>& rules) {
 	entity.rules = rules;
 	ui.rulesWidget->setRowCount(static_cast<int>(rules.size()));
 	int row = 0;
-	for (LyricIgnoreRule& singleton : rules) {
-		singleton.setRulesStr();
+	for (LyricIgnoreRule& rule : rules) {
+		rule.setRulesStr();
 		ui.rulesWidget->setItem(
-			row, 0, new QTableWidgetItem(LyricIgnoreRule::lyricRulesToString(singleton.getRuleField())));
+			row, 0, new QTableWidgetItem(LyricIgnoreRule::lyricRulesToString(rule.getRuleField())));
 		ui.rulesWidget->setItem(
-			row, 1, new QTableWidgetItem(LyricIgnoreRule::ignoreRulesToString(singleton.getRuleType())));
-		ui.rulesWidget->setItem(row, 2, new QTableWidgetItem(singleton.getRuleName()));
+			row, 1, new QTableWidgetItem(LyricIgnoreRule::ignoreRulesToString(rule.getRuleType())));
+		ui.rulesWidget->setItem(row, 2, new QTableWidgetItem(rule.getRuleName()));
 		row++;
 	}
-}
-
-void Settings::setRecursiveScanToUI(const bool recursiveScan) {
-	entity.recursiveScan = recursiveScan;
-	ui.recursiveScan->setChecked(recursiveScan);
 }
 
 void Settings::on_confirmButton_clicked() {
@@ -193,7 +194,7 @@ void Settings::on_deleteSelectedRule_clicked() {
 	}
 }
 
-void Settings::addRule(const LyricIgnoreRule& singleton) {
-	entity.rules.append(singleton);
+void Settings::addRule(const LyricIgnoreRule& rule) {
+	entity.rules.append(rule);
 	setIgnoreRulesToUI(entity.rules);
 }

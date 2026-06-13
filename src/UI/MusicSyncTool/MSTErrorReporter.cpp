@@ -12,9 +12,9 @@
 #include <QMessageBox>
 #include <QWidget>
 
+#include "MSTTableManager.h"
 #include "../../Core/SettingEntity.h"
 #include "../OperationResult/OperationResult.h"
-#include "MSTTableManager.h"
 
 /**
  * @brief 构造函数
@@ -26,36 +26,37 @@ MSTErrorReporter::MSTErrorReporter(QWidget* parentWidget, MSTTableManager* table
 /**
  * @brief 根据错误类型弹出错误对话框
  */
-void MSTErrorReporter::popError(const PET type) const {
+void MSTErrorReporter::popError(const AppErrorType type) const {
 	switch (type) {
-	case PET::NOAUDIO:
+	case AppErrorType::NO_AUDIO:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("没有选定音频！（提示：可以通过双击表格中的歌曲来预览）"));
 		break;
-	case PET::NPS:
+	case AppErrorType::NO_PATH:
+	case AppErrorType::DUPLICATE_FILE:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("没有选定路径！"));
 		break;
-	case PET::NDP:
+	case AppErrorType::NO_DEST_PATH:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("目标文件夹尚未打开，请先选择目标路径！"));
 		break;
-	case PET::NFT:
+	case AppErrorType::NO_FAV_TAG:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("没有设置喜爱标签！请在设置中指定！"));
 		break;
-	case PET::NFS:
+	case AppErrorType::NO_FILE:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("没有选定文件！"));
 		break;
-	case PET::FIRST:
+	case AppErrorType::FIRST:
 		QMessageBox::information(parentWidget, tr("提示"), tr("已经是第一页了！"));
 		break;
-	case PET::LAST:
+	case AppErrorType::LAST:
 		QMessageBox::information(parentWidget, tr("提示"), tr("已经是最后一页了！"));
 		break;
-	case PET::RUNNING:
+	case AppErrorType::RUNNING:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("程序已在运行！"));
 		break;
-	case PET::NOLANG:
+	case AppErrorType::NO_LANGUAGE:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("找不到程序语言配置文件，程序即将退出！"));
 		break;
-	case PET::DBERROR:
+	case AppErrorType::DB_ERROR:
 		QMessageBox::critical(parentWidget, tr("错误"), tr("操作数据库中数据时出现严重错误，程序即将退出！"));
 		break;
 	default:
@@ -71,7 +72,7 @@ void MSTErrorReporter::addToErrorList(const QString& file, const FileErrorType e
 	case FileErrorType::DUPLICATE:
 		errorList.append(tr("复制") + file + tr("失败：文件已存在"));
 		break;
-	case FileErrorType::LNF:
+	case FileErrorType::LYRIC_NOT_FOUND:
 		errorList.append(tr("复制") + file + tr("失败：找不到歌词文件"));
 		break;
 	case FileErrorType::DISKFULL:
@@ -85,10 +86,10 @@ void MSTErrorReporter::addToErrorList(const QString& file, const FileErrorType e
  */
 void MSTErrorReporter::addToErrorList(const QString& file, const LoadErrorType error) {
 	switch (error) {
-	case LoadErrorType::FNS:
+	case LoadErrorType::FILE_NOT_SCANNABLE:
 		errorList.append(tr("加载") + file + tr("失败：文件不可扫描"));
 		break;
-	case LoadErrorType::TAGERR:
+	case LoadErrorType::TAG_READ_ERROR:
 		errorList.append(tr("加载") + file + tr("失败：标签错误"));
 		break;
 	}
@@ -98,26 +99,26 @@ void MSTErrorReporter::addToErrorList(const QString& file, const LoadErrorType e
  * @brief 显示操作结果对话框
  */
 void MSTErrorReporter::showOperationResult(const OperationType type) {
-	const auto result = new OperationResult();
+	const auto resultDialog = new OperationResult();
 	switch (type) {
 	case OperationType::COPY:
-		result->setWindowTitle(tr("复制结果"));
+		resultDialog->setWindowTitle(tr("复制结果"));
 		break;
 	case OperationType::LOAD:
-		result->setWindowTitle(tr("加载结果"));
+		resultDialog->setWindowTitle(tr("加载结果"));
 		break;
 	}
 
 	if (errorList.isEmpty()) {
-		delete result;
+		delete resultDialog;
 	}
 	else {
 		QString errorString;
 		for (QString& error : errorList) {
 			errorString += error + "\n";
 		}
-		result->setText(errorString);
-		result->exec();
+		resultDialog->setText(errorString);
+		resultDialog->exec();
 		errorList.clear();
 	}
 

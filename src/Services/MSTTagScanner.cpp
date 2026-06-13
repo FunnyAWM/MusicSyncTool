@@ -13,8 +13,8 @@
 #include <taglib/fileref.h>
 #include <taglib/tpropertymap.h>
 
-#include "../Core/MSTTagUtils.h"
 #include "Logger.h"
+#include "../Core/MSTTagUtils.h"
 
 /**
  * @brief 构造函数
@@ -41,11 +41,11 @@ QList<FavoriteUpdate> MSTTagScanner::scanFavorite(const QString& basePath,
 		emit currentProgress(i);
 
 		// 读取文件标签
-		const TagLib::FileRef f = MSTTagUtils::createFileRef(basePath + "/" + file);
+		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(basePath + "/" + file);
 
 		FavoriteUpdate update;
 		update.fileName = file;
-		update.isFavorite = f.properties().contains(tag.toStdString().c_str());
+		update.isFavorite = fileRef.properties().contains(tag.toStdString().c_str());
 		results.append(update);
 		i++;
 	}
@@ -65,33 +65,36 @@ QList<RuleHitUpdate> MSTTagScanner::scanRuleHit(const QString& basePath,
 	}
 
 	QList<RuleHitUpdate> results;
+	emit totalSize(items.count());
+	int i = 0;
 	for (const auto& item : items) {
 		RuleHitUpdate update;
 		update.fileName = item.getFileName();
-
+		emit currentProgress(i);
 		// 检查是否有任何规则命中当前音乐项
 		update.isRuleHit = std::any_of(rules.begin(), rules.end(), [&item](const LyricIgnoreRule& rule) {
-			QString fieldStr;
+			QString fieldValue;
 			// 根据规则字段类型获取对应的音乐属性
 			switch (rule.getRuleField()) {
 			case RuleField::TITLE:
-				fieldStr = item.getTitle();
+				fieldValue = item.getTitle();
 				break;
 			case RuleField::ARTIST:
-				fieldStr = item.getArtist();
+				fieldValue = item.getArtist();
 				break;
 			case RuleField::ALBUM:
-				fieldStr = item.getAlbum();
+				fieldValue = item.getAlbum();
 				break;
 			}
 			// 使用正则表达式匹配规则
 			const QRegularExpression regExp(rule.getRuleName());
-			const bool hasMatch = regExp.match(fieldStr).hasMatch();
+			const bool hasMatch = regExp.match(fieldValue).hasMatch();
 			// 根据规则类型返回匹配结果（包含或排除）
 			return (rule.getRuleType() == RuleType::INCLUDES) ? hasMatch : !hasMatch;
 		});
 
 		results.append(update);
+		i++;
 	}
 
 	return results;

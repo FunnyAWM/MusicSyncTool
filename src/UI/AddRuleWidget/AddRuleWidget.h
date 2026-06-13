@@ -10,8 +10,8 @@
 #ifndef ADDRULEWIDGET_H
 #define ADDRULEWIDGET_H
 
-#include "../../Data/LyricIgnoreRule.h"
 #include "ui_AddRuleWidget.h"
+#include "../../Data/LyricIgnoreRule.h"
 
 /**
  * @brief 添加规则对话框类
@@ -22,21 +22,10 @@ class AddRuleWidget final : public QDialog
 	Q_OBJECT
 
 public:
-	/**
-	 * @brief 构造函数
-	 * @param parent 父窗口指针，默认为nullptr
-	 */
 	explicit AddRuleWidget(QWidget *parent = nullptr);
 	
-	/**
-	 * @brief 获取用户设置的规则
-	 * @return 返回配置的歌词忽略规则对象
-	 */
 	LyricIgnoreRule getRules() const;
 	
-	/**
-	 * @brief 析构函数
-	 */
 	~AddRuleWidget() override = default;
 
 private:
@@ -50,9 +39,6 @@ signals:
 	void sendRules(LyricIgnoreRule rule);
 
 public slots:
-	/**
-	 * @brief 确认按钮点击事件槽函数
-	 */
 	void on_confirmButton_clicked();
 };
 

@@ -12,7 +12,6 @@
 
 #include <QLabel>
 #include <QPushButton>
-#include <QSlider>
 #include <QTableWidget>
 #include <taglib/fileref.h>
 
@@ -52,13 +51,6 @@ MSTMediaController::MSTMediaController(
 }
 
 /**
- * @brief 初始化媒体播放器
- */
-void MSTMediaController::initMediaPlayer() const {
-	player->setVolume(0.5);
-}
-
-/**
  * @brief 格式化毫秒时间为 mm:ss 字符串
  */
 QString MSTMediaController::formatTime(const qint64 ms) {
@@ -71,10 +63,87 @@ QString MSTMediaController::formatTime(const qint64 ms) {
 }
 
 /**
- * @brief 设置正在播放的标题显示
+ * @brief 初始化媒体播放器
  */
-void MSTMediaController::setNowPlayingTitle(const QString& file) const {
-	nowPlayingLabel->setText(tr("正在播放：") + file);
+void MSTMediaController::initMediaPlayer() const {
+	player->setVolume(0.5);
+}
+
+/**
+ * @brief 连接媒体播放器信号
+ */
+void MSTMediaController::connectSignals() {
+	connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged,
+	        this, &MSTMediaController::updateSliderPosition);
+	connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged,
+	        this, &MSTMediaController::handleMediaEnd);
+}
+
+/**
+ * @brief 播放或暂停切换
+ */
+void MSTMediaController::togglePlayPause() {
+	if (player->getNowPlaying().isEmpty()) {
+		emit errorOccurred(AppErrorType::NO_AUDIO);
+		return;
+	}
+	if (player->isPlaying()) {
+		player->pause();
+		setMediaWidget(PlayState::PAUSED);
+	}
+	else {
+		player->play();
+		setMediaWidget(PlayState::PLAYING);
+	}
+}
+
+/**
+ * @brief 播放选定的曲目
+ */
+void MSTMediaController::playSelectedTrack(const PathType path, const int row) {
+	const QTableWidget& tableWidget = path == PathType::LOCAL ? *tableLocal : *tableRemote;
+	MSTDataSource& dataSource = path == PathType::LOCAL ? localDataSource : remoteDataSource;
+
+	// 行号越界或单元格为空时中止
+	if (row < 0 || row >= tableWidget.rowCount()) {
+		emit errorOccurred(AppErrorType::NO_FILE);
+		return;
+	}
+	if (!tableWidget.item(row, 0) || !tableWidget.item(row, 1) || !tableWidget.item(row, 2)) {
+		emit errorOccurred(AppErrorType::NO_FILE);
+		return;
+	}
+
+	const auto item = std::make_shared<QueryItem>();
+	item->setTitle(tableWidget.item(row, 0)->text());
+	item->setArtist(tableWidget.item(row, 1)->text());
+	item->setAlbum(tableWidget.item(row, 2)->text());
+	QList<QueryItem> file;
+	file.append(*item);
+	const QStringList fileNames = dataSource.getFileNameByMetadata(file);
+	if (fileNames.isEmpty()) {
+		emit errorOccurred(AppErrorType::NO_FILE);
+		return;
+	}
+	nowPlaying = fileNames.at(0);
+
+	const QString filePath = (path == PathType::LOCAL
+		                          ? localDataSource.getPath()
+		                          : remoteDataSource.getPath()) + "/" + nowPlaying;
+	player->setNowPlaying(filePath);
+
+	const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(filePath);
+
+	if (!fileRef.isNull() && fileRef.audioProperties()) {
+		const qint64 length = fileRef.audioProperties()->lengthInMilliseconds();
+		setNowPlayingTitle(nowPlaying);
+		player->setPosition(0);
+		player->play();
+		setMediaWidget(PlayState::PLAYING);
+		playSlider->setMaximum(static_cast<int>(length));
+		playSlider->setValue(0);
+		playProgress->setText("00:00");
+	}
 }
 
 /**
@@ -96,21 +165,10 @@ void MSTMediaController::setMediaWidget(const PlayState state) const {
 }
 
 /**
- * @brief 播放或暂停切换
+ * @brief 设置正在播放的标题显示
  */
-void MSTMediaController::togglePlayPause() {
-	if (player->getNowPlaying().isEmpty()) {
-		emit errorOccurred(PET::NOAUDIO);
-		return;
-	}
-	if (player->isPlaying()) {
-		player->pause();
-		setMediaWidget(PlayState::PAUSED);
-	}
-	else {
-		player->play();
-		setMediaWidget(PlayState::PLAYING);
-	}
+void MSTMediaController::setNowPlayingTitle(const QString& file) const {
+	nowPlayingLabel->setText(tr("正在播放：") + file);
 }
 
 /**
@@ -122,18 +180,18 @@ void MSTMediaController::seekToPosition(const int position) const {
 }
 
 /**
+ * @brief 更新播放进度显示
+ */
+void MSTMediaController::updateSliderPosition(const qint64 position) const {
+	playSlider->setValue(static_cast<int>(position));
+	playProgress->setText(formatTime(position) + "/" + formatTime(player->getDuration()));
+}
+
+/**
  * @brief 按下播放进度滑块
  */
 void MSTMediaController::onPlaySliderPressed() const {
 	player->setPosition(playSlider->value());
-}
-
-/**
- * @brief 设置音量（从滑块值）
- */
-void MSTMediaController::setVolumeFromSlider(const int position) const {
-	player->setVolume(static_cast<float>(position / 100.0));
-	volumeLabel->setText(tr("音量：") + QString::number(position) + "%");
 }
 
 /**
@@ -145,11 +203,11 @@ void MSTMediaController::onVolumeSliderPressed() const {
 }
 
 /**
- * @brief 更新播放进度显示
+ * @brief 设置音量（从滑块值）
  */
-void MSTMediaController::updateSliderPosition(const qint64 position) const {
-	playSlider->setValue(static_cast<int>(position));
-	playProgress->setText(formatTime(position) + "/" + formatTime(player->getDuration()));
+void MSTMediaController::setVolumeFromSlider(const int position) const {
+	player->setVolume(static_cast<float>(position / 100.0));
+	volumeLabel->setText(tr("音量：") + QString::number(position) + "%");
 }
 
 /**
@@ -162,63 +220,4 @@ void MSTMediaController::handleMediaEnd(const QMediaPlayer::PlaybackState state)
 		playSlider->setValue(0);
 		playProgress->setText("00:00");
 	}
-}
-
-/**
- * @brief 播放选定的曲目
- */
-void MSTMediaController::playSelectedTrack(const PathType path, const int row) {
-	const QTableWidget& widget = path == PathType::LOCAL ? *tableLocal : *tableRemote;
-	MSTDataSource& ds = path == PathType::LOCAL ? localDataSource : remoteDataSource;
-
-	// 行号越界或单元格为空时中止
-	if (row < 0 || row >= widget.rowCount()) {
-		emit errorOccurred(PET::NFS);
-		return;
-	}
-	if (!widget.item(row, 0) || !widget.item(row, 1) || !widget.item(row, 2)) {
-		emit errorOccurred(PET::NFS);
-		return;
-	}
-
-	const auto item = std::make_shared<QueryItem>();
-	item->setTitle(widget.item(row, 0)->text());
-	item->setArtist(widget.item(row, 1)->text());
-	item->setAlbum(widget.item(row, 2)->text());
-	QList<QueryItem> file;
-	file.append(*item);
-	const QStringList fileNames = ds.getFileNameByMD(file);
-	if (fileNames.isEmpty()) {
-		emit errorOccurred(PET::NFS);
-		return;
-	}
-	nowPlaying = fileNames.at(0);
-
-	const QString filePath = (path == PathType::LOCAL
-		                          ? localDataSource.getPath()
-		                          : remoteDataSource.getPath()) + "/" + nowPlaying;
-	player->setNowPlaying(filePath);
-
-	const TagLib::FileRef f = MSTTagUtils::createFileRef(filePath);
-
-	if (!f.isNull() && f.audioProperties()) {
-		const qint64 length = f.audioProperties()->lengthInMilliseconds();
-		setNowPlayingTitle(nowPlaying);
-		player->setPosition(0);
-		player->play();
-		setMediaWidget(PlayState::PLAYING);
-		playSlider->setMaximum(static_cast<int>(length));
-		playSlider->setValue(0);
-		playProgress->setText("00:00");
-	}
-}
-
-/**
- * @brief 连接媒体播放器信号
- */
-void MSTMediaController::connectSignals() {
-	connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged,
-	        this, &MSTMediaController::updateSliderPosition);
-	connect(player->getMediaPlayer(), &QMediaPlayer::playbackStateChanged,
-	        this, &MSTMediaController::handleMediaEnd);
 }

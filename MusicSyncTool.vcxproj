@@ -121,6 +121,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StringPooling>true</StringPooling>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\Qt\6.8.1\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -152,6 +153,7 @@
     <ClCompile>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <CallingConvention>Cdecl</CallingConvention>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
@@ -278,6 +280,19 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\titles.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\base-style.qss" />
+    <None Include="resources\style-light.qss" />
+    <None Include="resources\style-dark-mode.qss" />
+    <None Include="resources\style.qss" />
+    <None Include="resources\style-green.qss" />
+    <None Include="resources\style-purple.qss" />
+    <None Include="resources\style-dark.qss" />
+    <None Include="resources\checkmark.svg" />
+    <None Include="resources\radiodot.svg" />
+    <None Include="resources\downarrow.svg" />
+    <None Include="resources\downarrow-light.svg" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="src\UI\AboutPage\AboutPage.ui" />

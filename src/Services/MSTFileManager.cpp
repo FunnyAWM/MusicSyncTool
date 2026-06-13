@@ -23,7 +23,7 @@ const QStringList MSTFileManager::supportedFormat = {
  * @brief 构造函数，初始化存储信息
  * @param path 存储路径
  */
-MSTFileManager::MSTFileManager(QString path) {
+MSTFileManager::MSTFileManager(const QString& path) {
 	storageInfo = QStorageInfo(path);
 }
 
@@ -126,12 +126,12 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
     
     bool diskFull = false;
     for (const QString& file : fileList) {
-        QStringList list = file.split(":");
-        QString sourceFile = source + "/" + list.at(0);
-        QString targetFile = target + "/" + list.at(0);
+        QStringList fileParts = file.split(":");
+        QString sourceFile = source + "/" + fileParts.at(0);
+        QString targetFile = target + "/" + fileParts.at(0);
         
         if (diskFull) {
-            if (onError) onError(list.at(0), 2); // DISKFULL = 2
+            if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
             continue;
         }
         
@@ -139,33 +139,33 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
         QString lyricTarget;
         for (const QString& format : supportedFormat) {
             if (sourceFile.contains(format)) {
-                QString temp = sourceFile;
-                QString tempTarget = targetFile;
-                lyric = temp.replace(format, "lrc");
-                lyricTarget = tempTarget.replace(format, "lrc");
+                QString lyricSourcePath = sourceFile;
+                QString lyricTargetPath = targetFile;
+                lyric = lyricSourcePath.replace(format, "lrc");
+                lyricTarget = lyricTargetPath.replace(format, "lrc");
                 break;
             }
         }
         
         if (QFile::exists(targetFile)) {
             Logger::Warn("File existed, skipping " + targetFile);
-            if (onError) onError(list.at(0), 0); // DUPLICATE = 0
+            if (onError) onError(fileParts.at(0), 0); // DUPLICATE = 0
             continue;
         }
         
-        if (!ignoreLyric && !static_cast<bool>(list.at(1).toInt())) {
+        if (!ignoreLyric && !static_cast<bool>(fileParts.at(1).toInt())) {
             if (!QFile::exists(lyric)) {
-                TagLib::FileRef f;
+                TagLib::FileRef fileRef;
 #if defined(_WIN64) or defined(_WIN32)
-                f = TagLib::FileRef(sourceFile.toStdWString().c_str());
+                fileRef = TagLib::FileRef(sourceFile.toStdWString().c_str());
 #else
-                f = TagLib::FileRef(sourceFile.toStdString().c_str());
+                fileRef = TagLib::FileRef(sourceFile.toStdString().c_str());
 #endif
-                if (!f.isNull() && f.tag()) {
-                    const TagLib::Tag* tag = f.tag();
+                if (!fileRef.isNull() && fileRef.tag()) {
+                    const TagLib::Tag* tag = fileRef.tag();
                     if (!tag->properties().contains(key)) {
                         Logger::Warn("Lyric file not found, skipping " + lyric);
-                        if (onError) onError(list.at(0), 1); // LNF = 1
+                        if (onError) onError(fileParts.at(0), 1); // LNF = 1
                         continue;
                     }
                 }
@@ -173,7 +173,7 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
                 diskFull = isFull(sourceFile, target);
                 if (diskFull) {
                     rollBackCopy(targetFile);
-                    if (onError) onError(list.at(0), 2); // DISKFULL = 2
+                    if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
                     continue;
                 }
                 QFile::copy(lyric, lyricTarget);
@@ -183,7 +183,7 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
         diskFull = isFull(sourceFile, target);
         if (diskFull) {
             rollBackCopy(targetFile);
-            if (onError) onError(list.at(0), 2); // DISKFULL = 2
+            if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
             continue;
         }
         

@@ -9,21 +9,41 @@
 
 #include "MSTSettingsManager.h"
 
-#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QTextStream>
 
-#include "../Data/LyricIgnoreRule.h"
 #include "Logger.h"
+#include "../Data/LyricIgnoreRule.h"
+
+/**
+ * @brief 创建默认设置文件
+ */
+void MSTSettingsManager::createDefaultSettings() {
+	QFile file("settings.json");
+	if (!file.open(QIODevice::WriteOnly)) {
+		Logger::Error("Failed to create default settings file");
+		return;
+	}
+	QJsonObject obj;
+	obj["ignoreLyric"] = false;
+	obj["sortBy"] = PROPERTIES::toShort(PROPERTIES::SortByEnum::TITLE);
+	obj["orderBy"] = PROPERTIES::toShort(PROPERTIES::OrderByEnum::ASC);
+	obj["language"] = "";
+	obj["favoriteTag"] = "";
+	obj["rules"] = QJsonArray();
+	obj["recursiveScan"] = false;
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
+}
 
 /**
  * @brief 从settings.json文件加载设置
  * @param entity 输出的设置实体引用
  * @return 成功加载返回true，否则返回false
  */
-bool MSTSettingsManager::loadSettings(set& entity) {
+bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
 		Logger::Warn("No settings file found, creating default setting file named settings.json");
@@ -49,6 +69,10 @@ bool MSTSettingsManager::loadSettings(set& entity) {
 	QJsonArray rulesArray = obj["rules"].toArray();
 	for (QJsonValue rule : rulesArray) {
 		QJsonObject ruleObj = rule.toObject();
+		if (ruleObj["ruleType"].isNull() || ruleObj["ruleField"].isNull() || ruleObj["ruleName"].isNull()) {
+			Logger::Warn("Invalid rule found in settings file, skipping");
+			continue;
+		}
 		rules.append(LyricIgnoreRule(LyricIgnoreRule::stringToIgnoreRules(ruleObj["ruleType"].toString()),
 		                             LyricIgnoreRule::stringToLyricRules(ruleObj["ruleField"].toString()),
 		                             ruleObj["ruleName"].toString()));
@@ -63,7 +87,7 @@ bool MSTSettingsManager::loadSettings(set& entity) {
  * @param entity 要保存的设置实体
  * @return 成功保存返回true，否则返回false
  */
-bool MSTSettingsManager::saveSettings(const set& entity) {
+bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
 		Logger::Fatal("Error opening settings file");
@@ -90,27 +114,6 @@ bool MSTSettingsManager::saveSettings(const set& entity) {
 	file.write(settings.toJson());
 	file.close();
 	return true;
-}
-
-/**
- * @brief 创建默认设置文件
- */
-void MSTSettingsManager::createDefaultSettings() {
-	QFile file("settings.json");
-	if (!file.open(QIODevice::WriteOnly)) {
-		Logger::Error("Failed to create default settings file");
-		return;
-	}
-	QJsonObject obj;
-	obj["ignoreLyric"] = false;
-	obj["sortBy"] = PROPERTIES::toShort(PROPERTIES::SortByEnum::TITLE);
-	obj["orderBy"] = PROPERTIES::toShort(PROPERTIES::OrderByEnum::ASC);
-	obj["language"] = "";
-	obj["favoriteTag"] = "";
-	obj["rules"] = QJsonArray();
-	obj["recursiveScan"] = false;
-	file.write(QJsonDocument(obj).toJson());
-	file.close();
 }
 
 /**
@@ -167,19 +170,19 @@ void MSTSettingsManager::writeLog(const QString& logFilePath, const QDateTime& d
  */
 QString MSTSettingsManager::buildLogFileName(const QString& path) {
 	QStringList pathForLog = path.split("/");
-	QString logFileNameBuilder = "lastScan";
+	QString logFilePath = "lastScan";
 	if (!pathForLog[0].isEmpty()) {
 		pathForLog[0].remove(":");
 	}
 	else {
 		pathForLog.removeFirst();
 	}
-	for (const QString& tempStr : pathForLog) {
-		logFileNameBuilder += " - " + tempStr;
+	for (const QString& pathSegment : pathForLog) {
+		logFilePath += " - " + pathSegment;
 	}
-	logFileNameBuilder += ".log";
-	logFileNameBuilder = QCoreApplication::applicationDirPath() + "/log/" + logFileNameBuilder;
-	return logFileNameBuilder;
+	logFilePath += ".log";
+	logFilePath = QCoreApplication::applicationDirPath() + "/log/" + logFilePath;
+	return logFilePath;
 }
 
 /**

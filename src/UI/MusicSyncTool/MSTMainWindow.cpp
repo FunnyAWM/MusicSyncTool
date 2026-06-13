@@ -12,18 +12,15 @@
 // ReSharper disable CppClangTidyConcurrencyMtUnsafe
 #pragma warning(disable : 6031)
 #include "MSTMainWindow.h"
-#include <algorithm>
 #include <iostream>
-#include <taglib/fileref.h>
-#include <taglib/flacfile.h>
+#include <QJsonArray>
 #include <taglib/tag.h>
-#include <taglib/tpropertymap.h>
-#include "../../Services/Logger.h"
-#include "../../Services/MSTSettingsManager.h"
-#include "MSTTableManager.h"
-#include "MSTMediaController.h"
 #include "MSTErrorReporter.h"
+#include "MSTMediaController.h"
+#include "MSTTableManager.h"
+#include "../../Services/Logger.h"
 #include "../../Services/MSTScanController.h"
+#include "../../Services/MSTSettingsManager.h"
 
 #if defined(__linux)
 #include <unistd.h>
@@ -80,7 +77,7 @@ MSTMainWindow::~MSTMainWindow() {
 	if (remote.isOpen()) {
 		remote.closeDB();
 	}
-	delete copyStats;
+	delete copyOperationInProgress;
 	delete scanController;
 	delete mediaController;
 	delete errorReporter;
@@ -96,6 +93,27 @@ MSTMainWindow::~MSTMainWindow() {
 void MSTMainWindow::initDatabase() {
 	local.setConnectionName("local");
 	remote.setConnectionName("remote");
+}
+
+/**
+ * @brief 初始化用户界面组件
+ * @details 设置主窗口的用户界面，包括：
+ *          - 加载UI布局文件
+ *          - 设置窗口图标
+ *          - 配置表格控件的列宽自适应模式
+ *          - 初始化音量滑块和标签的默认值（50%）
+ *          - 设置播放状态显示文本
+ */
+void MSTMainWindow::initUI() {
+	ui.setupUi(this);
+	this->setWindowIcon(QIcon(":/MSTMainWindow.ico"));
+	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui.volumeSlider->blockSignals(true);
+	ui.volumeSlider->setValue(50);
+	ui.volumeSlider->blockSignals(false);
+	ui.volumeLabel->setText(tr("音量：") + "50%");
+	ui.nowPlaying->setText(tr("播放已结束。"));
 }
 
 /**
@@ -116,7 +134,7 @@ void MSTMainWindow::loadSettings() {
 void MSTMainWindow::loadLanguage() {
 	QFile file(QApplication::applicationDirPath() + "/translations/langinfo.json");
 	if (!file.open(QIODevice::ReadOnly)) {
-		errorReporter->popError(PET::NOLANG);
+		errorReporter->popError(AppErrorType::NO_LANGUAGE);
 		Logger::Fatal("Error opening langinfo.json:" + file.errorString());
 		exit(EXIT_FAILURE);
 	}
@@ -140,24 +158,55 @@ void MSTMainWindow::loadLanguage() {
 }
 
 /**
- * @brief 初始化用户界面组件
- * @details 设置主窗口的用户界面，包括：
- *          - 加载UI布局文件
- *          - 设置窗口图标
- *          - 配置表格控件的列宽自适应模式
- *          - 初始化音量滑块和标签的默认值（50%）
- *          - 设置播放状态显示文本
+ * @brief 连接应用程序的信号槽
+ * @details 建立各个组件之间的信号槽连接，包括：
+ *          - 数据源与加载页面的进度连接
+ *          - 复制操作和加载操作的完成信号
+ *          - 媒体播放器的位置和状态变化信号
+ *          - 错误处理的信号连接
+ *          确保各组件能够正确响应事件和更新状态
  */
-void MSTMainWindow::initUI() {
-	ui.setupUi(this);
-	this->setWindowIcon(QIcon(":/MSTMainWindow.ico"));
-	ui.tableWidgetLocal->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	ui.tableWidgetRemote->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	ui.volumeSlider->blockSignals(true);
-	ui.volumeSlider->setValue(50);
-	ui.volumeSlider->blockSignals(false);
-	ui.volumeLabel->setText(tr("音量：") + "50%");
-	ui.nowPlaying->setText(tr("播放已结束。"));
+void MSTMainWindow::connectSlots() {
+	connect(&local, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
+	connect(&remote, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
+	connect(&local, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
+	connect(&remote, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
+	connect(this, &MSTMainWindow::copyFinished, errorReporter, &MSTErrorReporter::showOperationResult);
+	connect(&local, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
+	        &MSTErrorReporter::showOperationResult);
+	connect(&remote, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
+	        &MSTErrorReporter::showOperationResult);
+	connect(this, &MSTMainWindow::addToErrorListConcurrent, errorReporter,
+	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
+	connect(this, &MSTMainWindow::copyFinished, this, &MSTMainWindow::on_copyFinished);
+	connect(tableManager, &MSTTableManager::errorOccurred, errorReporter, &MSTErrorReporter::popError);
+	connect(tableManager, &MSTTableManager::requestLoadMusic, this, &MSTMainWindow::getMusic);
+	connect(tableManager, &MSTTableManager::requestLoadFavorite, this, [this](PathType path, unsigned short page) {
+		tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy),
+		                               toOrderBy(entity.orderBy));
+	});
+	connect(scanController, &MSTScanController::scanTotal, this, &MSTMainWindow::total);
+	connect(scanController, &MSTScanController::scanCurrent, this, &MSTMainWindow::current);
+	connect(scanController, &MSTScanController::errorOccurred, errorReporter, &MSTErrorReporter::popError);
+	connect(scanController, &MSTScanController::loadErrorOccurred, errorReporter,
+	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
+	// 扫描控制器加载页面管理
+	connect(scanController, &MSTScanController::scanStart, loading, &LoadingPage::showPage);
+	connect(scanController, &MSTScanController::scanFinished, loading, &LoadingPage::stopPage);
+	connect(scanController, &MSTScanController::scanTotal, loading, &LoadingPage::setTotal);
+	connect(scanController, &MSTScanController::scanCurrent, loading, &LoadingPage::setProgress);
+	connect(errorReporter, &MSTErrorReporter::requestRefreshMusic, this, [this](PathType path, unsigned short page) {
+		if (tableManager->isFavoriteOnly(path)) {
+			tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy),
+			                               toOrderBy(entity.orderBy));
+		}
+		else {
+			scanController->resetScan(path);
+			getMusic(path, page);
+		}
+	});
+	mediaController->connectSignals();
+	connect(mediaController, &MSTMediaController::errorOccurred, errorReporter, &MSTErrorReporter::popError);
 }
 
 /**
@@ -197,14 +246,14 @@ void MSTMainWindow::openFolder(const PathType path) {
  * @param page 页码
  * @details 委托给scanController执行扫描操作
  */
-void MSTMainWindow::getMusic(const PathType path, const unsigned short page) {
+void MSTMainWindow::getMusic(const PathType path, const unsigned short page) const {
 	scanController->startScan(path, page, entity);
 }
 
 /**
  * @brief 弹出错误对话框（委托给errorReporter）
  */
-void MSTMainWindow::popError(const PET type) {
+void MSTMainWindow::popError(const AppErrorType type) const {
 	errorReporter->popError(type);
 }
 
@@ -220,30 +269,28 @@ QStringList MSTMainWindow::getDuplicatedMusic(const PathType path) {
 	const QString selectedPath = path == PathType::LOCAL ? local.getPath() : remote.getPath();
 	if (selectedPath == "") {
 		Logger::Warn("No path selected");
-		errorReporter->popError(PET::NPS);
+		errorReporter->popError(AppErrorType::NO_PATH);
 		return {};
 	}
-	ShowDupe dp;
+	ShowDupe duplicateDialog;
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
 	QList<QueryItem> items = ds.getAll();
 	const QueryItem* slow = &items.first();
-	const QueryItem* fast = nullptr;
 	QStringList dupeList;
-	for (auto it = items.begin(); it != items.end(); ++it) {
-		fast = &*it;
-		if (*slow == *fast) {
+	for (const auto& fast : items) {
+		if (slow != nullptr && *slow == fast) {
 			dupeList.append(slow->getFileName());
-			dupeList.append(fast->getFileName());
+			dupeList.append(fast.getFileName());
 		}
-		slow = fast;
+		slow = &fast;
 	}
 	for (const auto& i : dupeList) {
 		Logger::Info(
 			"Found duplicated music named " + i + " at " + (
 				path == PathType::LOCAL ? local.getPath() : remote.getPath()));
-		dp.add(i);
+		duplicateDialog.add(i);
 	}
-	dp.exec();
+	duplicateDialog.exec();
 	return dupeList;
 }
 
@@ -255,7 +302,7 @@ QStringList MSTMainWindow::getDuplicatedMusic(const PathType path) {
  */
 void MSTMainWindow::showSettings() const {
 	const auto page = new Settings(entity);
-	connect(page, SIGNAL(confirmPressed(set)), this, SLOT(saveSettings(set)));
+	connect(page, SIGNAL(confirmPressed(SettingsData)), this, SLOT(saveSettings(SettingsData)));
 	page->show();
 }
 
@@ -266,18 +313,18 @@ void MSTMainWindow::showSettings() const {
  *          如果排序设置发生变化，会触发界面刷新以应用新的排序。
  *          如果规则或喜爱标签发生变化，会清除日志并重新扫描。
  */
-void MSTMainWindow::saveSettings(const set& entityParam) {
+void MSTMainWindow::saveSettings(const SettingsData& entityParam) {
 	if (!MSTSettingsManager::saveSettings(entityParam)) {
 		Logger::Fatal("Error opening settings file");
 		QMessageBox::critical(this, tr("错误"), tr("无法打开设置文件"));
 		return;
 	}
-	const int tempSort = this->entity.sortBy;
-	const int tempOrder = this->entity.orderBy;
-	const QList<LyricIgnoreRule> tempRules = this->entity.rules;
-	const QString tempTag = this->entity.favoriteTag;
+	const int previousSortBy = this->entity.sortBy;
+	const int previousOrderBy = this->entity.orderBy;
+	const QList<LyricIgnoreRule> previousRules = this->entity.rules;
+	const QString previousFavoriteTag = this->entity.favoriteTag;
 	this->entity = entityParam;
-	if (tempSort != entityParam.sortBy || tempOrder != entityParam.orderBy) {
+	if (previousSortBy != entityParam.sortBy || previousOrderBy != entityParam.orderBy) {
 		if (local.getPath() != "") {
 			scanController->resetScan(PathType::LOCAL);
 			getMusic(PathType::LOCAL, 1);
@@ -287,7 +334,7 @@ void MSTMainWindow::saveSettings(const set& entityParam) {
 			getMusic(PathType::REMOTE, 1);
 		}
 	}
-	if (tempRules != entity.rules || entityParam.favoriteTag != tempTag) {
+	if (previousRules != entity.rules || entityParam.favoriteTag != previousFavoriteTag) {
 		MSTSettingsManager::cleanLog();
 		if (local.getPath() != "") {
 			scanController->resetScan(PathType::LOCAL);
@@ -304,7 +351,7 @@ void MSTMainWindow::saveSettings(const set& entityParam) {
 	Logger::Info("OrderBy: " + QString::number(this->entity.orderBy));
 	Logger::Info("Language: " + this->entity.language);
 	Logger::Info("FavoriteTag: " + this->entity.favoriteTag);
-	Logger::Info("Recursive scan: " + this->entity.recursiveScan);
+	Logger::Info("Recursive scan: " + QString::fromStdString(this->entity.recursiveScan ? "true" : "false"));
 	int i = 1;
 	for (const auto& rule : entityParam.rules) {
 		Logger::Info("Rule No." + QString::number(i++) + ":");
@@ -343,7 +390,7 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 				errorReporter->addToErrorList(fileName, FileErrorType::DUPLICATE);
 				break;
 			case 1: // LNF
-				errorReporter->addToErrorList(fileName, FileErrorType::LNF);
+				errorReporter->addToErrorList(fileName, FileErrorType::LYRIC_NOT_FOUND);
 				break;
 			case 2: // DISKFULL
 				errorReporter->addToErrorList(fileName, FileErrorType::DISKFULL);
@@ -375,6 +422,20 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 [[nodiscard]]
 QString MSTMainWindow::getLanguage() const {
 	return entity.language;
+}
+
+/**
+ * @brief 获取可用空间并显示在顶部
+ * @param path 路径类型（本地或远程）
+ * @details 通过文件管理器获取指定路径的存储空间信息，
+ *          并在用户界面上显示可用空间大小，帮助用户了解
+ *          磁盘使用情况
+ */
+void MSTMainWindow::setAvailableSpace(const PathType path) const {
+	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
+	const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
+	const QString spaceInfoText = tr("可用空间：") + manager->getSpaceInfo();
+	(path == PathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(spaceInfoText);
 }
 
 /**
@@ -447,16 +508,16 @@ void MSTMainWindow::on_actionAbout_triggered(bool triggered) {
  */
 void MSTMainWindow::on_copyToRemote_clicked() {
 	if (local.getPath() == "") {
-		errorReporter->popError(PET::NPS);
+		errorReporter->popError(AppErrorType::NO_PATH);
 		return;
 	}
 	if (remote.getPath() == "") {
-		errorReporter->popError(PET::NDP);
+		errorReporter->popError(AppErrorType::NO_DEST_PATH);
 		return;
 	}
 	QStringList fileList = tableManager->getSelectedMusic(PathType::LOCAL);
 	if (fileList.isEmpty()) {
-		errorReporter->popError(PET::NFS);
+		errorReporter->popError(AppErrorType::NO_FILE);
 		return;
 	}
 	for (QString& file : fileList) {
@@ -476,16 +537,16 @@ void MSTMainWindow::on_copyToRemote_clicked() {
  */
 void MSTMainWindow::on_copyToLocal_clicked() {
 	if (remote.getPath() == "") {
-		errorReporter->popError(PET::NPS);
+		errorReporter->popError(AppErrorType::NO_PATH);
 		return;
 	}
 	if (local.getPath() == "") {
-		errorReporter->popError(PET::NDP);
+		errorReporter->popError(AppErrorType::NO_DEST_PATH);
 		return;
 	}
 	QStringList fileList = tableManager->getSelectedMusic(PathType::REMOTE);
 	if (fileList.isEmpty()) {
-		errorReporter->popError(PET::NFS);
+		errorReporter->popError(AppErrorType::NO_FILE);
 		return;
 	}
 	for (QString& file : fileList) {
@@ -518,6 +579,7 @@ void MSTMainWindow::on_refreshLocal_clicked() {
 	scanController->resetScan(PathType::LOCAL);
 	getMusic(PathType::LOCAL, 1);
 }
+
 /**
  * @brief 刷新远程音乐列表的槽函数
  * @details 响应用户点击远程刷新按钮，重新扫描远程路径
@@ -527,24 +589,31 @@ void MSTMainWindow::on_refreshRemote_clicked() {
 	scanController->resetScan(PathType::REMOTE);
 	getMusic(PathType::REMOTE, 1);
 }
+
 /**
  * @brief 本地搜索的槽函数
  * @details 响应用户在本地搜索框中按下回车键，
  *          根据输入的文本在本地音乐列表中进行搜索
  */
-void MSTMainWindow::on_searchLocal_returnPressed() { tableManager->searchMusic(PathType::LOCAL, ui.searchLocal->text()); }
+void MSTMainWindow::on_searchLocal_returnPressed() const {
+	tableManager->searchMusic(PathType::LOCAL, ui.searchLocal->text());
+}
+
 /**
  * @brief 远程搜索的槽函数
  * @details 响应用户在远程搜索框中按下回车键，
  *          根据输入的文本在远程音乐列表中进行搜索
  */
-void MSTMainWindow::on_searchRemote_returnPressed() { tableManager->searchMusic(PathType::REMOTE, ui.searchRemote->text()); }
+void MSTMainWindow::on_searchRemote_returnPressed() const {
+	tableManager->searchMusic(PathType::REMOTE, ui.searchRemote->text());
+}
+
 /**
  * @brief 本地表格双击预览的槽函数
  * @param row 双击的行号
  * @param column 双击的列号（未使用）
  */
-void MSTMainWindow::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) {
+void MSTMainWindow::on_tableWidgetLocal_cellDoubleClicked(const int row, int column) const {
 	mediaController->playSelectedTrack(PathType::LOCAL, row);
 }
 
@@ -553,7 +622,7 @@ void MSTMainWindow::on_tableWidgetLocal_cellDoubleClicked(const int row, int col
  * @param row 双击的行号
  * @param column 双击的列号（未使用）
  */
-void MSTMainWindow::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) {
+void MSTMainWindow::on_tableWidgetRemote_cellDoubleClicked(const int row, int column) const {
 	mediaController->playSelectedTrack(PathType::REMOTE, row);
 }
 
@@ -590,7 +659,7 @@ void MSTMainWindow::on_actionClean_log_files_triggered(bool triggered) {
  *          - 如果正在播放，则暂停播放并更新界面状态
  *          - 如果已暂停或停止，则开始播放并更新界面状态
  */
-void MSTMainWindow::on_playControl_clicked() {
+void MSTMainWindow::on_playControl_clicked() const {
 	mediaController->togglePlayPause();
 }
 
@@ -606,6 +675,7 @@ void MSTMainWindow::on_playSlider_sliderMoved(const int position) const {
  * @brief 播放滑块按下的槽函数
  */
 void MSTMainWindow::on_playSlider_sliderPressed() const { mediaController->onPlaySliderPressed(); }
+
 void MSTMainWindow::on_volumeSlider_sliderPressed() const {
 	mediaController->onVolumeSliderPressed();
 }
@@ -614,46 +684,50 @@ void MSTMainWindow::on_volumeSlider_sliderPressed() const {
  * @brief 本地收藏按钮的槽函数
  * @details 响应用户点击本地收藏按钮，显示第一页的收藏音乐列表
  */
-void MSTMainWindow::on_favoriteOnlyLocal_clicked() {
-	tableManager->getFavoriteMusic(PathType::LOCAL, 1, entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+void MSTMainWindow::on_favoriteOnlyLocal_clicked() const {
+	tableManager->getFavoriteMusic(PathType::LOCAL, 1, entity.favoriteTag, toSortBy(entity.sortBy),
+	                               toOrderBy(entity.orderBy));
 }
+
 /**
  * @brief 远程收藏按钮的槽函数
  * @details 响应用户点击远程收藏按钮，显示第一页的收藏音乐列表
  */
-void MSTMainWindow::on_favoriteOnlyRemote_clicked() {
-	tableManager->getFavoriteMusic(PathType::REMOTE, 1, entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+void MSTMainWindow::on_favoriteOnlyRemote_clicked() const {
+	tableManager->getFavoriteMusic(PathType::REMOTE, 1, entity.favoriteTag, toSortBy(entity.sortBy),
+	                               toOrderBy(entity.orderBy));
 }
+
 /*
  * @brief 上一页（本地）的槽函数
  */
-void MSTMainWindow::on_lastPageLocal_clicked() {
+void MSTMainWindow::on_lastPageLocal_clicked() const {
 	tableManager->goToPrevPage(PathType::LOCAL, local.getPath() != "",
-		entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+	                           entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
 }
 
 /*
  * @brief 下一页（本地）的槽函数
  */
-void MSTMainWindow::on_nextPageLocal_clicked() {
+void MSTMainWindow::on_nextPageLocal_clicked() const {
 	tableManager->goToNextPage(PathType::LOCAL, local.getPath() != "",
-		entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+	                           entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
 }
 
 /*
  * @brief 上一页（远程）的槽函数
  */
-void MSTMainWindow::on_lastPageRemote_clicked() {
+void MSTMainWindow::on_lastPageRemote_clicked() const {
 	tableManager->goToPrevPage(PathType::REMOTE, remote.getPath() != "",
-		entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+	                           entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
 }
 
 /*
  * @brief 下一页（远程）的槽函数
  */
-void MSTMainWindow::on_nextPageRemote_clicked() {
+void MSTMainWindow::on_nextPageRemote_clicked() const {
 	tableManager->goToNextPage(PathType::REMOTE, remote.getPath() != "",
-		entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
+	                           entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
 }
 
 /*
@@ -675,72 +749,4 @@ void MSTMainWindow::on_copyFinished(OperationType op) const {
 	if (remote.getPath() != "") {
 		setAvailableSpace(PathType::REMOTE);
 	}
-}
-
-/**
- * @brief 连接应用程序的信号槽
- * @details 建立各个组件之间的信号槽连接，包括：
- *          - 数据源与加载页面的进度连接
- *          - 复制操作和加载操作的完成信号
- *          - 媒体播放器的位置和状态变化信号
- *          - 错误处理的信号连接
- *          确保各组件能够正确响应事件和更新状态
- */
-void MSTMainWindow::connectSlots() {
-	connect(&local, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
-	connect(&remote, &MSTDataSource::totalSize, loading, &LoadingPage::setTotal);
-	connect(&local, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
-	connect(&remote, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
-	connect(&local, &MSTDataSource::loadStarted, loading, &LoadingPage::showPage);
-	connect(&remote, &MSTDataSource::loadStarted, loading, &LoadingPage::showPage);
-	connect(&local, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
-	connect(&remote, QOverload<>::of(&MSTDataSource::loadFinished), loading, &LoadingPage::stopPage);
-	connect(this, &MSTMainWindow::copyFinished, errorReporter, &MSTErrorReporter::showOperationResult);
-	connect(&local, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
-	        &MSTErrorReporter::showOperationResult);
-	connect(&remote, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
-	        &MSTErrorReporter::showOperationResult);
-	connect(this, &MSTMainWindow::addToErrorListConcurrent, errorReporter,
-	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
-	connect(this, &MSTMainWindow::copyFinished, this, &MSTMainWindow::on_copyFinished);
-	connect(tableManager, &MSTTableManager::errorOccurred, errorReporter, &MSTErrorReporter::popError);
-	connect(tableManager, &MSTTableManager::requestLoadMusic, this, &MSTMainWindow::getMusic);
-	connect(tableManager, &MSTTableManager::requestLoadFavorite, this, [this](PathType path, unsigned short page) {
-		tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
-	});
-	connect(scanController, &MSTScanController::scanTotal, this, &MSTMainWindow::total);
-	connect(scanController, &MSTScanController::scanCurrent, this, &MSTMainWindow::current);
-	connect(scanController, &MSTScanController::errorOccurred, errorReporter, &MSTErrorReporter::popError);
-	connect(scanController, &MSTScanController::loadErrorOccurred, errorReporter,
-	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
-	// 标签扫描器进度信号
-	connect(scanController->getTagScanner(), &MSTTagScanner::loadStarted, loading, &LoadingPage::showPage);
-	connect(scanController, &MSTScanController::scanTotal, loading, &LoadingPage::setTotal);
-	connect(scanController, &MSTScanController::scanCurrent, loading, &LoadingPage::setProgress);
-	connect(scanController->getTagScanner(), &MSTTagScanner::totalSize, loading, &LoadingPage::setTotal);
-	connect(scanController->getTagScanner(), &MSTTagScanner::currentProgress, loading, &LoadingPage::setProgress);
-	connect(errorReporter, &MSTErrorReporter::requestRefreshMusic, this, [this](PathType path, unsigned short page) {
-		if (tableManager->isFavoriteOnly(path)) {
-			tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy), toOrderBy(entity.orderBy));
-		} else {
-			scanController->resetScan(path);
-			getMusic(path, page);
-		}
-	});
-	mediaController->connectSignals();
-	connect(mediaController, &MSTMediaController::errorOccurred, errorReporter, &MSTErrorReporter::popError);
-}
-
-/**
- * @brief 获取可用空间并显示在顶部
- * @param path 路径类型（本地或远程）
- * @details 通过文件管理器获取指定路径的存储空间信息，
- *          并在用户界面上显示可用空间大小，帮助用户了解
- *          磁盘使用情况
- */
-void MSTMainWindow::setAvailableSpace(const PathType path) const {
-	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
-	const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
-	const QString textBuilder = tr("可用空间：") + manager->getSpaceInfo();
-	(path == PathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(textBuilder);
 }

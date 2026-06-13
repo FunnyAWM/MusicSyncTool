@@ -17,6 +17,13 @@
    <item row="1" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
+      <widget class="QCheckBox" name="recursiveScan">
+       <property name="text">
+        <string>递归扫描</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -54,27 +61,21 @@
       </layout>
      </item>
      <item>
-      <widget class="QCheckBox" name="recursiveScan">
-       <property name="text">
-        <string>递归扫描</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Policy::Preferred</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QLabel" name="theme">
+         <property name="text">
+          <string>主题：</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="themeColor"/>
+       </item>
+       <item>
+        <widget class="QComboBox" name="themeLD"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -170,22 +171,6 @@
           <string notr="true">orderGroup</string>
          </attribute>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Policy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </item>
@@ -397,7 +382,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="orderGroup"/>
   <buttongroup name="sortByGroup"/>
+  <buttongroup name="orderGroup"/>
  </buttongroups>
 </ui>

@@ -1,0 +1,336 @@
+/* ============================================================
+   OpenTunes - Base Appearance Stylesheet
+   Contains layout, sizing, font, and shared neutral properties.
+   Load order: base-style.qss → style-light/dark-mode.qss → theme.qss
+   ============================================================ */
+
+/* ── Global ──────────────────────────────────────────────── */
+* {
+    font-family: "Microsoft YaHei UI", "Segoe UI", "Noto Sans CJK SC", sans-serif;
+    font-size: 9pt;
+}
+
+/* ── Menu Bar ────────────────────────────────────────────── */
+QMenuBar {
+    border-bottom: 1px solid;
+    padding: 2px 0px;
+}
+
+QMenuBar::item {
+    padding: 6px 14px;
+    background: transparent;
+    border-radius: 3px;
+    margin: 1px 2px;
+}
+
+/* ── Menus ───────────────────────────────────────────────── */
+QMenu {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 4px 0px;
+}
+
+QMenu::item {
+    padding: 7px 36px 7px 20px;
+    border-radius: 3px;
+    margin: 1px 4px;
+}
+
+QMenu::separator {
+    height: 1px;
+    margin: 4px 12px;
+}
+
+/* ── Status Bar ──────────────────────────────────────────── */
+QStatusBar {
+    border-top: 1px solid;
+    padding: 2px 8px;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+/* ── Labels ──────────────────────────────────────────────── */
+QLabel {
+    background: transparent;
+    padding: 1px 2px;
+}
+
+/* ── Line Edits ──────────────────────────────────────────── */
+QLineEdit {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+
+QLineEdit:focus {
+    border: 2px solid;
+    padding: 4px 9px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+QPushButton {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 6px 18px;
+    min-height: 22px;
+}
+
+/* Primary action buttons (copy to remote / local) */
+QPushButton#copyToRemote,
+QPushButton#copyToLocal {
+    border: 1px solid;
+    font-weight: bold;
+}
+
+/* Toggle-style favorite buttons (shared light theme defaults,
+   dark theme file overrides these) */
+QPushButton#favoriteOnlyLocal,
+QPushButton#favoriteOnlyRemote {
+    background-color: #fff8e1;
+    border-color: #f0c94b;
+    color: #8a6d00;
+}
+
+QPushButton#favoriteOnlyLocal:hover,
+QPushButton#favoriteOnlyRemote:hover {
+    background-color: #fef3c7;
+    border-color: #e6b800;
+}
+
+QPushButton#favoriteOnlyLocal:checked,
+QPushButton#favoriteOnlyRemote:checked {
+    background-color: #f0c94b;
+    color: #ffffff;
+    border-color: #d4a017;
+}
+
+/* Confirm and cancel buttons in dialogs */
+QPushButton#confirmButton,
+QPushButton#cancel {
+    border: 1px solid;
+    min-width: 80px;
+    font-weight: bold;
+}
+
+/* ── Tables ──────────────────────────────────────────────── */
+QTableWidget {
+    border: 1px solid;
+    border-radius: 4px;
+}
+
+QTableWidget::item {
+    padding: 4px 8px;
+    border-bottom: 1px solid;
+}
+
+QTableWidget QTableCornerButton::section {
+    border: none;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+}
+
+QHeaderView::section {
+    font-weight: bold;
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 2px solid;
+    border-right: 1px solid;
+}
+
+QHeaderView::section:last {
+    border-right: none;
+}
+
+/* ── List Widget ─────────────────────────────────────────── */
+QListWidget {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 4px;
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 5px 8px;
+    border-radius: 3px;
+    margin: 1px 0px;
+}
+
+/* ── Text Edit (Operation Result) ────────────────────────── */
+QTextEdit {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+/* ── Combo Boxes ─────────────────────────────────────────── */
+QComboBox {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 5px 10px;
+    min-width: 60px;
+}
+
+QComboBox:focus {
+    border: 2px solid;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 24px;
+    border: none;
+    border-left: 1px solid;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+QComboBox::down-arrow {
+    width: 10px;
+    height: 10px;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid;
+    border-radius: 3px;
+    outline: none;
+    padding: 2px;
+}
+
+/* ── Radio Buttons ───────────────────────────────────────── */
+QRadioButton {
+    spacing: 8px;
+    padding: 3px 0px;
+    background: transparent;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    border-radius: 9px;
+}
+
+QRadioButton::indicator:checked {
+    border: 2px solid;
+    image: url(":/MusicSyncTool/radiodot.svg");
+}
+
+/* ── Check Boxes ─────────────────────────────────────────── */
+QCheckBox {
+    spacing: 8px;
+    padding: 3px 0px;
+    background: transparent;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    border-radius: 3px;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid;
+    image: url(":/MusicSyncTool/checkmark.svg");
+}
+
+/* ── Sliders ─────────────────────────────────────────────── */
+QSlider::groove:horizontal {
+    height: 4px;
+    border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+    width: 14px;
+    height: 14px;
+    margin: -5px 0px;
+    border-radius: 7px;
+}
+
+QSlider::sub-page:horizontal {
+    border-radius: 2px;
+}
+
+QSlider::add-page:horizontal {
+    border-radius: 2px;
+}
+
+/* ── Progress Bar ────────────────────────────────────────── */
+QProgressBar {
+    border: none;
+    border-radius: 3px;
+    text-align: center;
+    height: 6px;
+}
+
+QProgressBar::chunk {
+    border-radius: 3px;
+}
+
+/* ── Tool Tips ───────────────────────────────────────────── */
+QToolTip {
+    border: none;
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 8pt;
+}
+
+/* ── Scroll Bars ─────────────────────────────────────────── */
+QScrollBar:vertical {
+    width: 10px;
+    border-radius: 3px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 30px;
+    border-radius: 3px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    height: 10px;
+    border-radius: 3px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    min-width: 30px;
+    border-radius: 3px;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* ── Group Box (if any) ──────────────────────────────────── */
+QGroupBox {
+    border: 1px solid;
+    border-radius: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    font-weight: bold;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0px 8px;
+}
+
+/* ── Play Control Button ─────────────────────────────────── */
+QPushButton#playControl {
+    border: none;
+    border-radius: 4px;
+    min-width: 60px;
+    min-height: 24px;
+    font-weight: bold;
+    font-size: 10pt;
+}

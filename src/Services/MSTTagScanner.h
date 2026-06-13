@@ -50,24 +50,10 @@ public:
 	explicit MSTTagScanner(QObject* parent = nullptr);
 	~MSTTagScanner() override = default;
 
-	/**
-	 * @brief 扫描收藏状态
-	 * @param basePath 音乐目录路径
-	 * @param fileNames 需要扫描的文件名列表
-	 * @param tag 收藏标签名称
-	 * @return 收藏状态更新结果列表
-	 */
 	QList<FavoriteUpdate> scanFavorite(const QString& basePath,
 	                                   const QStringList& fileNames,
 	                                   const QString& tag);
 
-	/**
-	 * @brief 扫描规则命中状态
-	 * @param basePath 音乐目录路径
-	 * @param items 需要扫描的音乐数据列表
-	 * @param rules 歌词忽略规则列表
-	 * @return 规则命中更新结果列表
-	 */
 	QList<RuleHitUpdate> scanRuleHit(const QString& basePath,
 	                                 const QList<QueryItem>& items,
 	                                 const QList<LyricIgnoreRule>& rules);

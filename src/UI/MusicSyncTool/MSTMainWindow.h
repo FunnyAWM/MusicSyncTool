@@ -22,9 +22,9 @@
 #include <memory>
 
 // Qt核心模块
-#include <QAudioOutput>
 #include <QAtomicInt>
 #include <QAtomicPointer>
+#include <QAudioOutput>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
@@ -51,28 +51,28 @@
 #include <taglib/tag.h>
 
 // 项目内部头文件
-#include "../AboutPage/AboutPage.h"
-#include "../LoadingPage/LoadingPage.h"
-#include "../../Services/MSTDataSource.h"
-#include "../../Services/MSTFileManager.h"
-#include "../../Services/MSTMediaPlayer.h"
-#include "../../Core/MusicProperties.h"
-#include "../../Services/MSTSettingsManager.h"
-#include "../../Services/MSTScanController.h"
-#include "../OperationResult/OperationResult.h"
-#include "../Settings/Settings.h"
-#include "../ShowDupe/ShowDupe.h"
 #include "MSTErrorReporter.h"
 #include "MSTMediaController.h"
 #include "MSTTableManager.h"
 #include "ui_MSTMainWindow.h"
+#include "../../Core/MusicProperties.h"
+#include "../../Services/MSTDataSource.h"
+#include "../../Services/MSTFileManager.h"
+#include "../../Services/MSTMediaPlayer.h"
+#include "../../Services/MSTScanController.h"
+#include "../../Services/MSTSettingsManager.h"
+#include "../AboutPage/AboutPage.h"
+#include "../LoadingPage/LoadingPage.h"
+#include "../OperationResult/OperationResult.h"
+#include "../Settings/Settings.h"
+#include "../ShowDupe/ShowDupe.h"
 
 // 命名空间使用声明
 using PROPERTIES::FileErrorType;
 using PROPERTIES::LoadErrorType;
 using PROPERTIES::OperationType;
 using PROPERTIES::PathType;
-using PROPERTIES::PET;
+using PROPERTIES::AppErrorType;
 using PROPERTIES::PlayState;
 using std::shared_ptr;
 
@@ -120,79 +120,60 @@ private:
 	MSTMediaController* mediaController;    ///< 媒体播放UI控制器
 	
 	// 状态管理
-	QAtomicPointer<bool> copyStats;         ///< 复制操作状态（原子指针）
+	QAtomicPointer<bool> copyOperationInProgress;         ///< 复制操作状态（原子指针）
 	
 	// 配置和常量
-	set entity;                             ///< 应用程序设置实体
+	SettingsData entity;                             ///< 应用程序设置实体
 
 public:
-	/**
-	 * @brief 构造函数
-	 * 初始化主窗口，设置UI，加载配置和连接信号槽
-	 * @param parent 父窗口指针，默认为nullptr
-	 */
 	explicit MSTMainWindow(QWidget* parent = nullptr);
 	
-	/**
-	 * @brief 析构函数
-	 * 清理资源，关闭数据库连接，释放内存
-	 */
 	~MSTMainWindow() override;
-	void connectSlots();
-	void copyMusic(const QString&, const QStringList&, const QString&);
-	[[nodiscard]] QString getLanguage() const;
-	QStringList getDuplicatedMusic(PathType);
-	/**
-	 * @brief 启动音乐扫描
-	 * @param path 路径类型
-	 * @param page 页码
-	 * @details 委托给scanController执行，保持与其他模块的接口兼容
-	 */
-	void getMusic(PathType path, unsigned short page);
 	void initDatabase();
 	void initUI();
-	void loadLanguage();
 	void loadSettings();
+	void loadLanguage();
+	void connectSlots();
 	void openFolder(PathType);
-	/**
-	 * @brief 弹出错误对话框（委托给errorReporter）
-	 * @param type 错误类型
-	 */
-	void popError(PET type);
-	void setAvailableSpace(PathType) const;
+	void getMusic(PathType path, unsigned short page) const;
+	void popError(AppErrorType type) const;
+	QStringList getDuplicatedMusic(PathType);
 	void showSettings() const;
+	void copyMusic(const QString&, const QStringList&, const QString&);
+	[[nodiscard]] QString getLanguage() const;
+	void setAvailableSpace(PathType) const;
 
 public slots:
 	void on_actionAbout_triggered(bool);
 	void on_actionClean_log_files_triggered(bool);
 	void on_actionDupeLocal_triggered(bool);
 	void on_actionDupeRemote_triggered(bool);
-	void on_actionExit_triggered(bool);
+	[[noreturn]] void on_actionExit_triggered(bool);
 	void on_actionLocal_triggered(bool);
 	void on_actionRemote_triggered(bool);
 	void on_actionSettings_triggered(bool) const;
 	void on_copyToLocal_clicked();
 	void on_copyToRemote_clicked();
-	void on_favoriteOnlyLocal_clicked();
-	void on_favoriteOnlyRemote_clicked();
-	void on_lastPageLocal_clicked();
-	void on_lastPageRemote_clicked();
-	void on_nextPageLocal_clicked();
-	void on_nextPageRemote_clicked();
-	void on_playControl_clicked();
+	void on_favoriteOnlyLocal_clicked() const;
+	void on_favoriteOnlyRemote_clicked() const;
+	void on_lastPageLocal_clicked() const;
+	void on_lastPageRemote_clicked() const;
+	void on_nextPageLocal_clicked() const;
+	void on_nextPageRemote_clicked() const;
+	void on_playControl_clicked() const;
 	void on_playSlider_sliderMoved(int) const;
 	void on_playSlider_sliderPressed() const;
 	void on_refreshLocal_clicked();
 	void on_refreshRemote_clicked();
-	void on_searchLocal_returnPressed();
-	void on_searchRemote_returnPressed();
-	void on_tableWidgetLocal_cellDoubleClicked(int, int);
-	void on_tableWidgetRemote_cellDoubleClicked(int, int);
+	void on_searchLocal_returnPressed() const;
+	void on_searchRemote_returnPressed() const;
+	void on_tableWidgetLocal_cellDoubleClicked(int, int) const;
+	void on_tableWidgetRemote_cellDoubleClicked(int, int) const;
 	void on_volumeSlider_sliderMoved(int) const;
 	void on_volumeSlider_sliderPressed() const;
 	void on_volumeSlider_valueChanged(int) const;
 	void on_copyFinished(OperationType) const;
-	void saveSettings(const set&);
+	void saveSettings(const SettingsData&);
 
 signals:
 	void addToErrorListConcurrent(QString, LoadErrorType);

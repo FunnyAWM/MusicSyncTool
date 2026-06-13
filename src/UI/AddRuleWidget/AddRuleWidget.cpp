@@ -28,37 +28,39 @@ AddRuleWidget::AddRuleWidget(QWidget* parent)
  * @return 返回根据用户选择创建的歌词忽略规则对象
  */
 LyricIgnoreRule AddRuleWidget::getRules() const {
-	RuleField lyricRules;      // 规则字段（标题/艺术家/专辑）
-	RuleType ignoreLyricRules; // 规则类型（包含/排除）
+	RuleField selectedRuleField;      // 规则字段（标题/艺术家/专辑）
+	RuleType selectedRuleType; // 规则类型（包含/排除）
 	const QString rule = ui.valueEdit->text(); // 规则值
 	
 	// 根据类型下拉框选择设置规则字段
 	switch (ui.typeComboBox->currentIndex()) {
 	case 0:
-		lyricRules = RuleField::TITLE;  // 标题
+		selectedRuleField = RuleField::TITLE;  // 标题
 		break;
 	case 1:
-		lyricRules = RuleField::ARTIST; // 艺术家
+		selectedRuleField = RuleField::ARTIST; // 艺术家
 		break;
 	case 2:
-		lyricRules = RuleField::ALBUM;  // 专辑
+		selectedRuleField = RuleField::ALBUM;  // 专辑
 		break;
 	default:
+		selectedRuleField = RuleField::NONE;
 	    break;
 	}
 	
 	// 根据规则下拉框选择设置规则类型
 	switch (ui.ruleComboBox->currentIndex()) {
 	case 0:
-		ignoreLyricRules = RuleType::INCLUDES; // 包含
+		selectedRuleType = RuleType::INCLUDES; // 包含
 		break;
 	case 1:
-		ignoreLyricRules = RuleType::EXCLUDES; // 排除
+		selectedRuleType = RuleType::EXCLUDES; // 排除
 		break;
 	default:
+		selectedRuleType = RuleType::NONE;
 	    break;
 	}
-	return LyricIgnoreRule(ignoreLyricRules, lyricRules, rule);
+	return LyricIgnoreRule(selectedRuleType, selectedRuleField, rule);
 }
 
 /**

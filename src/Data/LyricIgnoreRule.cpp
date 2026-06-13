@@ -22,12 +22,14 @@ LyricIgnoreRule::LyricIgnoreRule(const RuleType ruleType, const RuleField ruleFi
 
 /**
  * @brief 拷贝构造函数
- * @param ruleSingleton 要拷贝的规则对象
+ * @param other 要拷贝的规则对象
  */
-LyricIgnoreRule::LyricIgnoreRule(const LyricIgnoreRule& ruleSingleton) {
-	ruleType = ruleSingleton.ruleType;
-	ruleField = ruleSingleton.ruleField;
-	ruleName = ruleSingleton.ruleName;
+LyricIgnoreRule::LyricIgnoreRule(const LyricIgnoreRule& other) {
+	ruleType = other.ruleType;
+	ruleField = other.ruleField;
+	ruleName = other.ruleName;
+	ruleTypeStr = other.ruleTypeStr;
+	ruleFieldStr = other.ruleFieldStr;
 }
 
 /**
@@ -84,7 +86,7 @@ QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 	case RuleField::ALBUM:
 		return tr("专辑");      // 专辑
 	default:
-		return QString();
+		return "";
 	}
 }
 
@@ -100,7 +102,7 @@ QString LyricIgnoreRule::ignoreRulesToString(const RuleType rules) {
 	case RuleType::EXCLUDES:
 		return tr("排除");      // 排除匹配
 	default:
-		return QString();
+		return "";
 	}
 }
 

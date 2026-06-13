@@ -11,11 +11,11 @@
 #include "MSTDataSource.h"
 
 #include <QFile>
-#include <QSqlError>
 #include <QRegularExpression>
+#include <QSqlError>
 #include <taglib/fileref.h>
-#include "../Core/MSTTagUtils.h"
 #include "Logger.h"
+#include "../Core/MSTTagUtils.h"
 
 /**
  * @brief 获取分页大小
@@ -118,26 +118,7 @@ void MSTDataSource::closeDB() {
  * @brief 准备SQL语句
  * @param stmt 要准备的SQL语句
  */
-void MSTDataSource::prepareStatement(const QString& stmt) { query.prepare(stmt); }
-
-/**
- * @brief 绑定参数值到预处理语句
- * 使用模板避免重复代码，支持各种数据类型
- * @tparam T 参数类型
- * @param key 参数占位符
- * @param value 参数值
- */
-template <class T>
-void MSTDataSource::bindValue(const QString& key, const T& value) {
-	// 运行时类型检查以避免错误
-	if constexpr (std::is_convertible_v<const T&, QVariant>) {
-		query.bindValue(key, value);
-	}
-	else {
-		// 如果类型不直接支持，使用QVariant::fromValue转换
-		query.bindValue(key, QVariant::fromValue(value));
-	}
-}
+void MSTDataSource::prepareStatement(const QString& sqlStatement) { query.prepare(sqlStatement); }
 
 /**
  * @brief 执行查询
@@ -149,12 +130,14 @@ void MSTDataSource::execQuery() { query.exec(); }
  * @param updates 收藏状态更新结果列表
  */
 void MSTDataSource::updateFavoriteBatch(const QList<FavoriteUpdate>& updates) {
+	query.exec("BEGIN TRANSACTION");
 	for (const auto& update : updates) {
 		prepareStatement("UPDATE musicInfo SET favorite = :fav WHERE fileName = :fileName");
 		bindValue(":fav", update.isFavorite);
 		bindValue(":fileName", update.fileName);
 		execQuery();
 	}
+	query.exec("COMMIT");
 }
 
 /**
@@ -162,12 +145,69 @@ void MSTDataSource::updateFavoriteBatch(const QList<FavoriteUpdate>& updates) {
  * @param updates 规则命中更新结果列表
  */
 void MSTDataSource::updateRuleHitBatch(const QList<RuleHitUpdate>& updates) {
+	query.exec("BEGIN TRANSACTION");
 	for (const auto& update : updates) {
 		prepareStatement("UPDATE musicInfo SET ruleHit = :ruleHit WHERE fileName = :fileName");
 		bindValue(":ruleHit", update.isRuleHit);
 		bindValue(":fileName", update.fileName);
 		execQuery();
 	}
+	query.exec("COMMIT");
+}
+
+/**
+ * @brief 开始数据库事务
+ */
+void MSTDataSource::beginTransaction() {
+	query.exec("BEGIN TRANSACTION");
+}
+
+/**
+ * @brief 提交数据库事务
+ */
+void MSTDataSource::commitTransaction() {
+	query.exec("COMMIT");
+}
+
+/**
+ * @brief 根据文件名列表批量获取音乐数据
+ * @param fileNames 文件名列表
+ * @return 查询结果列表（含完整字段）
+ * @details 使用 WHERE fileName IN (...) 让数据库做过滤，
+ *          避免全表加载后再内存过滤
+ */
+QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
+	if (fileNames.isEmpty()) {
+		return {};
+	}
+
+	// 构建参数化 IN 子句：WHERE fileName IN (:f0, :f1, ...)
+	QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (";
+	QStringList paramNames;
+	for (int i = 0; i < fileNames.size(); i++) {
+		paramNames << ":f" + QString::number(i);
+	}
+	sql += paramNames.join(",") + ") ORDER BY title ASC";
+
+	prepareStatement(sql);
+	for (int i = 0; i < fileNames.size(); i++) {
+		bindValue(":f" + QString::number(i), fileNames.at(i));
+	}
+	execQuery();
+
+	QList<QueryItem> items;
+	while (query.next()) {
+		items.append(QueryItem(
+			query.value(0).toString(),  // title
+			query.value(1).toString(),  // artist
+			query.value(2).toString(),  // album
+			query.value(3).toString(),  // genre
+			query.value(4).toUInt(),    // year
+			query.value(5).toUInt(),    // track
+			query.value(6).toString()   // fileName
+		));
+	}
+	return items;
 }
 
 /**
@@ -223,44 +263,44 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 
 	// 解析查询结果
 	QList<QueryItem> items;
-	QueryItem temp;
+	QueryItem currentRow;
 	while (query.next()) {
 		for (int i = 0; i < rowMap.size(); i++) {
 			switch (rowMap[i]) {
 			case QueryRows::TITLE:
-				temp.setTitle(query.value(i).toString());
+				currentRow.setTitle(query.value(i).toString());
 				break;
 			case QueryRows::ARTIST:
-				temp.setArtist(query.value(i).toString());
+				currentRow.setArtist(query.value(i).toString());
 				break;
 			case QueryRows::ALBUM:
-				temp.setAlbum(query.value(i).toString());
+				currentRow.setAlbum(query.value(i).toString());
 				break;
 			case QueryRows::GENRE:
-				temp.setGenre(query.value(i).toString());
+				currentRow.setGenre(query.value(i).toString());
 				break;
 			case QueryRows::YEAR:
-				temp.setYear(query.value(i).toUInt());
+				currentRow.setYear(query.value(i).toUInt());
 				break;
 			case QueryRows::TRACK:
-				temp.setTrack(query.value(i).toUInt());
+				currentRow.setTrack(query.value(i).toUInt());
 				break;
 			case QueryRows::FILENAME:
-				temp.setFileName(query.value(i).toString());
+				currentRow.setFileName(query.value(i).toString());
 				break;
 			case QueryRows::ALL:
 				// 查询所有字段时，按固定顺序设置值
-				temp.setTitle(query.value(0).toString());
-				temp.setArtist(query.value(1).toString());
-				temp.setAlbum(query.value(2).toString());
-				temp.setGenre(query.value(3).toString());
-				temp.setYear(query.value(4).toUInt());
-				temp.setTrack(query.value(5).toUInt());
-				temp.setFileName(query.value(6).toString());
+				currentRow.setTitle(query.value(0).toString());
+				currentRow.setArtist(query.value(1).toString());
+				currentRow.setAlbum(query.value(2).toString());
+				currentRow.setGenre(query.value(3).toString());
+				currentRow.setYear(query.value(4).toUInt());
+				currentRow.setTrack(query.value(5).toUInt());
+				currentRow.setFileName(query.value(6).toString());
 				break;
 			}
 		}
-		items.append(temp);
+		items.append(currentRow);
 	}
 	return items;
 }
@@ -271,14 +311,14 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
  * @return 添加失败的文件路径列表
  */
 QStringList MSTDataSource::addMusic(const QStringList& files) {
-	QStringList errList; // 错误文件列表
+	QStringList failedFileList; // 错误文件列表
 
 	for (const QString& file : files) {
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(path + "/" + file);
 
 		// 检查文件是否有效
 		if (fileRef.isNull()) {
-			errList.append(file);
+			failedFileList.append(file);
 			Logger::Warn("Failed to add file" + file);
 			continue;
 		}
@@ -299,10 +339,10 @@ QStringList MSTDataSource::addMusic(const QStringList& files) {
 		// 执行插入操作，失败时记录错误
 		if (!query.exec()) {
 			Logger::Warn("Error inserting data into database: " + query.lastError().text());
-			errList.append(file);
+			failedFileList.append(file);
 		}
 	}
-	return errList;
+	return failedFileList;
 }
 
 /**
@@ -436,7 +476,7 @@ QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
  * @param items 音乐项列表
  * @return 对应的文件名列表
  */
-QStringList MSTDataSource::getFileNameByMD(const QList<QueryItem>& items) {
+QStringList MSTDataSource::getFileNameByMetadata(const QList<QueryItem>& items) {
 	QStringList fileList;
 	for (const QueryItem& item : items) {
 		prepareStatement("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");

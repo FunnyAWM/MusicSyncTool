@@ -22,45 +22,35 @@
  */
 class Logger final{
 	static PROPERTIES::LogToFile logToFile;  ///< 日志文件输出设置
-    static const QString logFileName;        ///< 日志文件名
+    std::optional<QString> logFileName;        ///< 日志文件名
 
 public:
+    explicit Logger() {
+	    try {
+            logFileName = QCoreApplication::applicationDirPath() + "/log/lastRun.log";
+		}
+		catch (const std::exception& e) {
+			// 如果获取应用程序目录失败，禁用日志文件输出
+			logToFile = PROPERTIES::LogToFile::DISABLE;
+            Warn("无法获取应用程序目录，日志文件输出已禁用:" + QString::fromStdString(e.what()));
+		}
+    }
 	/**
 	 * @brief 设置日志文件输出模式
-	 * @param logToFile 日志文件输出设置
+	 * @param logToFile_ 日志文件输出设置
 	 */
-	static void setLogToFile(const PROPERTIES::LogToFile& logToFile) { 
-		Logger::logToFile = logToFile; 
+	static void setLogToFile(const PROPERTIES::LogToFile& logToFile_) { 
+		logToFile = logToFile_; 
 	}
 	
-	/**
-	 * @brief 记录信息级别日志
-	 * @param message 日志消息
-	 */
     static void Info(const QString& message);
     
-    /**
-     * @brief 记录调试级别日志
-     * @param message 日志消息
-     */
     static void Debug(const QString& message);
     
-    /**
-     * @brief 记录警告级别日志
-     * @param message 日志消息
-     */
     static void Warn(const QString& message);
     
-    /**
-     * @brief 记录错误级别日志
-     * @param message 日志消息
-     */
     static void Error(const QString& message);
     
-    /**
-     * @brief 记录致命错误级别日志
-     * @param message 日志消息
-     */
     static void Fatal(const QString& message);
 };
 

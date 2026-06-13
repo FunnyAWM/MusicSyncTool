@@ -10,7 +10,6 @@
 #ifndef ABOUTPAGE_H
 #define ABOUTPAGE_H
 
-#include <QDialog>
 #include "ui_AboutPage.h"
 
 /**
@@ -21,15 +20,8 @@ class AboutPage final : public QDialog {
 	Q_OBJECT
 
 public:
-	/**
-	 * @brief 构造函数
-	 * @param parent 父窗口指针，默认为nullptr
-	 */
 	explicit AboutPage(QWidget* parent = nullptr);
 	
-	/**
-	 * @brief 析构函数
-	 */
 	~AboutPage() override = default;
 
 private:

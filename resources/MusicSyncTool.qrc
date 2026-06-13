@@ -2,5 +2,17 @@
     <qresource prefix="/MusicSyncTool">
         <file>MusicSyncTool.ico</file>
         <file>MusicSyncTool.rc</file>
+        <file>base-style.qss</file>
+        <file>style-light.qss</file>
+        <file>style-dark-mode.qss</file>
+        <file>style.qss</file>
+        <file>style-green.qss</file>
+        <file>style-purple.qss</file>
+        <file>style-dark.qss</file>
+        <file>titles.txt</file>
+        <file>checkmark.svg</file>
+        <file>radiodot.svg</file>
+        <file>downarrow.svg</file>
+        <file>downarrow-light.svg</file>
     </qresource>
 </RCC>

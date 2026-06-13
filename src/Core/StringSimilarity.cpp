@@ -8,8 +8,8 @@
  */
 
 #include "StringSimilarity.h"
-#include <QVector>
 #include <algorithm>
+#include <QVector>
 
 namespace StringSimilarity {
 
@@ -56,8 +56,8 @@ namespace StringSimilarity {
 		}
 
 		// 将字符串转换为小写进行比较
-		QString lowerText = text.toLower();
-		QString lowerPattern = pattern.toLower();
+		const QString lowerText = text.toLower();
+		const QString lowerPattern = pattern.toLower();
 
 		if (lowerText == lowerPattern) {
 			return true;
@@ -67,7 +67,7 @@ namespace StringSimilarity {
 		QString shorter = (lowerText.length() <= lowerPattern.length()) ? lowerText : lowerPattern;
 		QString longer = (lowerText.length() > lowerPattern.length()) ? lowerText : lowerPattern;
 
-		std::vector<int> next = buildKMPNext(shorter);
+		const std::vector<int> next = buildKMPNext(shorter);
 		int matchCount = 0;
 		int j = 0;
 
@@ -96,7 +96,7 @@ namespace StringSimilarity {
 	 * @return 如果是CJK字符返回true
 	 */
 	bool isCJKChar(const QChar& ch) {
-		ushort unicode = ch.unicode();
+		const int32_t unicode = ch.unicode();
 		return (unicode >= 0x4E00 && unicode <= 0x9FFF) || // CJK统一汉字
 			(unicode >= 0x3400 && unicode <= 0x4DBF) || // CJK扩展A
 			(unicode >= 0x20000 && unicode <= 0x2A6DF) || // CJK扩展B
@@ -115,12 +115,9 @@ namespace StringSimilarity {
 	 * @return 如果包含CJK字符返回true
 	 */
 	bool isCJKString(const QString& str) {
-		for (const QChar& ch : str) {
-			if (isCJKChar(ch)) {
-				return true;
-			}
-		}
-		return false;
+		return std::any_of(str.begin(), str.end(), [](const QChar& ch) {
+			return isCJKChar(ch);
+		});
 	}
 
 	/**
@@ -129,7 +126,7 @@ namespace StringSimilarity {
 	 * @return 转换后的字符
 	 */
 	QChar fullWidthToHalfWidth(const QChar& ch) {
-		ushort unicode = ch.unicode();
+		const ushort unicode = ch.unicode();
 
 		// 全角ASCII字符 (FF01-FF5E) 转换为半角 (0021-007E)
 		if (unicode >= 0xFF01 && unicode <= 0xFF5E) {
@@ -141,25 +138,8 @@ namespace StringSimilarity {
 			return QChar(0x0020);
 		}
 
-		// 特殊全角字符转换
-		switch (unicode) {
-		case 0xFF0F:
-			return QChar('/'); // 全角斜杠
-		case 0xFF1A:
-			return QChar(':'); // 全角冒号
-		case 0xFF1B:
-			return QChar(';'); // 全角分号
-		case 0xFF1F:
-			return QChar('?'); // 全角问号
-		case 0xFF01:
-			return QChar('!'); // 全角感叹号
-		case 0xFF0C:
-			return QChar(','); // 全角逗号
-		case 0xFF0E:
-			return QChar('.'); // 全角句号
-		default:
-			return ch;
-		}
+		// 其他字符保持不变
+		return ch;
 	}
 
 	/**
@@ -205,8 +185,8 @@ namespace StringSimilarity {
 		}
 
 		// 使用动态规划计算编辑距离（Levenshtein距离）
-		int len1 = str1.length();
-		int len2 = str2.length();
+		const int len1 = str1.length();
+		const int len2 = str2.length();
 
 		// 创建DP表
 		QVector<QVector<int>> dp(len1 + 1, QVector<int>(len2 + 1));
@@ -233,8 +213,8 @@ namespace StringSimilarity {
 			}
 		}
 
-		int editDistance = dp[len1][len2];
-		int maxLen = qMax(len1, len2);
+		const int editDistance = dp[len1][len2];
+		const int maxLen = qMax(len1, len2);
 
 		// 计算相似度：1 - (编辑距离 / 最大长度)
 		return 1.0 - (static_cast<double>(editDistance) / maxLen);
@@ -253,13 +233,13 @@ namespace StringSimilarity {
 		}
 
 		// 检查是否包含CJK字符
-		bool hasCJK1 = isCJKString(str1);
-		bool hasCJK2 = isCJKString(str2);
+		const bool hasCJK1 = isCJKString(str1);
+		const bool hasCJK2 = isCJKString(str2);
 
 		if (hasCJK1 || hasCJK2) {
 			// CJK字符串处理
-			QString norm1 = normalizeCJKString(str1);
-			QString norm2 = normalizeCJKString(str2);
+			const QString norm1 = normalizeCJKString(str1);
+			const QString norm2 = normalizeCJKString(str2);
 
 			// 标准化后精确匹配
 			if (norm1 == norm2) {
@@ -267,7 +247,7 @@ namespace StringSimilarity {
 			}
 
 			// 使用CJK特殊相似度算法（更严格的阈值0.85）
-			double similarity = cjkStringSimilarity(norm1, norm2);
+			const double similarity = cjkStringSimilarity(norm1, norm2);
 			return similarity >= 0.85;
 		}
 		else {

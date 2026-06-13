@@ -1,0 +1,262 @@
+/* ============================================================
+   OpenTunes - Dark Mode Colors
+   Background, text, border colors for all non-button elements.
+   Load AFTER base-style.qss, BEFORE theme accent file.
+   ============================================================ */
+
+QMainWindow {
+    background-color: #1a1a2e;
+}
+
+QWidget {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+}
+
+QDialog {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+}
+
+QMenuBar {
+    background-color: #252540;
+    border-bottom-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+QMenuBar::item {
+    color: #e0e0e0;
+}
+
+QMenuBar::item:selected {
+    background-color: #333355;
+}
+
+QMenuBar::item:pressed {
+    background-color: #3a3a5c;
+}
+
+QMenu {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+QMenu::item {
+    color: #e0e0e0;
+}
+
+QMenu::item:selected {
+    background-color: #333355;
+}
+
+QMenu::separator {
+    background: #333355;
+}
+
+QStatusBar {
+    background-color: #252540;
+    border-top-color: #3a3a5c;
+    color: #9e9e9e;
+}
+
+QLabel {
+    color: #e0e0e0;
+}
+
+QLineEdit {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+    selection-background-color: #3a3a5c;
+    selection-color: #e0e0e0;
+}
+
+QLineEdit:hover {
+    border-color: #4a4a6c;
+}
+
+QLineEdit:disabled {
+    background-color: #2a2a45;
+    color: #666680;
+    border-color: #333355;
+}
+
+QPushButton {
+    background-color: #2d2d4a;
+    color: #e0e0e0;
+    border-color: #3a3a5c;
+}
+
+QPushButton:disabled {
+    background-color: #2a2a45;
+    color: #666680;
+    border-color: #333355;
+}
+
+QTableWidget {
+    background-color: #252540;
+    alternate-background-color: #222238;
+    border-color: #3a3a5c;
+    gridline-color: #333355;
+    selection-background-color: #3a3a5c;
+    selection-color: #e0e0e0;
+    color: #e0e0e0;
+}
+
+QTableWidget::item {
+    border-bottom-color: #2d2d4a;
+}
+
+QTableWidget QTableCornerButton::section {
+    background-color: #252540;
+    border-bottom-color: #333355;
+    border-right-color: #333355;
+}
+
+QHeaderView::section {
+    background-color: #252540;
+    color: #b0b0b0;
+    border-bottom-color: #3a3a5c;
+    border-right-color: #333355;
+}
+
+QHeaderView::section:hover {
+    background-color: #2d2d4a;
+}
+
+QListWidget {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+QListWidget::item:hover {
+    background-color: #2d2d4a;
+}
+
+QListWidget::item:selected {
+    background-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+QTextEdit {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+    selection-background-color: #3a3a5c;
+    selection-color: #e0e0e0;
+}
+
+QComboBox {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+QComboBox:hover {
+    border-color: #4a4a6c;
+}
+
+QComboBox::drop-down {
+    border-left-color: #3a3a5c;
+}
+
+QComboBox::down-arrow {
+    image: url(":/MusicSyncTool/downarrow-light.svg");
+}
+
+QComboBox QAbstractItemView {
+    background-color: #252540;
+    border-color: #3a3a5c;
+    selection-background-color: #3a3a5c;
+    selection-color: #e0e0e0;
+    color: #e0e0e0;
+}
+
+QRadioButton {
+    color: #e0e0e0;
+}
+
+QRadioButton::indicator {
+    border-color: #3a3a5c;
+    background-color: #252540;
+}
+
+QCheckBox {
+    color: #e0e0e0;
+}
+
+QCheckBox::indicator {
+    border-color: #3a3a5c;
+    background-color: #252540;
+}
+
+QSlider::groove:horizontal {
+    background: #3a3a5c;
+}
+
+QSlider::add-page:horizontal {
+    background: #3a3a5c;
+}
+
+QProgressBar {
+    background-color: #333355;
+    color: #e0e0e0;
+}
+
+QScrollBar:vertical {
+    background: #252540;
+}
+
+QScrollBar::handle:vertical {
+    background: #3a3a5c;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4a4a6c;
+}
+
+QScrollBar:horizontal {
+    background: #252540;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3a3a5c;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4a4a6c;
+}
+
+QGroupBox {
+    background-color: #1a1a2e;
+    border-color: #3a3a5c;
+    color: #e0e0e0;
+}
+
+/* Dark theme favorite button colors (override base light defaults) */
+QPushButton#favoriteOnlyLocal,
+QPushButton#favoriteOnlyRemote {
+    background-color: #3a3520;
+    border-color: #8a7a30;
+    color: #e0d090;
+}
+
+QPushButton#favoriteOnlyLocal:hover,
+QPushButton#favoriteOnlyRemote:hover {
+    background-color: #4a4525;
+    border-color: #a08a20;
+}
+
+QPushButton#favoriteOnlyLocal:checked,
+QPushButton#favoriteOnlyRemote:checked {
+    background-color: #c9a825;
+    color: #1a1a2e;
+    border-color: #a08a20;
+}
+
+QToolTip {
+    background-color: #3a3a5c;
+    color: #e0e0e0;
+}

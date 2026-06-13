@@ -11,16 +11,14 @@
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
-#include <vector>
-#include <algorithm>
 
-#include "../Core/MSTTagUtils.h"
 #include <QVector>
+#include "../Core/MSTTagUtils.h"
 
 #include "../Core/StringSimilarity.h"
 
 /// 默认相似度阈值为4（考虑核心字段权重为2）
-int QueryItem::sensitivity = 4;
+int QueryItem::similarityThreshold = 4;
 
 /**
  * @brief 从音乐文件构造QueryItem对象
@@ -128,58 +126,58 @@ QString QueryItem::getFileName() const {
 
 /**
  * @brief 设置音乐标题
- * @param title 新的音乐标题
+ * @param title_ 新的音乐标题
  */
-void QueryItem::setTitle(const QString& title) {
-	this->title = title;
+void QueryItem::setTitle(const QString& title_) {
+	this->title = title_;
 }
 
 /**
  * @brief 设置艺术家名称
- * @param artist 新的艺术家名称
+ * @param artist_ 新的艺术家名称
  */
-void QueryItem::setArtist(const QString& artist) {
-	this->artist = artist;
+void QueryItem::setArtist(const QString& artist_) {
+	this->artist = artist_;
 }
 
 /**
  * @brief 设置专辑名称
- * @param album 新的专辑名称
+ * @param album_ 新的专辑名称
  */
-void QueryItem::setAlbum(const QString& album) {
-	this->album = album;
+void QueryItem::setAlbum(const QString& album_) {
+	this->album = album_;
 }
 
 /**
  * @brief 设置音乐流派
- * @param genre 新的音乐流派
+ * @param genre_ 新的音乐流派
  */
-void QueryItem::setGenre(const QString& genre) {
-	this->genre = genre;
+void QueryItem::setGenre(const QString& genre_) {
+	this->genre = genre_;
 }
 
 /**
  * @brief 设置发行年份
- * @param year 新的发行年份
+ * @param year_ 新的发行年份
  */
-void QueryItem::setYear(const uint year) {
-	this->year = year;
+void QueryItem::setYear(const uint year_) {
+	this->year = year_;
 }
 
 /**
  * @brief 设置音轨编号
- * @param track 新的音轨编号
+ * @param track_ 新的音轨编号
  */
-void QueryItem::setTrack(const uint track) {
-	this->track = track;
+void QueryItem::setTrack(const uint track_) {
+	this->track = track_;
 }
 
 /**
  * @brief 设置文件名
- * @param fileName 新的文件名
+ * @param fileName_ 新的文件名
  */
-void QueryItem::setFileName(const QString& fileName) {
-	this->fileName = fileName;
+void QueryItem::setFileName(const QString& fileName_) {
+	this->fileName = fileName_;
 }
 
 // ==================== 比较运算符实现 ====================
@@ -224,5 +222,5 @@ bool QueryItem::operator==(const QueryItem& other) const {
 	}
 
 	// 判断条件：必须有核心字段匹配且总分达到阈值
-	return hasCoreMatch && threshold >= sensitivity;
+	return hasCoreMatch && threshold >= similarityThreshold;
 }

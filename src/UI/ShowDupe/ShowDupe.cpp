@@ -8,9 +8,7 @@
 
 #include "ShowDupe.h"
 #include <QFile>
-#include <QJsonDocument>
 #include <QJsonObject>
-#include <QTranslator>
 
 /**
  * @brief 构造函数，初始化显示重复项对话框

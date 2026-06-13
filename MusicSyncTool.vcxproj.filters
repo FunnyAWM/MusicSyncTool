@@ -290,6 +290,41 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\base-style.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style-light.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style-dark-mode.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style-green.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style-purple.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\style-dark.qss">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\checkmark.svg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\radiodot.svg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\downarrow.svg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\downarrow-light.svg">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
   <!-- ==================== Form Files ==================== -->
   <ItemGroup>
     <QtUic Include="src\UI\AboutPage\AboutPage.ui">

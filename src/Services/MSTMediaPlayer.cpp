@@ -28,36 +28,11 @@ MSTMediaPlayer::~MSTMediaPlayer() {
 }
 
 /**
- * @brief 获取媒体播放器对象指针
- * @return QMediaPlayer对象指针
+ * @brief 检查是否正在播放
+ * @return 如果正在播放返回true，否则返回false
  */
-QMediaPlayer* MSTMediaPlayer::getMediaPlayer() { 
-    return &mediaPlayer; 
-}
-
-/**
- * @brief 获取当前播放位置
- * @return 当前播放位置（毫秒）
- */
-qint64 MSTMediaPlayer::getPosition() const { 
-    return mediaPlayer.position(); 
-}
-
-/**
- * @brief 获取音乐总时长
- * @return 音乐总时长（毫秒）
- */
-qint64 MSTMediaPlayer::getDuration() const { 
-    return mediaPlayer.duration(); 
-}
-
-/**
- * @brief 设置当前播放的音乐文件
- * @param file 音乐文件的完整路径
- */
-void MSTMediaPlayer::setNowPlaying(const QString& file) {
-    nowPlaying = file.split("/").last();               // 提取文件名（去除路径）
-    mediaPlayer.setSource(QUrl::fromLocalFile(file)); // 设置媒体播放器的音频源
+bool MSTMediaPlayer::isPlaying() const { 
+    return mediaPlayer.playbackState() == QMediaPlayer::PlayingState; 
 }
 
 /**
@@ -94,19 +69,52 @@ void MSTMediaPlayer::stop() {
 }
 
 /**
+ * @brief 设置当前播放的音乐文件
+ * @param file 音乐文件的完整路径
+ */
+void MSTMediaPlayer::setNowPlaying(const QString& file) {
+    nowPlaying = file.split("/").last();               // 提取文件名（去除路径）
+    mediaPlayer.setSource(QUrl::fromLocalFile(file)); // 设置媒体播放器的音频源
+}
+
+/**
+ * @brief 获取媒体播放器对象指针
+ * @return QMediaPlayer对象指针
+ */
+QMediaPlayer* MSTMediaPlayer::getMediaPlayer() { 
+    return &mediaPlayer; 
+}
+
+/**
+ * @brief 获取当前播放位置
+ * @return 当前播放位置（毫秒）
+ */
+qint64 MSTMediaPlayer::getPosition() const { 
+    return mediaPlayer.position(); 
+}
+
+/**
+ * @brief 获取音乐总时长
+ * @return 音乐总时长（毫秒）
+ */
+qint64 MSTMediaPlayer::getDuration() const { 
+    return mediaPlayer.duration(); 
+}
+
+/**
  * @brief 设置播放位置
  * @param pos 目标播放位置（毫秒）
  */
-void MSTMediaPlayer::setPosition(const qint64 pos) { 
-    mediaPlayer.setPosition(pos); 
+void MSTMediaPlayer::setPosition(const qint64 positionMs) { 
+    mediaPlayer.setPosition(positionMs); 
 }
 
 /**
  * @brief 设置音量
  * @param vol 音量值（0.0-1.0范围）
  */
-void MSTMediaPlayer::setVolume(const float vol) { 
-    audioOutput.setVolume(vol); 
+void MSTMediaPlayer::setVolume(const float volumeLevel) { 
+    audioOutput.setVolume(volumeLevel); 
 }
 
 /**
@@ -123,12 +131,4 @@ float MSTMediaPlayer::getVolume() const {
  */
 QString MSTMediaPlayer::getNowPlaying() const { 
     return nowPlaying; 
-}
-
-/**
- * @brief 检查是否正在播放
- * @return 如果正在播放返回true，否则返回false
- */
-bool MSTMediaPlayer::isPlaying() const { 
-    return mediaPlayer.playbackState() == QMediaPlayer::PlayingState; 
 }

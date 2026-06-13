@@ -10,6 +10,7 @@
 
 #ifndef MUSICPROPERTIES_H
 #define MUSICPROPERTIES_H
+#include <cstdint>
 
 /**
  * @brief 音乐属性命名空间
@@ -20,7 +21,7 @@ namespace PROPERTIES {
 	 * @brief 路径类型枚举
 	 * 用于区分本地路径和远程路径
 	 */
-	enum class PathType { 
+	enum class PathType : uint8_t { 
 		LOCAL,   ///< 本地路径
 		REMOTE   ///< 远程路径
 	};
@@ -29,7 +30,7 @@ namespace PROPERTIES {
 	 * @brief 播放状态枚举
 	 * 表示媒体播放器的当前状态
 	 */
-	enum class PlayState { 
+	enum class PlayState : uint8_t { 
 		PLAYING,  ///< 正在播放
 		PAUSED,   ///< 已暂停
 		STOPPED   ///< 已停止
@@ -39,26 +40,26 @@ namespace PROPERTIES {
 	 * @brief 文件错误类型枚举
 	 * 文件复制操作中可能遇到的错误类型
 	 */
-	enum class FileErrorType { 
-		DUPLICATE,  ///< 重复文件
-		LNF,        ///< 歌词文件未找到 (Lyric Not Found)
-		DISKFULL    ///< 磁盘空间不足
+	enum class FileErrorType : uint8_t { 
+		DUPLICATE,        ///< 重复文件
+		LYRIC_NOT_FOUND,  ///< 歌词文件未找到 (Lyric Not Found)
+		DISKFULL          ///< 磁盘空间不足
 	};
 
 	/**
 	 * @brief 加载错误类型枚举
 	 * 音乐文件加载过程中可能遇到的错误类型
 	 */
-	enum class LoadErrorType { 
-		FNS,     ///< 文件无法扫描 (File Not Scannable)
-		TAGERR   ///< 标签读取错误
+	enum class LoadErrorType : uint8_t { 
+		FILE_NOT_SCANNABLE,  ///< 文件无法扫描 (File Not Scannable)
+		TAG_READ_ERROR       ///< 标签读取错误
 	};
 
 	/**
 	 * @brief 排序字段枚举
 	 * 指定音乐列表排序所依据的字段
 	 */
-	enum class SortByEnum { 
+	enum class SortByEnum : uint8_t { 
 		TITLE,   ///< 按标题排序
 		ARTIST,  ///< 按艺术家排序
 		ALBUM    ///< 按专辑排序
@@ -68,7 +69,7 @@ namespace PROPERTIES {
 	 * @brief 排序顺序枚举
 	 * 指定排序的升降序方向
 	 */
-	enum class OrderByEnum { 
+	enum class OrderByEnum : uint8_t { 
 		ASC,   ///< 升序
 		DESC   ///< 降序
 	};
@@ -77,25 +78,25 @@ namespace PROPERTIES {
 	 * @brief 程序错误类型枚举 (Program Error Type)
 	 * 应用程序运行时可能遇到的各类错误
 	 */
-	enum class PET { 
-		NOAUDIO,  ///< 无音频设备或未选定音频
-		NPS,      ///< 未选择路径 (No Path Selected)
-		NDP,      ///< 未选择目标路径 (No Destination Path)
-		NFT,      ///< 无收藏标签 (No Favorite Tag)
-		NFS,      ///< 未选择文件 (No File Selected)
-		FIRST,    ///< 已经是第一页
-		LAST,     ///< 已经是最后一页
-		RUNNING,  ///< 程序已在运行
-		NOLANG,   ///< 找不到语言配置文件
-		DBERROR,  ///< 数据库操作错误
-		DOF       ///< 目录打开失败 (Directory Open Failed)
+	enum class AppErrorType : uint8_t { 
+		NO_AUDIO,          ///< 无音频设备或未选定音频
+		NO_PATH,           ///< 未选择路径 (No Path Selected)
+		NO_DEST_PATH,      ///< 未选择目标路径 (No Destination Path)
+		NO_FAV_TAG,        ///< 无收藏标签 (No Favorite Tag)
+		NO_FILE,           ///< 未选择文件 (No File Selected)
+		FIRST,             ///< 已经是第一页
+		LAST,              ///< 已经是最后一页
+		RUNNING,           ///< 程序已在运行
+		NO_LANGUAGE,       ///< 找不到语言配置文件
+		DB_ERROR,          ///< 数据库操作错误
+		DUPLICATE_FILE     ///< 目录打开失败 (Directory Open Failed)
 	};
 
 	/**
 	 * @brief 操作类型枚举
 	 * 用于区分不同的异步操作类型
 	 */
-	enum class OperationType { 
+	enum class OperationType : uint8_t { 
 		COPY,  ///< 文件复制操作
 		LOAD   ///< 数据加载操作
 	};
@@ -104,26 +105,28 @@ namespace PROPERTIES {
 	 * @brief 规则字段枚举
 	 * 歌词忽略规则所作用的字段
 	 */
-	enum class RuleField { 
+	enum class RuleField : uint8_t { 
 		TITLE,   ///< 标题字段
 		ARTIST,  ///< 艺术家字段
-		ALBUM    ///< 专辑字段
+		ALBUM,    ///< 专辑字段
+		NONE
 	};
 
 	/**
 	 * @brief 规则类型枚举
 	 * 歌词忽略规则的匹配方式
 	 */
-	enum class RuleType { 
+	enum class RuleType : uint8_t { 
 		INCLUDES,  ///< 包含匹配
-		EXCLUDES   ///< 排除匹配
+		EXCLUDES,   ///< 排除匹配
+		NONE
 	};
 
 	/**
 	 * @brief 查询行枚举
 	 * 指定数据库查询时需要返回的字段
 	 */
-	enum class QueryRows { 
+	enum class QueryRows : uint8_t { 
 		TITLE,     ///< 标题行
 		ARTIST,    ///< 艺术家行
 		ALBUM,     ///< 专辑行
@@ -138,7 +141,7 @@ namespace PROPERTIES {
 	 * @brief 日志文件输出枚举
 	 * 控制日志是否同时输出到文件
 	 */
-	enum class LogToFile { 
+	enum class LogToFile : uint8_t { 
 		ENABLE,   ///< 启用日志文件输出
 		DISABLE   ///< 禁用日志文件输出
 	};

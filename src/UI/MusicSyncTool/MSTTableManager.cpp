@@ -8,8 +8,8 @@
  */
 
 #include "MSTTableManager.h"
-#include "../../Services/MSTDataSource.h"
 #include "../../Core/MusicProperties.h"
+#include "../../Services/MSTDataSource.h"
 
 /**
  * @brief 构造函数
@@ -94,10 +94,10 @@ MSTDataSource& MSTTableManager::getDataSource(const PathType path) const {
 void MSTTableManager::fillTableWithItems(QTableWidget* table,
                                          const QList<QueryItem>& items,
                                          const int count) {
-	const int safeCount = qMin(count, items.size());
+	const int visibleRowCount = qMin(count, items.size());
 	table->clearContents();
-	table->setRowCount(safeCount);
-	for (int i = 0; i < safeCount; i++) {
+	table->setRowCount(visibleRowCount);
+	for (int i = 0; i < visibleRowCount; i++) {
 		table->setItem(i, 0, new QTableWidgetItem(items.at(i).getTitle()));
 		table->setItem(i, 1, new QTableWidgetItem(items.at(i).getArtist()));
 		table->setItem(i, 2, new QTableWidgetItem(items.at(i).getAlbum()));
@@ -124,10 +124,10 @@ void MSTTableManager::searchMusic(const PathType path, const QString& text) {
 		emit requestLoadMusic(path, 1);
 		return;
 	}
-	MSTDataSource& ds = getDataSource(path);
+	MSTDataSource& dataSource = getDataSource(path);
 	QTableWidget* targetTable = getTable(path);
 	targetTable->clearContents();
-	const QList<QueryItem> items = ds.searchMusic(text);
+	const QList<QueryItem> items = dataSource.searchMusic(text);
 	targetTable->setRowCount(items.count());
 	for (int i = 0; i < items.count(); i++) {
 		targetTable->setItem(i, 0, new QTableWidgetItem(items.at(i).getTitle()));
@@ -166,7 +166,7 @@ QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
 		artistList.append(table->item(i, 1)->text());
 		albumList.append(table->item(i, 2)->text());
 	}
-	MSTDataSource& ds = getDataSource(path);
+	MSTDataSource& dataSource = getDataSource(path);
 	QList<QueryItem> items;
 	QueryItem item;
 	for (int i = 0; i < titleList.count(); i++) {
@@ -175,7 +175,7 @@ QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
 		item.setAlbum(albumList.at(i));
 		items.append(item);
 	}
-	return ds.getFileNameByMD(items);
+	return dataSource.getFileNameByMetadata(items);
 }
 
 /**
@@ -191,20 +191,20 @@ void MSTTableManager::getFavoriteMusic(const PathType path, const unsigned short
                                        const PROPERTIES::SortByEnum sortBy,
                                        const PROPERTIES::OrderByEnum orderBy) {
 	if (getDataSource(path).getPath().isEmpty()) {
-		emit errorOccurred(PET::NPS);
+		emit errorOccurred(AppErrorType::NO_PATH);
 		return;
 	}
 	if (favoriteTag.isEmpty()) {
-		emit errorOccurred(PET::NFT);
+		emit errorOccurred(AppErrorType::NO_FAV_TAG);
 		return;
 	}
 
 	const int idx = pathIndex(path);
 	currentPage[idx] = page;
 
-	MSTDataSource& ds = getDataSource(path);
-	const auto fileList = ds.getFavorite(page, sortBy, orderBy);
-	const int trueTotal = ds.getLastFavoriteCount();
+	MSTDataSource& dataSource = getDataSource(path);
+	const auto fileList = dataSource.getFavorite(page, sortBy, orderBy);
+	const int trueTotal = dataSource.getLastFavoriteCount();
 	totalPage[idx] = trueTotal > 0
 		? static_cast<unsigned short>((trueTotal + PAGESIZE - 1) / PAGESIZE)
 		: 1;
@@ -266,12 +266,12 @@ void MSTTableManager::goToPrevPage(const PathType path, const bool hasPath,
                                    const PROPERTIES::SortByEnum sortBy,
                                    const PROPERTIES::OrderByEnum orderBy) {
 	if (!hasPath) {
-		emit errorOccurred(PET::NPS);
+		emit errorOccurred(AppErrorType::NO_PATH);
 		return;
 	}
 	const int idx = pathIndex(path);
 	if (currentPage[idx] == 1) {
-		emit errorOccurred(PET::FIRST);
+		emit errorOccurred(AppErrorType::FIRST);
 		return;
 	}
 	--currentPage[idx];
@@ -295,12 +295,12 @@ void MSTTableManager::goToNextPage(const PathType path, const bool hasPath,
                                    const PROPERTIES::SortByEnum sortBy,
                                    const PROPERTIES::OrderByEnum orderBy) {
 	if (!hasPath) {
-		emit errorOccurred(PET::NPS);
+		emit errorOccurred(AppErrorType::NO_PATH);
 		return;
 	}
 	const int idx = pathIndex(path);
 	if (currentPage[idx] == totalPage[idx]) {
-		emit errorOccurred(PET::LAST);
+		emit errorOccurred(AppErrorType::LAST);
 		return;
 	}
 	++currentPage[idx];
