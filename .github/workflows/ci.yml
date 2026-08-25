@@ -43,7 +43,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ matrix.qt-version }}
-        modules: 'qtmultimedia qt5compat'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: 配置 CMake 缓存
@@ -102,7 +102,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ matrix.qt-version }}
-        modules: 'qtmultimedia qt5compat'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: 构建单元测试
@@ -144,8 +144,8 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ matrix.qt-version }}
-        arch: win64_msvc2022_64
-        modules: 'qtmultimedia qt5compat'
+        arch: win64_msvc2019_64
+        modules: 'qtmultimedia'
         cache: true
     
     - name: 安装 vcpkg 和依赖
@@ -227,7 +227,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: 6.7.0
-        modules: 'qtmultimedia qt5compat'
+        modules: 'qtmultimedia'
         cache: true
     
     - name: 构建带覆盖率的测试
