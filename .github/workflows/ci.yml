@@ -163,17 +163,18 @@ jobs:
       run: |
         mkdir build-windows
         cd build-windows
-        cmake .. -G "Visual Studio 17 2022" -A x64 `
+        cmake .. -G "Ninja" `
+          -DCMAKE_BUILD_TYPE=Release `
           -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" `
           -DCMAKE_TOOLCHAIN_FILE="..\vcpkg\scripts\buildsystems\vcpkg.cmake"
-        cmake --build . --config Release
+        cmake --build .
     
     - name: 上传构建产物
       uses: actions/upload-artifact@v4
       with:
         name: windows-build-qt${{ matrix.qt-version }}
         path: |
-          build-windows/Release/
+          build-windows/
           !build-windows/**/*.pdb
 
   # 代码质量检查
