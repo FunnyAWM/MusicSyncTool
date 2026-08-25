@@ -1,12 +1,3 @@
-/**
- * @file MSTSettingsManager.cpp
- * @brief 音乐同步工具设置管理器类的实现
- * @details 实现设置的JSON持久化、默认设置创建和日志文件管理功能
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTSettingsManager.h"
 
 #include <QDir>
@@ -17,9 +8,6 @@
 #include "Logger.h"
 #include "../Data/LyricIgnoreRule.h"
 
-/**
- * @brief 创建默认设置文件
- */
 void MSTSettingsManager::createDefaultSettings() {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -38,11 +26,6 @@ void MSTSettingsManager::createDefaultSettings() {
 	file.close();
 }
 
-/**
- * @brief 从settings.json文件加载设置
- * @param entity 输出的设置实体引用
- * @return 成功加载返回true，否则返回false
- */
 bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::ReadOnly)) {
@@ -82,11 +65,6 @@ bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	return true;
 }
 
-/**
- * @brief 保存设置到settings.json文件
- * @param entity 要保存的设置实体
- * @return 成功保存返回true，否则返回false
- */
 bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
 	QFile file("settings.json");
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -116,11 +94,6 @@ bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
 	return true;
 }
 
-/**
- * @brief 从日志文件获取上次扫描时间
- * @param logFilePath 日志文件路径
- * @return 上次扫描的时间
- */
 QDateTime MSTSettingsManager::getDateFromLog(const QString& logFilePath) {
 	QFile file(logFilePath);
 	QDateTime dateTime;
@@ -147,11 +120,6 @@ QDateTime MSTSettingsManager::getDateFromLog(const QString& logFilePath) {
 	return dateTime;
 }
 
-/**
- * @brief 将扫描时间写入日志文件
- * @param logFilePath 日志文件路径
- * @param dateTime 要记录的时间
- */
 void MSTSettingsManager::writeLog(const QString& logFilePath, const QDateTime& dateTime) {
 	QFile file(logFilePath);
 	QTextStream out(&file);
@@ -162,9 +130,6 @@ void MSTSettingsManager::writeLog(const QString& logFilePath, const QDateTime& d
 }
 
 /**
- * @brief 构建扫描日志文件名
- * @param path 音乐文件夹路径
- * @return 完整的日志文件路径
  * @details 根据音乐文件夹路径生成唯一的日志文件名，
  *          格式为 "lastScan - <路径片段>.log"
  */
@@ -185,9 +150,6 @@ QString MSTSettingsManager::buildLogFileName(const QString& path) {
 	return logFilePath;
 }
 
-/**
- * @brief 清理日志目录下的所有日志文件
- */
 void MSTSettingsManager::cleanLog() {
 	const QDir logDir("log");
 	if (!logDir.exists()) {

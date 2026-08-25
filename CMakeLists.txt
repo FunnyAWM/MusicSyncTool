@@ -209,7 +209,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     option(BUILD_TESTS "Build unit tests" OFF)
     if(BUILD_TESTS)
         enable_testing()
-        add_subdirectory(UnitTest)
+        add_subdirectory(Test)
         message(STATUS "Unit tests enabled. Use 'make test' or 'ctest' to run tests.")
     endif()
     

@@ -1,12 +1,3 @@
-/**
- * @file Settings.cpp
- * @brief 设置界面类的实现
- * @details 实现设置界面的初始化、设置加载、保存和规则管理功能
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "Settings.h"
 #include <QJsonArray>
 #include <QMessageBox>
@@ -14,18 +5,12 @@
 
 #include "../AddRuleWidget/AddRuleWidget.h"
 
-/**
- * @brief 设置界面构造函数
- * 初始化UI并从已加载的设置实体填充界面
- * @param entity 已加载的设置实体
- * @param parent 父窗口指针
- */
 Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent) {
-	ui.setupUi(this); // 设置UI界面
-	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); // 设置表格头部自动拉伸
-	this->setWindowIcon(QIcon(":/MusicSyncTool.ico")); // 设置窗口图标
-	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint); // 设置窗口标志
-	this->setWindowModality(Qt::ApplicationModal); // 设置为应用程序模态对话框
+	ui.setupUi(this);
+	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
+	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
+	this->setWindowModality(Qt::ApplicationModal);
 
 	// 从实体加载设置到UI控件
 	setIgnoreLyricToUI(entity.ignoreLyric);
@@ -40,15 +25,10 @@ Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent
 	setIgnoreRulesToUI(rules);
 }
 
-/**
- * @brief 获取当前UI中的所有设置
- * @return 包含所有设置的结构体
- */
 SettingsData Settings::getSettings() {
 	SettingsData target;
-	target.ignoreLyric = ui.ignoreLyricBox->isChecked(); // 获取是否忽略歌词设置
+	target.ignoreLyric = ui.ignoreLyricBox->isChecked();
 
-	// 获取排序字段设置
 	if (ui.titleSelect->isChecked()) {
 		target.sortBy = toShort(SortByEnum::TITLE);
 	}
@@ -59,7 +39,6 @@ SettingsData Settings::getSettings() {
 		target.sortBy = toShort(SortByEnum::ALBUM);
 	}
 
-	// 获取排序顺序设置
 	if (ui.ascButton->isChecked()) {
 		target.orderBy = toShort(OrderByEnum::ASC);
 	}
@@ -67,8 +46,8 @@ SettingsData Settings::getSettings() {
 		target.orderBy = toShort(OrderByEnum::DESC);
 	}
 
-	target.language = ui.languageComboBox->currentText(); // 获取语言设置
-	target.favoriteTag = ui.favoriteTagEdit->text(); // 获取收藏标签设置
+	target.language = ui.languageComboBox->currentText();
+	target.favoriteTag = ui.favoriteTagEdit->text();
 
 	// 设置规则字符串并复制规则列表
 	for (auto& rule : entity.rules) {

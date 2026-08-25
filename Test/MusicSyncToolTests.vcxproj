@@ -38,18 +38,12 @@
     <Import Project="$(QtMsBuild)\Qt.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <CallingConvention>Cdecl</CallingConvention>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\src;$(ProjectDir)..\src\Core;$(ProjectDir)..\src\Data;$(ProjectDir)..\src\Services;$(ProjectDir)..\src\UI\MusicSyncTool;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -60,7 +54,7 @@
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>true</VcpkgEnabled>
   </PropertyGroup>
-  <!-- ==================== Test Headers (QtMoc - Q_OBJECT classes) ==================== -->
+  <!-- Test Headers (QtMoc) -->
   <ItemGroup>
     <QtMoc Include="TestMusicProperties.h" />
     <QtMoc Include="TestStringSimilarity.h" />
@@ -69,20 +63,18 @@
     <QtMoc Include="TestMSTFileManager.h" />
     <QtMoc Include="TestMSTDataSource.h" />
     <QtMoc Include="TestMSTSettingsManager.h" />
+    <QtMoc Include="TestIntegration.h" />
     <QtMoc Include="TestBlackBox.h" />
   </ItemGroup>
-  <!-- ==================== Main Project Headers ==================== -->
+  <!-- Main Project Headers -->
   <ItemGroup>
-    <!-- Core headers -->
     <ClInclude Include="..\src\Core\MusicProperties.h" />
     <ClInclude Include="..\src\Core\SettingEntity.h" />
     <ClInclude Include="..\src\Core\SingleInstance.h" />
     <ClInclude Include="..\src\Core\StringSimilarity.h" />
     <ClInclude Include="..\src\Core\MSTTagUtils.h" />
-    <!-- Data headers -->
     <QtMoc Include="..\src\Data\LyricIgnoreRule.h" />
     <ClInclude Include="..\src\Data\QueryItem.h" />
-    <!-- Services headers -->
     <ClInclude Include="..\src\Services\Logger.h" />
     <QtMoc Include="..\src\Services\MSTDataSource.h" />
     <ClInclude Include="..\src\Services\MSTFileManager.h" />
@@ -90,16 +82,12 @@
     <ClInclude Include="..\src\Services\MSTSettingsManager.h" />
     <QtMoc Include="..\src\Services\MSTTagScanner.h" />
   </ItemGroup>
-  <!-- ==================== Source Files ==================== -->
+  <!-- Source Files -->
   <ItemGroup>
-    <!-- Test runner entry point -->
     <ClCompile Include="main.cpp" />
-    <!-- Main project: Core layer -->
     <ClCompile Include="..\src\Core\StringSimilarity.cpp" />
-    <!-- Main project: Data layer -->
     <ClCompile Include="..\src\Data\QueryItem.cpp" />
     <ClCompile Include="..\src\Data\LyricIgnoreRule.cpp" />
-    <!-- Main project: Services layer -->
     <ClCompile Include="..\src\Services\Logger.cpp" />
     <ClCompile Include="..\src\Services\MSTDataSource.cpp" />
     <ClCompile Include="..\src\Services\MSTFileManager.cpp" />
@@ -107,7 +95,7 @@
     <ClCompile Include="..\src\Services\MSTSettingsManager.cpp" />
     <ClCompile Include="..\src\Services\MSTTagScanner.cpp" />
   </ItemGroup>
-  <!-- ==================== Test Implementation Files (not compiled - included by main.cpp) ==================== -->
+  <!-- Test Implementation Files (included by main.cpp, not compiled directly) -->
   <ItemGroup>
     <None Include="TestMusicProperties.cpp" />
     <None Include="TestStringSimilarity.cpp" />
@@ -116,6 +104,7 @@
     <None Include="TestMSTFileManager.cpp" />
     <None Include="TestMSTDataSource.cpp" />
     <None Include="TestMSTSettingsManager.cpp" />
+    <None Include="TestIntegration.cpp" />
     <None Include="TestBlackBox.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,13 +1,3 @@
-/**
- * @file MSTTagUtils.h
- * @brief TagLib 工具函数
- * @details 封装平台相关的 TagLib::FileRef 创建逻辑，
- *          消除多处重复的平台条件编译代码
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MSTTAGUTILS_H
 #define MSTTAGUTILS_H
 

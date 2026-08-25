@@ -1,13 +1,3 @@
-/**
- * @file MSTTableManager.h
- * @brief 音乐表格管理器类定义
- * @details 统一管理本地和远程两个音乐表格的数据填充、分页导航和选择操作，
- *          将表格相关的状态和逻辑从主窗口中分离出来
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MSTTABLEMANAGER_H
 #define MSTTABLEMANAGER_H
 
@@ -43,16 +33,17 @@ public:
 	                         QObject* parent = nullptr);
 
 private:
-	QTableWidget* localTable;       ///< 本地音乐表格控件
-	QTableWidget* remoteTable;      ///< 远程音乐表格控件
-	QLabel* localPageLabel;         ///< 本地分页标签
-	QLabel* remotePageLabel;        ///< 远程分页标签
-	MSTDataSource& localDataSource; ///< 本地数据源引用
-	MSTDataSource& remoteDataSource;///< 远程数据源引用
+	QTableWidget* localTable;
+	QTableWidget* remoteTable;
+	QLabel* localPageLabel;
+	QLabel* remotePageLabel;
+	MSTDataSource& localDataSource;
+	MSTDataSource& remoteDataSource;
 
-	unsigned short currentPage[2];  ///< 当前页码 [0:本地, 1:远程]
-	unsigned short totalPage[2];    ///< 总页数 [0:本地, 1:远程]
-	bool favoriteOnly[2];           ///< 收藏过滤模式 [0:本地, 1:远程]
+	unsigned short currentPage[2];
+	unsigned short totalPage[2];
+	bool favoriteOnly[2];
+	QString searchText[2];
 
 	[[nodiscard]] static int pathIndex(PathType path);
 
@@ -65,6 +56,8 @@ private:
 	static void fillTableWithItems(QTableWidget* table,
 	                               const QList<QueryItem>& items,
 	                               int count);
+
+	void loadSearchPage(PathType path);
 
 public:
 	void connectSignals() const;

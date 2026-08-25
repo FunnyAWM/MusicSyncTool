@@ -62,7 +62,7 @@ jobs:
       run: |
         mkdir -p build-test-linux
         cd build-test-linux
-        cmake ../UnitTest \
+        cmake ../Test \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
           -DCMAKE_PREFIX_PATH=$Qt6_DIR
         make -j$(nproc)
@@ -109,7 +109,7 @@ jobs:
       run: |
         mkdir -p build-test-macos
         cd build-test-macos
-        cmake ../UnitTest \
+        cmake ../Test \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_PREFIX_PATH=$Qt6_DIR
         make -j$(sysctl -n hw.ncpu)
@@ -144,7 +144,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ matrix.qt-version }}
-        arch: win64_msvc2019_64
+        arch: win64_msvc2022_64
         modules: 'qtmultimedia qt5compat'
         cache: true
     
@@ -234,7 +234,7 @@ jobs:
       run: |
         mkdir -p build-coverage
         cd build-coverage
-        cmake ../UnitTest \
+        cmake ../Test \
           -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
           -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
@@ -251,7 +251,7 @@ jobs:
         lcov --capture --directory . --output-file coverage.info
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
         lcov --remove coverage.info '**/build-coverage/**' --output-file coverage.info
-        lcov --remove coverage.info '**/UnitTest/**' --output-file coverage.info
+        lcov --remove coverage.info '**/Test/**' --output-file coverage.info
         lcov --remove coverage.info '**/Qt6/**' --output-file coverage.info
         genhtml coverage.info --output-directory coverage-html
     

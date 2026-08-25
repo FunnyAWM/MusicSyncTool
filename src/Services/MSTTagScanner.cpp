@@ -1,12 +1,3 @@
-/**
- * @file MSTTagScanner.cpp
- * @brief 音乐标签扫描器类的实现
- * @details 实现TagLib标签读取、收藏状态判定和规则命中评估
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTTagScanner.h"
 
 #include <QRegularExpression>
@@ -16,15 +7,9 @@
 #include "Logger.h"
 #include "../Core/MSTTagUtils.h"
 
-/**
- * @brief 构造函数
- */
 MSTTagScanner::MSTTagScanner(QObject* parent) : QObject(parent) {
 }
 
-/**
- * @brief 扫描收藏状态
- */
 QList<FavoriteUpdate> MSTTagScanner::scanFavorite(const QString& basePath,
                                                    const QStringList& fileNames,
                                                    const QString& tag) {
@@ -53,9 +38,6 @@ QList<FavoriteUpdate> MSTTagScanner::scanFavorite(const QString& basePath,
 	return results;
 }
 
-/**
- * @brief 扫描规则命中状态
- */
 QList<RuleHitUpdate> MSTTagScanner::scanRuleHit(const QString& basePath,
                                                  const QList<QueryItem>& items,
                                                  const QList<LyricIgnoreRule>& rules) {

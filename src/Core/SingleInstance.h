@@ -1,15 +1,3 @@
-/**
- * @file SingleInstance.h
- * @brief 应用程序单实例控制模块
- * @details 提供跨平台的应用程序单实例运行控制功能，
- *          防止用户同时启动多个程序实例。
- *          Windows平台使用Mutex互斥锁实现，
- *          Linux平台使用文件锁机制实现
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef LINUXSINGLEINSTANCE_H
 #define LINUXSINGLEINSTANCE_H
 #include <QCoreApplication>

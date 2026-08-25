@@ -1,13 +1,3 @@
-/**
- * @file Settings.h
- * @brief 设置界面类定义
- * @details 定义了应用程序设置的用户界面，包括歌词忽略、排序方式、
- *          语言、收藏标签和忽略规则等设置项
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
@@ -20,10 +10,6 @@
 
 
 
-/**
- * @brief 设置界面类
- * 提供应用程序设置的用户界面，包括歌词忽略、排序方式、语言等设置
- */
 class Settings final : public QWidget {
 	Q_OBJECT
 
@@ -58,8 +44,8 @@ public slots:
 	void addRule(const LyricIgnoreRule& rule);
 
 private:
-	Ui::SettingsClass ui;  ///< UI界面对象
-	SettingsData entity;            ///< 设置实体对象
+	Ui::SettingsClass ui;
+	SettingsData entity;
 
 signals:
 	/**

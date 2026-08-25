@@ -1,12 +1,3 @@
-/**
- * @file MSTFileManager.cpp
- * @brief 音乐同步工具文件管理器类的实现
- * @details 实现存储空间查询、音频格式检查、文件复制和错误回滚等文件管理功能
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTFileManager.h"
 #include <algorithm>
 #include <taglib/fileref.h>
@@ -14,26 +5,20 @@
 #include <taglib/tpropertymap.h>
 #include "Logger.h"
 
-/// 支持的音频格式列表常量定义
 const QStringList MSTFileManager::supportedFormat = {
     "mp3", "flac", "wav", "aac", "ogg", "wma", "m4a", "ape", "aiff", "opus"
 };
 
-/**
- * @brief 构造函数，初始化存储信息
- * @param path 存储路径
- */
 MSTFileManager::MSTFileManager(const QString& path) {
 	storageInfo = QStorageInfo(path);
 }
 
 /**
- * @brief 获取存储空间信息字符串
  * @return 格式化的存储空间信息，根据大小自动选择MB或GB单位
  */
 QString MSTFileManager::getSpaceInfo() const {
-	const qsizetype totalSpace = storageInfo.bytesTotal();       // 总空间
-	const qsizetype availableSpace = storageInfo.bytesAvailable(); // 可用空间
+	const qsizetype totalSpace = storageInfo.bytesTotal();
+	const qsizetype availableSpace = storageInfo.bytesAvailable();
 	
 	// 如果总空间小于1GB，使用MB单位显示
 	if (static_cast<double>(totalSpace) / 1024.0 / 1024.0 / 1024.0 < 1) {
@@ -47,19 +32,12 @@ QString MSTFileManager::getSpaceInfo() const {
 
 /**
  * @brief 检查文件是否可以复制（检查存储空间是否足够）
- * @param filePath 要检查的文件路径
- * @return 如果文件大小未超过可用空间且是有效文件返回true，否则返回false
  */
 bool MSTFileManager::copyable(const QString& filePath) const {
 	const QFileInfo fileInfo(filePath);
 	return fileInfo.size() <= storageInfo.bytesAvailable() && fileInfo.isFile();
 }
 
-/**
- * @brief 检查文件格式是否受支持
- * @param fileName 文件名
- * @return 如果文件格式受支持返回true，否则返回false
- */
 bool MSTFileManager::isFormatSupported(const QString& fileName) {
     return std::any_of(supportedFormat.begin(), supportedFormat.end(), [&fileName](const QString& format) {
         const QString extension = fileName.section('.', -1);
@@ -67,12 +45,6 @@ bool MSTFileManager::isFormatSupported(const QString& fileName) {
     });
 }
 
-/**
- * @brief 检查磁盘是否已满
- * @param filePath 文件路径
- * @param target 目标路径
- * @return 如果磁盘空间不足返回true，否则返回false
- */
 bool MSTFileManager::isFull(const QString& filePath, const QString& target) {
     const QFileInfo musicInfo(filePath);
     const QDir targetInfo(target);
@@ -84,8 +56,6 @@ bool MSTFileManager::isFull(const QString& filePath, const QString& target) {
 }
 
 /**
- * @brief 回滚复制操作
- * @param fileName 要回滚的文件名
  * @details 当文件复制失败时，清理已复制的文件，包括音乐文件本身
  *          和对应的歌词文件（.lrc文件）
  */
@@ -100,7 +70,6 @@ void MSTFileManager::rollBackCopy(const QString& fileName) {
 }
 
 /**
- * @brief 复制音乐文件的核心逻辑
  * @details 遍历文件列表，逐个复制音乐文件及其对应的歌词文件。
  *          处理文件已存在、歌词未找到、磁盘满等错误情况
  */
@@ -117,7 +86,7 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
     if (onTotal) onTotal(fileList.size());
     
     const QDir dir(target);
-    if (dir.isEmpty()) {
+    if (!dir.exists()) {
         if (!dir.mkpath(target)) {
             Logger::Fatal("Error creating directory: " + target);
             return;
@@ -176,7 +145,23 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
                     if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
                     continue;
                 }
-                QFile::copy(lyric, lyricTarget);
+
+                // 先复制音频文件
+                if (!QFile::copy(sourceFile, targetFile)) {
+                    rollBackCopy(targetFile);
+                    if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
+                    continue;
+                }
+
+                // 再复制歌词文件；失败则回滚已复制的音频
+                if (!QFile::copy(lyric, lyricTarget)) {
+                    rollBackCopy(targetFile);
+                    if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
+                    continue;
+                }
+
+                if (onProgress) onProgress(fileList.indexOf(file));
+                continue;
             }
         }
         
@@ -187,7 +172,11 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
             continue;
         }
         
-        QFile::copy(sourceFile, targetFile);
+        if (!QFile::copy(sourceFile, targetFile)) {
+            rollBackCopy(targetFile);
+            if (onError) onError(fileParts.at(0), 2); // DISKFULL = 2
+            continue;
+        }
         if (onProgress) onProgress(fileList.indexOf(file));
     }
     

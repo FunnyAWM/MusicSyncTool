@@ -1,15 +1,6 @@
-/**
- * @file MSTDataSource.cpp
- * @brief 音乐同步工具数据源类的实现
- * @details 实现音乐数据库的全部CRUD操作，包括数据库连接管理、
- *          表结构初始化、音乐文件的增删查改、收藏状态管理和规则命中检测
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTDataSource.h"
 
+#include <QDir>
 #include <QFile>
 #include <QRegularExpression>
 #include <QSqlError>
@@ -17,118 +8,57 @@
 #include "Logger.h"
 #include "../Core/MSTTagUtils.h"
 
-/**
- * @brief 获取分页大小
- * @return 当前分页大小
- */
 int MSTDataSource::getPageSize() const { return pageSize; }
 
-/**
- * @brief 设置分页大小
- * @param page_size 新的分页大小
- */
 void MSTDataSource::setPageSize(const int page_size) { pageSize = page_size; }
 
-/**
- * @brief 构造函数，设置数据库路径
- * @param path 数据库文件路径
- */
 MSTDataSource::MSTDataSource(const QString& path) { this->path = path; }
 
-/**
- * @brief 设置数据库路径
- * @param path_ 新的数据库路径
- */
 void MSTDataSource::setPath(const QString& path_) { this->path = path_; }
 
-/**
- * @brief 设置数据库连接名称
- * @param connectionName 连接名称
- */
 void MSTDataSource::setConnectionName(const QString& connectionName) { connection = connectionName; }
 
-/**
- * @brief 打开指定路径的数据库
- * @param path_ 数据库所在目录路径
- * @return 成功打开返回true，否则返回false
- */
 bool MSTDataSource::openDB(const QString& path_) {
 	db = QSqlDatabase::addDatabase("QSQLITE", connection);
 
-	// 规范化数据库文件路径（确保路径以斜杠结尾后拼接文件名）
-	if (path_.length() - path_.lastIndexOf('/') == 1) {
-		db.setDatabaseName(path_ + "musicInfo.db");
-	}
-	else {
-		db.setDatabaseName(path_ + "/musicInfo.db");
-	}
+	db.setDatabaseName(QDir(path_).filePath("musicInfo.db"));
 
-	// 尝试打开数据库
 	if (!db.open()) {
 		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
-	query = QSqlQuery(db); // 初始化查询对象
+	query = QSqlQuery(db);
 	return true;
 }
 
-/**
- * @brief 使用已设置路径打开数据库
- * @return 成功打开返回true，否则返回false
- */
 bool MSTDataSource::openDB() {
 	db = QSqlDatabase::addDatabase("QSQLITE", connection);
 
-	// 规范化数据库文件路径
-	if (path.length() - path.lastIndexOf('/') == 1) {
-		db.setDatabaseName(path + "musicInfo.db");
-	}
-	else {
-		db.setDatabaseName(path + "/musicInfo.db");
-	}
+	db.setDatabaseName(QDir(path).filePath("musicInfo.db"));
 
-	// 尝试打开数据库
 	if (!db.open()) {
 		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
-	query = QSqlQuery(db); // 初始化查询对象
+	query = QSqlQuery(db);
 	return true;
 }
 
-/**
- * @brief 初始化数据库表结构
- * 创建音乐信息表，包含标题、艺术家、专辑、流派、年份、音轨、收藏、规则命中、文件名等字段
- */
 void MSTDataSource::initTable() {
 	query.exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
 		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)");
 }
 
-/**
- * @brief 关闭数据库连接
- */
 void MSTDataSource::closeDB() {
 	if (db.isOpen()) {
 		db.close();
 	}
 }
 
-/**
- * @brief 准备SQL语句
- * @param stmt 要准备的SQL语句
- */
 void MSTDataSource::prepareStatement(const QString& sqlStatement) { query.prepare(sqlStatement); }
 
-/**
- * @brief 执行查询
- */
 void MSTDataSource::execQuery() { query.exec(); }
 
-/**
- * @brief 批量更新收藏状态
- * @param updates 收藏状态更新结果列表
- */
 void MSTDataSource::updateFavoriteBatch(const QList<FavoriteUpdate>& updates) {
 	query.exec("BEGIN TRANSACTION");
 	for (const auto& update : updates) {
@@ -140,10 +70,6 @@ void MSTDataSource::updateFavoriteBatch(const QList<FavoriteUpdate>& updates) {
 	query.exec("COMMIT");
 }
 
-/**
- * @brief 批量更新规则命中状态
- * @param updates 规则命中更新结果列表
- */
 void MSTDataSource::updateRuleHitBatch(const QList<RuleHitUpdate>& updates) {
 	query.exec("BEGIN TRANSACTION");
 	for (const auto& update : updates) {
@@ -155,24 +81,15 @@ void MSTDataSource::updateRuleHitBatch(const QList<RuleHitUpdate>& updates) {
 	query.exec("COMMIT");
 }
 
-/**
- * @brief 开始数据库事务
- */
 void MSTDataSource::beginTransaction() {
 	query.exec("BEGIN TRANSACTION");
 }
 
-/**
- * @brief 提交数据库事务
- */
 void MSTDataSource::commitTransaction() {
 	query.exec("COMMIT");
 }
 
 /**
- * @brief 根据文件名列表批量获取音乐数据
- * @param fileNames 文件名列表
- * @return 查询结果列表（含完整字段）
  * @details 使用 WHERE fileName IN (...) 让数据库做过滤，
  *          避免全表加载后再内存过滤
  */
@@ -198,29 +115,29 @@ QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	QList<QueryItem> items;
 	while (query.next()) {
 		items.append(QueryItem(
-			query.value(0).toString(),  // title
-			query.value(1).toString(),  // artist
-			query.value(2).toString(),  // album
-			query.value(3).toString(),  // genre
-			query.value(4).toUInt(),    // year
-			query.value(5).toUInt(),    // track
-			query.value(6).toString()   // fileName
+			query.value(0).toString(),
+			query.value(1).toString(),
+			query.value(2).toString(),
+			query.value(3).toString(),
+			query.value(4).toUInt(),
+			query.value(5).toUInt(),
+			query.value(6).toString()
 		));
 	}
 	return items;
 }
 
-/**
- * @brief 获取所有音乐数据
- * 根据指定的查询行类型构建SQL查询并返回结果
- * @param rows 要查询的字段类型向量，默认查询所有字段
- * @return 查询结果列表
- */
 QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
+	// 如果使用了 ALL 枚举，则禁用其他枚举同时出现
+	QVector<QueryRows> effectiveRows = rows;
+	if (rows.contains(QueryRows::ALL)) {
+		effectiveRows = {QueryRows::ALL};
+	}
+
 	QString sql = "SELECT ";
 
 	// 根据查询行类型构建SELECT语句
-	for (const auto& row : rows) {
+	for (const auto& row : effectiveRows) {
 		switch (row) {
 		case QueryRows::TITLE:
 			sql += "title, ";
@@ -251,17 +168,16 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 
 	// 创建行映射，用于后续数据解析
 	QMap<int, QueryRows> rowMap;
-	for (int i = 0; i < rows.size(); ++i) {
-		rowMap.insert(i, rows[i]);
+	for (int i = 0; i < effectiveRows.size(); ++i) {
+		rowMap.insert(i, effectiveRows[i]);
 	}
 
-	sql.chop(2); // 移除最后的逗号和空格
-	sql += " FROM musicInfo ORDER BY title ASC"; // 按标题升序排序
+	sql.chop(2);
+	sql += " FROM musicInfo ORDER BY title ASC";
 
 	prepareStatement(sql);
 	execQuery();
 
-	// 解析查询结果
 	QList<QueryItem> items;
 	QueryItem currentRow;
 	while (query.next()) {
@@ -305,38 +221,30 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 	return items;
 }
 
-/**
- * @brief 批量添加音乐文件到数据库
- * @param files 音乐文件路径列表
- * @return 添加失败的文件路径列表
- */
 QStringList MSTDataSource::addMusic(const QStringList& files) {
-	QStringList failedFileList; // 错误文件列表
+	QStringList failedFileList;
 
 	for (const QString& file : files) {
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(path + "/" + file);
 
-		// 检查文件是否有效
 		if (fileRef.isNull()) {
 			failedFileList.append(file);
 			Logger::Warn("Failed to add file" + file);
 			continue;
 		}
 
-		const TagLib::Tag* tag = fileRef.tag(); // 获取音乐标签
+		const TagLib::Tag* tag = fileRef.tag();
 
-		// 插入音乐信息到数据库
 		prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
 			":artist, :album, :genre, :year, :track, :fileName)");
-		bindValue(":title", tag->title().to8Bit(true));
-		bindValue(":artist", tag->artist().to8Bit(true));
-		bindValue(":album", tag->album().to8Bit(true));
-		bindValue(":genre", tag->genre().to8Bit(true));
+		bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
+		bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
+		bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
+		bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
 		bindValue(":year", QString::number(tag->year()));
 		bindValue(":track", QString::number(tag->track()));
 		bindValue(":fileName", file);
 
-		// 执行插入操作，失败时记录错误
 		if (!query.exec()) {
 			Logger::Warn("Error inserting data into database: " + query.lastError().text());
 			failedFileList.append(file);
@@ -345,26 +253,19 @@ QStringList MSTDataSource::addMusic(const QStringList& files) {
 	return failedFileList;
 }
 
-/**
- * @brief 添加单个音乐文件到数据库
- * @param file 音乐文件路径
- * @return 成功添加返回true，否则返回false
- */
 bool MSTDataSource::addMusic(const QString& file) {
 	if (file.isEmpty()) {
-		return false; // 文件路径为空
+		return false;
 	}
 
 	const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(path + "/" + file);
 
-	// 检查文件是否有效
 	if (fileRef.isNull()) {
 		return false;
 	}
 
-	const TagLib::Tag* tag = fileRef.tag(); // 获取音乐标签
+	const TagLib::Tag* tag = fileRef.tag();
 
-	// 插入音乐信息到数据库
 	prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
 		":artist, :album, :genre, :year, :track, :fileName)");
 	bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
@@ -375,7 +276,6 @@ bool MSTDataSource::addMusic(const QString& file) {
 	bindValue(":track", QString::number(tag->track()));
 	bindValue(":fileName", file);
 
-	// 执行插入操作        
 	if (!query.exec()) {
 		Logger::Warn("Error inserting data into database: " + query.lastError().text());
 		return false;
@@ -383,10 +283,6 @@ bool MSTDataSource::addMusic(const QString& file) {
 	return true;
 }
 
-/**
- * @brief 获取数据库中音乐记录的总数
- * @return 音乐记录总数
- */
 int MSTDataSource::getCount() {
 	prepareStatement("SELECT COUNT(*) FROM musicInfo");
 	execQuery();
@@ -394,14 +290,6 @@ int MSTDataSource::getCount() {
 	return query.value(0).toInt();
 }
 
-/**
- * @brief 获取用于表格显示的音乐数据
- * 支持分页、排序和排序顺序控制
- * @param pageNum 页码（从1开始）
- * @param sortBy 排序字段
- * @param orderBy 排序顺序
- * @return 查询结果列表
- */
 QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, const SortByEnum sortBy,
                                                 const OrderByEnum orderBy) {
 	QString sql = "SELECT title, artist, album, genre, year, track FROM musicInfo ORDER BY";
@@ -429,13 +317,11 @@ QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, co
 		break;
 	}
 
-	// 添加分页限制
 	sql += "LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize);
 
 	prepareStatement(sql);
 	execQuery();
 
-	// 构建结果列表
 	QList<QueryItem> result;
 	auto item = QueryItem();
 	while (query.next()) {
@@ -450,15 +336,9 @@ QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, co
 	return result;
 }
 
-/**
- * @brief 搜索音乐
- * 在标题、艺术家和专辑字段中搜索指定文本
- * @param text 搜索关键词
- * @return 匹配的音乐列表
- */
 QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
-	prepareStatement("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title = :text OR "
-		"artist = :text OR album = :text");
+	prepareStatement("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' OR "
+		"artist LIKE '%' || :text || '%' OR album LIKE '%' || :text || '%'");
 	bindValue(":text", text);
 	execQuery();
 
@@ -471,11 +351,6 @@ QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
 	return items;
 }
 
-/**
- * @brief 根据音乐元数据获取文件名列表
- * @param items 音乐项列表
- * @return 对应的文件名列表
- */
 QStringList MSTDataSource::getFileNameByMetadata(const QList<QueryItem>& items) {
 	QStringList fileList;
 	for (const QueryItem& item : items) {
@@ -490,17 +365,9 @@ QStringList MSTDataSource::getFileNameByMetadata(const QList<QueryItem>& items) 
 	return fileList;
 }
 
-/**
- * @brief 获取收藏的音乐列表
- * 支持分页、排序和进度报告
- * @param pageNum 页码（从1开始）
- * @param sortBy 排序字段
- * @param orderBy 排序顺序
- * @return 收藏音乐列表
- */
 QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const SortByEnum sortBy,
                                             const OrderByEnum orderBy) {
-	// emit loadStarted(); // 发出加载开始信号
+	// emit loadStarted();
 
 	// 获取收藏音乐的真实总数（不带LIMIT，用于分页计算）
 	prepareStatement("SELECT COUNT(*) FROM musicInfo WHERE favorite = 1");
@@ -508,9 +375,8 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 	query.next();
 	const int size = query.value(0).toInt();
 	lastFavoriteCount = size;
-	emit totalSize(size); // 发出总数量信号
+	emit totalSize(size);
 
-	// 构建查询语句
 	QString sql = "SELECT title, artist, album, genre, year, track FROM musicInfo WHERE favorite = 1 ORDER BY";
 	switch (sortBy) {
 	case SortByEnum::TITLE:
@@ -540,7 +406,7 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 	QueryItem item;
 	int i = 0;
 	while (query.next()) {
-		emit currentProgress(i); // 发出当前进度信号
+		emit currentProgress(i);
 		item.setTitle(query.value(0).toString());
 		item.setArtist(query.value(1).toString());
 		item.setAlbum(query.value(2).toString());
@@ -550,18 +416,10 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 		items.append(item);
 		i++;
 	}
-	// emit loadFinished(); // 发出加载完成信号
+	// emit loadFinished();
 	return items;
 }
 
-/**
- * @brief 获取规则命中的音乐列表
- * 支持分页和排序
- * @param pageNum 页码（从1开始）
- * @param sortBy 排序字段
- * @param orderBy 排序顺序
- * @return 规则命中的音乐列表
- */
 QList<QueryItem> MSTDataSource::getRuleHit(const unsigned short pageNum, const SortByEnum sortBy,
                                            const OrderByEnum orderBy) {
 	QString sql = "SELECT title, artist, album, genre, year, track FROM musicInfo WHERE ruleHit = 1 ORDER BY";
@@ -603,11 +461,6 @@ QList<QueryItem> MSTDataSource::getRuleHit(const unsigned short pageNum, const S
 	return items;
 }
 
-/**
- * @brief 删除指定的音乐文件记录
- * @param fileList 要删除的文件路径列表
- * @return 全部删除成功返回true，否则返回false
- */
 bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 	if (fileList.isEmpty()) {
 		return true; // 空列表视为成功
@@ -625,11 +478,6 @@ bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 	});
 }
 
-/** 
- * @brief 通过文件名获取是否命中规则
- * @param fileName 音乐文件名
- * @return 如果命中规则返回true，否则返回false
- */
 bool MSTDataSource::getRuleHit(const QString& fileName) {
 	prepareStatement("SELECT ruleHit FROM musicInfo WHERE fileName = :fileName");
 	bindValue(":fileName", fileName);

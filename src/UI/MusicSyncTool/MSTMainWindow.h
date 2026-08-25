@@ -1,19 +1,3 @@
-/**
- * @file MSTMainWindow.h
- * @brief 音乐同步工具主窗口类定义
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- * 
- * 这是音乐同步工具的主窗口类，负责整个应用程序的核心功能，包括：
- * - 音乐文件的扫描、加载和显示
- * - 本地和远程路径之间的音乐文件同步
- * - 音乐播放器控制和预览功能
- * - 重复音乐检测和处理
- * - 用户界面交互和设置管理
- * - 多线程文件操作和进度显示
- */
-
 // ReSharper disable CppUnusedIncludeDirective
 #ifndef MUSICSYNCTOOL_H
 #define MUSICSYNCTOOL_H
@@ -94,36 +78,36 @@ class MSTMainWindow final : public QMainWindow {
 	
 private:
 	// UI相关成员变量
-	Ui::MSTMainWindowClass ui;              ///< 主窗口UI对象
-	QTranslator* translator;                ///< 翻译器，用于多语言支持
-	LoadingPage* loading;                   ///< 加载进度页面
+	Ui::MSTMainWindowClass ui;
+	QTranslator* translator;
+	LoadingPage* loading;
 	
 	// 数据源和文件管理
-	MSTDataSource local;                    ///< 本地音乐数据源
-	MSTDataSource remote;                   ///< 远程音乐数据源
-	shared_ptr<MSTFileManager> localManager;  ///< 本地文件管理器
-	shared_ptr<MSTFileManager> remoteManager; ///< 远程文件管理器
+	MSTDataSource local;
+	MSTDataSource remote;
+	shared_ptr<MSTFileManager> localManager;
+	shared_ptr<MSTFileManager> remoteManager;
 	
 	// 表格管理器
-	MSTTableManager* tableManager;          ///< 表格分页与显示管理器
+	MSTTableManager* tableManager;
 	
 	// 扫描控制器
-	MSTScanController* scanController;      ///< 音乐扫描控制器
+	MSTScanController* scanController;
 	
 	// 错误报告器
-	MSTErrorReporter* errorReporter;        ///< 错误报告与结果展示
+	MSTErrorReporter* errorReporter;
 	
 	// 媒体播放相关
-	shared_ptr<MSTMediaPlayer> player;      ///< 音乐播放器
+	shared_ptr<MSTMediaPlayer> player;
 	
 	// 媒体播放控制器
-	MSTMediaController* mediaController;    ///< 媒体播放UI控制器
+	MSTMediaController* mediaController;
 	
 	// 状态管理
-	QAtomicPointer<bool> copyOperationInProgress;         ///< 复制操作状态（原子指针）
+	QAtomicPointer<bool> copyOperationInProgress;
 	
 	// 配置和常量
-	SettingsData entity;                             ///< 应用程序设置实体
+	SettingsData entity;
 
 public:
 	explicit MSTMainWindow(QWidget* parent = nullptr);

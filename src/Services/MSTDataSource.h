@@ -1,14 +1,3 @@
-/**
- * @file MSTDataSource.h
- * @brief 音乐同步工具数据源类定义
- * @details 定义了管理音乐数据库连接、查询和操作的数据源类，
- *          封装了SQLite数据库的CRUD操作，包括音乐文件的添加、删除、
- *          搜索、分页查询以及收藏和规则命中状态管理
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MSTDATASOURCE_H
 #define MSTDATASOURCE_H
 
@@ -21,20 +10,15 @@
 #include "MSTTagScanner.h"
 #include "../Data/QueryItem.h"
 
-/**
- * @brief 音乐同步工具数据源类
- * 负责管理音乐数据库的连接、查询和操作。
- * 继承自QObject以支持信号槽机制进行异步进度通知
- */
 class MSTDataSource final : public QObject {
 	Q_OBJECT
 
-	QString path; ///< 数据库文件路径
-	QString connection; ///< 数据库连接名称
-	QSqlDatabase db; ///< 数据库对象
-	QSqlQuery query; ///< SQL查询对象
-	int pageSize = 200; ///< 分页大小，默认200条记录
-	int lastFavoriteCount = 0; ///< 最近一次getFavorite查询的收藏总数
+	QString path;
+	QString connection;
+	QSqlDatabase db;
+	QSqlQuery query;
+	int pageSize = 200;
+	int lastFavoriteCount = 0;
 
 public:
 	[[nodiscard]] int getPageSize() const;

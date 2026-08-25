@@ -1,14 +1,3 @@
-/**
- * @file StringSimilarity.h
- * @brief 字符串相似度计算模块
- * @details 提供多种字符串相似度匹配算法，包括KMP模式匹配、
- *          CJK字符处理、编辑距离计算和模糊匹配功能。
- *          用于音乐元数据的智能去重和搜索匹配
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef STRINGSIMILARITY_H
 #define STRINGSIMILARITY_H
 

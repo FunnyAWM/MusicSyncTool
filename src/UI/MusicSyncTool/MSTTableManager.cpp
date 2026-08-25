@@ -1,26 +1,7 @@
-/**
- * @file MSTTableManager.cpp
- * @brief 音乐表格管理器类的实现
- * @details 实现本地和远程音乐表格的数据填充、分页导航、搜索和选择操作
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTTableManager.h"
 #include "../../Core/MusicProperties.h"
 #include "../../Services/MSTDataSource.h"
 
-/**
- * @brief 构造函数
- * @param localTable 本地音乐表格控件
- * @param remoteTable 远程音乐表格控件
- * @param localPageLabel 本地分页标签控件
- * @param remotePageLabel 远程分页标签控件
- * @param localDataSource 本地数据源引用
- * @param remoteDataSource 远程数据源引用
- * @param parent 父对象指针
- */
 MSTTableManager::MSTTableManager(QTableWidget* localTable,
                                  QTableWidget* remoteTable,
                                  QLabel* localPageLabel,
@@ -48,49 +29,22 @@ void MSTTableManager::connectSignals() const {
 	connect(this, &MSTTableManager::requestScroll, this, &MSTTableManager::scrollToTop);
 }
 
-/**
- * @brief 将PathType转换为数组索引
- * @param path 路径类型
- * @return 0表示本地，1表示远程
- */
 int MSTTableManager::pathIndex(const PathType path) {
 	return path == PathType::LOCAL ? 0 : 1;
 }
 
-/**
- * @brief 获取指定路径对应的表格控件
- * @param path 路径类型
- * @return 对应的表格指针
- */
 QTableWidget* MSTTableManager::getTable(const PathType path) const {
 	return path == PathType::LOCAL ? localTable : remoteTable;
 }
 
-/**
- * @brief 获取指定路径对应的分页标签
- * @param path 路径类型
- * @return 对应的标签指针
- */
 QLabel* MSTTableManager::getPageLabel(const PathType path) const {
 	return path == PathType::LOCAL ? localPageLabel : remotePageLabel;
 }
 
-/**
- * @brief 获取指定路径对应的数据源
- * @param path 路径类型
- * @return 数据源引用
- */
 MSTDataSource& MSTTableManager::getDataSource(const PathType path) const {
 	return path == PathType::LOCAL ? localDataSource : remoteDataSource;
 }
 
-/**
- * @brief 将QueryItem列表填充到表格
- * @param table 目标表格
- * @param items 音乐数据列表
- * @param start 起始索引
- * @param count 填充条数
- */
 void MSTTableManager::fillTableWithItems(QTableWidget* table,
                                          const QList<QueryItem>& items,
                                          const int count) {
@@ -114,36 +68,65 @@ void MSTTableManager::scrollToTop(const PathType path) const {
 }
 
 
-/**
- * @brief 搜索音乐并填充表格
- * @param path 路径类型（本地或远程）
- * @param text 搜索关键字
- */
 void MSTTableManager::searchMusic(const PathType path, const QString& text) {
+	const int idx = pathIndex(path);
 	if (text.isEmpty()) {
+		searchText[idx].clear();
+		favoriteOnly[idx] = false;
 		emit requestLoadMusic(path, 1);
 		return;
 	}
 	MSTDataSource& dataSource = getDataSource(path);
 	QTableWidget* targetTable = getTable(path);
+	searchText[idx] = text;
+	favoriteOnly[idx] = false;
+	currentPage[idx] = 1;
+
+	const QList<QueryItem> allItems = dataSource.searchMusic(text);
+	const int total = allItems.size();
+	totalPage[idx] = total > 0 ? static_cast<unsigned short>((total + PAGESIZE - 1) / PAGESIZE) : 1;
+	getPageLabel(path)->setText(
+		QString::number(currentPage[idx]) + "/" + QString::number(totalPage[idx]));
+
+	const int start = 0;
+	const int count = qMin(static_cast<int>(PAGESIZE), total - start);
 	targetTable->clearContents();
-	const QList<QueryItem> items = dataSource.searchMusic(text);
-	targetTable->setRowCount(items.count());
-	for (int i = 0; i < items.count(); i++) {
-		targetTable->setItem(i, 0, new QTableWidgetItem(items.at(i).getTitle()));
-		targetTable->setItem(i, 1, new QTableWidgetItem(items.at(i).getArtist()));
-		targetTable->setItem(i, 2, new QTableWidgetItem(items.at(i).getAlbum()));
-		targetTable->setItem(i, 3, new QTableWidgetItem(items.at(i).getGenre()));
-		targetTable->setItem(i, 4, new QTableWidgetItem(QString::number(items.at(i).getYear())));
-		targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(items.at(i).getTrack())));
+	targetTable->setRowCount(count);
+	for (int i = 0; i < count; i++) {
+		targetTable->setItem(i, 0, new QTableWidgetItem(allItems.at(start + i).getTitle()));
+		targetTable->setItem(i, 1, new QTableWidgetItem(allItems.at(start + i).getArtist()));
+		targetTable->setItem(i, 2, new QTableWidgetItem(allItems.at(start + i).getAlbum()));
+		targetTable->setItem(i, 3, new QTableWidgetItem(allItems.at(start + i).getGenre()));
+		targetTable->setItem(i, 4, new QTableWidgetItem(allItems.at(start + i).getYear() != 0 ? QString::number(allItems.at(start + i).getYear()) : ""));
+		targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(allItems.at(start + i).getTrack())));
 	}
 }
 
-/**
- * @brief 获取表格中选中的音乐文件名
- * @param path 路径类型（本地或远程）
- * @return 选中音乐文件的文件名列表
- */
+void MSTTableManager::loadSearchPage(const PathType path) {
+	const int idx = pathIndex(path);
+	MSTDataSource& dataSource = getDataSource(path);
+	QTableWidget* targetTable = getTable(path);
+
+	const QList<QueryItem> allItems = dataSource.searchMusic(searchText[idx]);
+	const int total = allItems.size();
+	totalPage[idx] = total > 0 ? static_cast<unsigned short>((total + PAGESIZE - 1) / PAGESIZE) : 1;
+	getPageLabel(path)->setText(
+		QString::number(currentPage[idx]) + "/" + QString::number(totalPage[idx]));
+
+	const int start = (currentPage[idx] - 1) * PAGESIZE;
+	const int count = qMin(static_cast<int>(PAGESIZE), total - start);
+	targetTable->clearContents();
+	targetTable->setRowCount(count);
+	for (int i = 0; i < count; i++) {
+		targetTable->setItem(i, 0, new QTableWidgetItem(allItems.at(start + i).getTitle()));
+		targetTable->setItem(i, 1, new QTableWidgetItem(allItems.at(start + i).getArtist()));
+		targetTable->setItem(i, 2, new QTableWidgetItem(allItems.at(start + i).getAlbum()));
+		targetTable->setItem(i, 3, new QTableWidgetItem(allItems.at(start + i).getGenre()));
+		targetTable->setItem(i, 4, new QTableWidgetItem(allItems.at(start + i).getYear() != 0 ? QString::number(allItems.at(start + i).getYear()) : ""));
+		targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(allItems.at(start + i).getTrack())));
+	}
+}
+
 QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
 	const QTableWidget* const table = getTable(path);
 	if (table->rowCount() == 0) {
@@ -178,14 +161,6 @@ QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
 	return dataSource.getFileNameByMetadata(items);
 }
 
-/**
- * @brief 加载收藏音乐到表格
- * @param path 路径类型（本地或远程）
- * @param page 页码
- * @param favoriteTag 收藏标签关键字
- * @param sortBy 排序字段
- * @param orderBy 排序方向
- */
 void MSTTableManager::getFavoriteMusic(const PathType path, const unsigned short page,
                                        const QString& favoriteTag,
                                        const PROPERTIES::SortByEnum sortBy,
@@ -224,19 +199,13 @@ void MSTTableManager::getFavoriteMusic(const PathType path, const unsigned short
 	emit requestScroll(path);
 }
 
-/**
- * @brief 填充音乐列表到表格
- * @param path 路径类型（本地或远程）
- * @param items 音乐数据列表
- * @param page 当前页码
- * @param totalPages 总页数
- */
 void MSTTableManager::populateTable(const PathType path, const QList<QueryItem>& items,
                                     const unsigned short page, const unsigned short totalPages) {
 	const int idx = pathIndex(path);
 	currentPage[idx] = page;
 	totalPage[idx] = totalPages;
 	favoriteOnly[idx] = false;
+	searchText[idx].clear();
 
 	QTableWidget* targetTable = getTable(path);
 	getPageLabel(path)->setText(
@@ -253,14 +222,6 @@ void MSTTableManager::populateTable(const PathType path, const QList<QueryItem>&
 	fillTableWithItems(targetTable, items, static_cast<int>(rowSize));
 }
 
-/**
- * @brief 尝试翻到上一页
- * @param path 路径类型（本地或远程）
- * @param hasPath 是否已选择路径
- * @param favoriteTag 收藏标签关键字
- * @param sortBy 排序字段
- * @param orderBy 排序方向
- */
 void MSTTableManager::goToPrevPage(const PathType path, const bool hasPath,
                                    const QString& favoriteTag,
                                    const PROPERTIES::SortByEnum sortBy,
@@ -275,6 +236,10 @@ void MSTTableManager::goToPrevPage(const PathType path, const bool hasPath,
 		return;
 	}
 	--currentPage[idx];
+	if (!searchText[idx].isEmpty()) {
+		loadSearchPage(path);
+		return;
+	}
 	if (favoriteOnly[idx]) {
 		emit requestLoadFavorite(path, currentPage[idx]);
 	} else {
@@ -282,14 +247,6 @@ void MSTTableManager::goToPrevPage(const PathType path, const bool hasPath,
 	}
 }
 
-/**
- * @brief 尝试翻到下一页
- * @param path 路径类型（本地或远程）
- * @param hasPath 是否已选择路径
- * @param favoriteTag 收藏标签关键字
- * @param sortBy 排序字段
- * @param orderBy 排序方向
- */
 void MSTTableManager::goToNextPage(const PathType path, const bool hasPath,
                                    const QString& favoriteTag,
                                    const PROPERTIES::SortByEnum sortBy,
@@ -304,6 +261,10 @@ void MSTTableManager::goToNextPage(const PathType path, const bool hasPath,
 		return;
 	}
 	++currentPage[idx];
+	if (!searchText[idx].isEmpty()) {
+		loadSearchPage(path);
+		return;
+	}
 	if (favoriteOnly[idx]) {
 		emit requestLoadFavorite(path, currentPage[idx]);
 	} else {
@@ -311,32 +272,26 @@ void MSTTableManager::goToNextPage(const PathType path, const bool hasPath,
 	}
 }
 
-/// @brief 获取指定路径的当前页码
 unsigned short MSTTableManager::getCurrentPage(const PathType path) const {
 	return currentPage[pathIndex(path)];
 }
 
-/// @brief 设置指定路径的当前页码
 void MSTTableManager::setCurrentPage(const PathType path, const unsigned short page) {
 	currentPage[pathIndex(path)] = page;
 }
 
-/// @brief 获取指定路径的总页数
 unsigned short MSTTableManager::getTotalPage(const PathType path) const {
 	return totalPage[pathIndex(path)];
 }
 
-/// @brief 设置指定路径的总页数
 void MSTTableManager::setTotalPage(const PathType path, const unsigned short total) {
 	totalPage[pathIndex(path)] = total;
 }
 
-/// @brief 获取指定路径是否处于收藏过滤模式
 bool MSTTableManager::isFavoriteOnly(const PathType path) const {
 	return favoriteOnly[pathIndex(path)];
 }
 
-/// @brief 设置指定路径的收藏过滤模式
 void MSTTableManager::setFavoriteOnly(const PathType path, const bool value) {
 	favoriteOnly[pathIndex(path)] = value;
 }

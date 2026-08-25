@@ -1,14 +1,3 @@
-/**
- * @file LyricIgnoreRule.h
- * @brief 歌词忽略规则类定义
- * @details 定义了用于管理歌词处理忽略规则的类，
- *          包括规则类型（包含/排除）、规则字段（标题/艺术家/专辑）
- *          和规则名称/值，以及规则与字符串之间的转换功能
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef LYRICIGNORERULE_H
 #define LYRICIGNORERULE_H
 #include <QObject>
@@ -25,11 +14,11 @@ using namespace PROPERTIES;  // NOLINT(clang-diagnostic-header-hygiene)
 class LyricIgnoreRule final : public QObject {
 	Q_OBJECT
 	
-	RuleType ruleType;      ///< 规则类型（包含/排除）
-	RuleField ruleField;    ///< 规则字段（标题/艺术家/专辑）
-	QString ruleName;       ///< 规则名称/值
-	QString ruleTypeStr;    ///< 规则类型字符串表示
-	QString ruleFieldStr;   ///< 规则字段字符串表示
+	RuleType ruleType;
+	RuleField ruleField;
+	QString ruleName;
+	QString ruleTypeStr;
+	QString ruleFieldStr;
 
 public:
 	explicit LyricIgnoreRule(RuleType ruleType, RuleField ruleField, QString ruleName);
@@ -38,9 +27,6 @@ public:
 	
 	LyricIgnoreRule& operator=(const LyricIgnoreRule& other);
 	
-	/**
-	 * @brief 析构函数
-	 */
 	~LyricIgnoreRule() override = default;
 	
 	[[nodiscard]] RuleType getRuleType() const;

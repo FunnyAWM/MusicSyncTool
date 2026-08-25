@@ -1,13 +1,3 @@
-/**
- * @file MusicProperties.h
- * @brief 音乐同步工具核心枚举类型与工具函数定义
- * @details 定义了应用程序中使用的所有枚举类型，包括路径类型、播放状态、
- *          排序方式、规则类型等，以及枚举与数值之间的转换工具函数
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MUSICPROPERTIES_H
 #define MUSICPROPERTIES_H
 #include <cstdint>
@@ -145,8 +135,6 @@ namespace PROPERTIES {
 		ENABLE,   ///< 启用日志文件输出
 		DISABLE   ///< 禁用日志文件输出
 	};
-
-	// ==================== 枚举转换工具函数 ====================
 
 	/**
 	 * @brief 将数值转换为排序字段枚举

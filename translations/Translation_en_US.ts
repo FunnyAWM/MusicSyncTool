@@ -116,27 +116,27 @@
 <context>
     <name>LyricIgnoreRule</name>
     <message>
-        <location filename="../src/Data/LyricIgnoreRule.cpp" line="83"/>
+        <location filename="../src/Data/LyricIgnoreRule.cpp" line="47"/>
         <source>名称</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/Data/LyricIgnoreRule.cpp" line="85"/>
+        <location filename="../src/Data/LyricIgnoreRule.cpp" line="49"/>
         <source>艺术家</source>
         <translation>Artist</translation>
     </message>
     <message>
-        <location filename="../src/Data/LyricIgnoreRule.cpp" line="87"/>
+        <location filename="../src/Data/LyricIgnoreRule.cpp" line="51"/>
         <source>专辑</source>
         <translation>Album</translation>
     </message>
     <message>
-        <location filename="../src/Data/LyricIgnoreRule.cpp" line="101"/>
+        <location filename="../src/Data/LyricIgnoreRule.cpp" line="67"/>
         <source>包含</source>
         <translation>Include</translation>
     </message>
     <message>
-        <location filename="../src/Data/LyricIgnoreRule.cpp" line="103"/>
+        <location filename="../src/Data/LyricIgnoreRule.cpp" line="69"/>
         <source>排除</source>
         <translation>Exclude</translation>
     </message>
@@ -167,118 +167,118 @@
 <context>
     <name>MSTErrorReporter</name>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="32"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="36"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="17"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="21"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="24"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="27"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="30"/>
         <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="39"/>
         <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="42"/>
         <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="45"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="54"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="57"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="60"/>
         <source>错误</source>
         <translation type="unfinished">Error</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="32"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="17"/>
         <source>没有选定音频！（提示：可以通过双击表格中的歌曲来预览）</source>
         <translation type="unfinished">No audio selected! (Hint: You can preview music by double clicking songs in the table.)</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="36"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="21"/>
         <source>没有选定路径！</source>
         <translation type="unfinished">No path selected!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="39"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="24"/>
         <source>目标文件夹尚未打开，请先选择目标路径！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="42"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="27"/>
         <source>没有设置喜爱标签！请在设置中指定！</source>
         <translation type="unfinished">No favorite tag selected! Please edit it in settings!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="45"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="30"/>
         <source>没有选定文件！</source>
         <translation type="unfinished">No file selected!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="48"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="51"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="33"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="36"/>
         <source>提示</source>
         <translation type="unfinished">Information</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="48"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="33"/>
         <source>已经是第一页了！</source>
         <translation type="unfinished">It&apos;s first page already!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="51"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="36"/>
         <source>已经是最后一页了！</source>
         <translation type="unfinished">It&apos;s last page already!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="54"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="39"/>
         <source>程序已在运行！</source>
         <translation type="unfinished">Program is already running!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="57"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="42"/>
         <source>找不到程序语言配置文件，程序即将退出！</source>
         <translation type="unfinished">Failed to locate program language configuration, program will quit!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="60"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="45"/>
         <source>操作数据库中数据时出现严重错误，程序即将退出！</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="73"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="76"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="79"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="55"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="58"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="61"/>
         <source>复制</source>
         <translation type="unfinished">Copying </translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="73"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="55"/>
         <source>失败：文件已存在</source>
         <translation type="unfinished">failed: file existed</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="76"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="58"/>
         <source>失败：找不到歌词文件</source>
         <translation type="unfinished">failed: No lyric file found</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="79"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="61"/>
         <source>失败：磁盘已满</source>
         <translation type="unfinished">failed: Target disk is full</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="90"/>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="93"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="69"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="72"/>
         <source>加载</source>
         <translation type="unfinished">Loading </translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="90"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="69"/>
         <source>失败：文件不可扫描</source>
         <translation type="unfinished"> failed: File unscannable</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="93"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="72"/>
         <source>失败：标签错误</source>
         <translation type="unfinished"> failed: Tag error</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="105"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="81"/>
         <source>复制结果</source>
         <translation type="unfinished">Copy Result</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="108"/>
+        <location filename="../src/UI/MusicSyncTool/MSTErrorReporter.cpp" line="84"/>
         <source>加载结果</source>
         <translation type="unfinished">Loading result</translation>
     </message>
@@ -286,17 +286,17 @@
 <context>
     <name>MSTMainWindow</name>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="115"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="79"/>
         <source>音量：</source>
         <translation type="unfinished">Volume:</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="116"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="80"/>
         <source>播放已结束。</source>
         <translation type="unfinished">Playback ended.</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="319"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="223"/>
         <source>错误</source>
         <translation type="unfinished">Error</translation>
     </message>
@@ -317,8 +317,8 @@
         <translation type="obsolete">No file selected!</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="647"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="652"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="425"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="430"/>
         <source>提示</source>
         <translation type="unfinished">Information</translation>
     </message>
@@ -375,7 +375,7 @@
         <translation type="obsolete"> failed: Tag error</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="319"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="223"/>
         <source>无法打开设置文件</source>
         <translation type="unfinished">Can not open setting files</translation>
     </message>
@@ -392,17 +392,17 @@
         <translation type="obsolete">Now playing:</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="647"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="425"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished">Are you sure you will clean up all the log files?</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="652"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="430"/>
         <source>日志文件已清除</source>
         <translation type="unfinished">Log file cleaned.</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="437"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="314"/>
         <source>可用空间：</source>
         <translation type="unfinished">Available Space:</translation>
     </message>
@@ -583,32 +583,32 @@
 <context>
     <name>MSTMediaController</name>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="171"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="137"/>
         <source>正在播放：</source>
         <translation type="unfinished">Now playing:</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="154"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="123"/>
         <source>暂停</source>
         <translation type="unfinished">Pause</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="158"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="161"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="218"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="127"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="130"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="166"/>
         <source>播放</source>
         <translation type="unfinished">Play</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="162"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="219"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="131"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="167"/>
         <source>播放已结束。</source>
         <translation type="unfinished">Playback ended.</translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="164"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="202"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="210"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="133"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="156"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMediaController.cpp" line="161"/>
         <source>音量：</source>
         <translation type="unfinished">Volume:</translation>
     </message>
@@ -875,12 +875,12 @@
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="111"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="90"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="111"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="90"/>
         <source>无法打开语言文件</source>
         <translation>Can&apos;t open language file</translation>
     </message>

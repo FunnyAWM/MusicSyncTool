@@ -1,12 +1,3 @@
-/**
- * @file MSTScanController.cpp
- * @brief 音乐扫描控制器类的实现
- * @details 实现音乐文件目录扫描、文件差异比对、数据库同步和收藏/规则设置
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTScanController.h"
 
 #include <algorithm>
@@ -27,9 +18,6 @@
 #include "../Data/QueryItem.h"
 #include "../UI/MusicSyncTool/MSTTableManager.h"
 
-/**
- * @brief 构造函数
- */
 MSTScanController::MSTScanController(MSTDataSource& localDataSource,
                                      MSTDataSource& remoteDataSource,
                                      MSTTableManager* tableManager,
@@ -40,22 +28,15 @@ MSTScanController::MSTScanController(MSTDataSource& localDataSource,
 	  tableManager(tableManager) {
 }
 
-/**
- * @brief 获取指定路径对应的数据源
- */
 MSTDataSource& MSTScanController::getDataSource(const PathType path) const {
 	return path == PathType::LOCAL ? localDataSource : remoteDataSource;
 }
 
-/**
- * @brief 获取指定路径对应的目录路径
- */
 QString MSTScanController::getPath(const PathType path) const {
 	return path == PathType::LOCAL ? localDataSource.getPath() : remoteDataSource.getPath();
 }
 
 /**
- * @brief 启动音乐扫描（多线程入口）
  * @details 根据扫描标记决定执行完整扫描还是仅加载页面数据。
  *          已完成过扫描的路径将直接加载页面，避免翻页时重复扫描。
  */
@@ -72,14 +53,10 @@ void MSTScanController::startScan(const PathType path, const unsigned short page
 	}
 }
 
-/**
- * @brief 执行音乐扫描（并发执行体）
- */
 void MSTScanController::scanConcurrent(const PathType path, const unsigned short page, const SettingsData& entity) {
 	const clock_t start = clock();
 	MSTDataSource& dataSource = getDataSource(path);
 
-	// 设置当前页码和收藏过滤状态
 	tableManager->setCurrentPage(path, page);
 	tableManager->setFavoriteOnly(path, false);
 	if (page == 1) {
@@ -106,8 +83,8 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		for (const QueryItem& item : storedDbItems) {
 			oldFileList.append(item.getFileName());
 		}
-		QStringList dirFiles = newFileList;     // 目录中已过滤格式的文件
-		QStringList dbFiles = oldFileList;      // 数据库中的文件
+		QStringList dirFiles = newFileList;
+		QStringList dbFiles = oldFileList;
 		dirFiles.sort();
 		dbFiles.sort();
 
@@ -168,12 +145,10 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 
 		dataSource.commitTransaction();
 		globalProgress += newFileList.size();
-		// 收藏标签扫描阶段
 		setFavorite(path, filesToScan, entity.favoriteTag, globalProgress);
 		globalProgress += filesToScan.size();
 		endPhase = clock();
 		Logger::Info("Favorite scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
-		// 规则命中扫描阶段
 		setRuleHit(path, entity.rules, filesToScan, globalProgress);
 		globalProgress += filesToScan.size();
 		endPhase = clock();
@@ -195,13 +170,6 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 	emit tableManager->requestScroll(path);
 }
 
-/**
- * @brief 设置收藏标签
- * @param path 路径类型
- * @param filesToScan 需要扫描的文件名列表（增量）
- * @param favoriteTag 收藏标签字符串
- * @param progressOffset 全局进度偏移量
- */
 void MSTScanController::setFavorite(const PathType path,
                                     const QStringList& filesToScan, const QString& favoriteTag,
                                     const qsizetype progressOffset) {
@@ -219,17 +187,9 @@ void MSTScanController::setFavorite(const PathType path,
 		favResult.isFavorite = fileRef.properties().contains(favoriteTag.toStdString().c_str());
 		results.append(favResult);
 	}
-	// 批量写入数据库
 	dataSource.updateFavoriteBatch(results);
 }
 
-/**
- * @brief 设置规则命中状态
- * @param path 路径类型
- * @param rules 歌词忽略规则列表
- * @param filesToFilter 需要扫描的文件名列表（增量）
- * @param progressOffset 全局进度偏移量
- */
 void MSTScanController::setRuleHit(const PathType path, const QList<LyricIgnoreRule>& rules,
                                    const QStringList& filesToFilter, const qsizetype progressOffset) {
 	MSTDataSource& dataSource = getDataSource(path);
@@ -258,19 +218,14 @@ void MSTScanController::setRuleHit(const PathType path, const QList<LyricIgnoreR
 		});
 		results.append(ruleResult);
 	}
-	// 批量写入数据库
 	dataSource.updateRuleHitBatch(results);
 }
 
-/**
- * @brief 获取标签扫描器指针
- */
 MSTTagScanner* MSTScanController::getTagScanner() {
 	return &tagScanner;
 }
 
 /**
- * @brief 仅加载页面数据（不执行目录扫描）
  * @details 从数据库读取指定页码的音乐数据并填充表格，
  *          用于已完成扫描后的翻页操作，避免重复扫描目录
  */
@@ -285,7 +240,6 @@ void MSTScanController::loadPage(const PathType path, const unsigned short page,
 }
 
 /**
- * @brief 重置扫描标记
  * @details 清除指定路径的已扫描标记，使下次startScan调用触发完整扫描
  */
 void MSTScanController::resetScan(const PathType path) {

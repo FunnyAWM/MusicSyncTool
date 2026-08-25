@@ -1,13 +1,3 @@
-/**
- * @file MSTMediaController.h
- * @brief 媒体播放控制器类定义
- * @details 封装媒体播放器的UI控制逻辑，包括播放/暂停、进度滑块、
- *          音量控制和曲目选择，将播放控制职责从主窗口中分离出来
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MEDIAMEDIACONTROLLER_H
 #define MEDIAMEDIACONTROLLER_H
 
@@ -56,18 +46,18 @@ public:
 		QObject* parent = nullptr);
 
 private:
-	MSTMediaPlayer* player;            ///< 媒体播放器指针
-	QPushButton* playControl;          ///< 播放/暂停按钮
-	QSlider* playSlider;               ///< 播放进度滑块
-	QLabel* playProgress;              ///< 播放进度标签
-	QSlider* volumeSlider;             ///< 音量滑块
-	QLabel* volumeLabel;               ///< 音量标签
-	QLabel* nowPlayingLabel;           ///< 正在播放标签
-	QTableWidget* tableLocal;          ///< 本地音乐表格
-	QTableWidget* tableRemote;         ///< 远程音乐表格
-	MSTDataSource& localDataSource;    ///< 本地数据源引用
-	MSTDataSource& remoteDataSource;   ///< 远程数据源引用
-	QString nowPlaying;                ///< 当前播放的文件名
+	MSTMediaPlayer* player;
+	QPushButton* playControl;
+	QSlider* playSlider;
+	QLabel* playProgress;
+	QSlider* volumeSlider;
+	QLabel* volumeLabel;
+	QLabel* nowPlayingLabel;
+	QTableWidget* tableLocal;
+	QTableWidget* tableRemote;
+	MSTDataSource& localDataSource;
+	MSTDataSource& remoteDataSource;
+	QString nowPlaying;
 
 	[[nodiscard]] static QString formatTime(qint64 ms);
 

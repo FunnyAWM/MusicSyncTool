@@ -1,13 +1,3 @@
-/**
- * @file MSTMediaController.cpp
- * @brief 媒体播放控制器类的实现
- * @details 实现媒体播放器的UI控制逻辑，包括播放/暂停、进度控制、
- *          音量控制和曲目选择播放
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTMediaController.h"
 
 #include <QLabel>
@@ -20,9 +10,6 @@
 #include "../../Services/MSTDataSource.h"
 #include "../../Services/MSTMediaPlayer.h"
 
-/**
- * @brief 构造函数
- */
 MSTMediaController::MSTMediaController(
 	MSTMediaPlayer* player,
 	QPushButton* playControl,
@@ -50,9 +37,6 @@ MSTMediaController::MSTMediaController(
 	  remoteDataSource(remoteDataSource) {
 }
 
-/**
- * @brief 格式化毫秒时间为 mm:ss 字符串
- */
 QString MSTMediaController::formatTime(const qint64 ms) {
 	const qint64 minutes = ms / 60000;
 	const qint64 seconds = ms % 60000 / 1000;
@@ -62,16 +46,10 @@ QString MSTMediaController::formatTime(const qint64 ms) {
 	return QString::number(minutes) + ":" + QString::number(seconds);
 }
 
-/**
- * @brief 初始化媒体播放器
- */
 void MSTMediaController::initMediaPlayer() const {
 	player->setVolume(0.5);
 }
 
-/**
- * @brief 连接媒体播放器信号
- */
 void MSTMediaController::connectSignals() {
 	connect(player->getMediaPlayer(), &QMediaPlayer::positionChanged,
 	        this, &MSTMediaController::updateSliderPosition);
@@ -79,9 +57,6 @@ void MSTMediaController::connectSignals() {
 	        this, &MSTMediaController::handleMediaEnd);
 }
 
-/**
- * @brief 播放或暂停切换
- */
 void MSTMediaController::togglePlayPause() {
 	if (player->getNowPlaying().isEmpty()) {
 		emit errorOccurred(AppErrorType::NO_AUDIO);
@@ -97,9 +72,6 @@ void MSTMediaController::togglePlayPause() {
 	}
 }
 
-/**
- * @brief 播放选定的曲目
- */
 void MSTMediaController::playSelectedTrack(const PathType path, const int row) {
 	const QTableWidget& tableWidget = path == PathType::LOCAL ? *tableLocal : *tableRemote;
 	MSTDataSource& dataSource = path == PathType::LOCAL ? localDataSource : remoteDataSource;
@@ -146,9 +118,6 @@ void MSTMediaController::playSelectedTrack(const PathType path, const int row) {
 	}
 }
 
-/**
- * @brief 根据播放状态更新UI控件
- */
 void MSTMediaController::setMediaWidget(const PlayState state) const {
 	if (state == PlayState::PLAYING) {
 		playControl->setText(tr("暂停"));
@@ -164,55 +133,34 @@ void MSTMediaController::setMediaWidget(const PlayState state) const {
 	volumeLabel->setText(tr("音量：") + QString::number(volumeSlider->value()) + "%");
 }
 
-/**
- * @brief 设置正在播放的标题显示
- */
 void MSTMediaController::setNowPlayingTitle(const QString& file) const {
 	nowPlayingLabel->setText(tr("正在播放：") + file);
 }
 
-/**
- * @brief 拖动播放进度滑块
- */
 void MSTMediaController::seekToPosition(const int position) const {
 	player->setPosition(position);
 	playProgress->setText(formatTime(position));
 }
 
-/**
- * @brief 更新播放进度显示
- */
 void MSTMediaController::updateSliderPosition(const qint64 position) const {
 	playSlider->setValue(static_cast<int>(position));
 	playProgress->setText(formatTime(position) + "/" + formatTime(player->getDuration()));
 }
 
-/**
- * @brief 按下播放进度滑块
- */
 void MSTMediaController::onPlaySliderPressed() const {
 	player->setPosition(playSlider->value());
 }
 
-/**
- * @brief 按下音量滑块
- */
 void MSTMediaController::onVolumeSliderPressed() const {
 	player->setVolume(static_cast<float>(volumeSlider->value() / 100.0));
 	volumeLabel->setText(tr("音量：") + QString::number(volumeSlider->value()) + "%");
 }
 
-/**
- * @brief 设置音量（从滑块值）
- */
 void MSTMediaController::setVolumeFromSlider(const int position) const {
 	player->setVolume(static_cast<float>(position / 100.0));
 	volumeLabel->setText(tr("音量：") + QString::number(position) + "%");
 }
 
-/**
- * @brief 处理播放结束状态
- */
 void MSTMediaController::handleMediaEnd(const QMediaPlayer::PlaybackState state) const {
 	if (state == QMediaPlayer::PlaybackState::StoppedState) {
 		playControl->setText(tr("播放"));

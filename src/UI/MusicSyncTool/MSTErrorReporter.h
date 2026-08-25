@@ -1,13 +1,3 @@
-/**
- * @file MSTErrorReporter.h
- * @brief 错误报告与操作结果展示类定义
- * @details 封装错误对话框弹出、错误列表管理和操作结果展示逻辑，
- *          将错误处理职责从主窗口中分离出来
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #ifndef MSTERRORREPORTER_H
 #define MSTERRORREPORTER_H
 
@@ -56,9 +46,9 @@ signals:
 	void requestRefreshMusic(PathType path, unsigned short page);
 
 private:
-	QWidget* parentWidget;             ///< 父窗口部件
-	MSTTableManager* tableManager;     ///< 表格管理器指针
-	QStringList errorList;             ///< 错误信息列表
+	QWidget* parentWidget;
+	MSTTableManager* tableManager;
+	QStringList errorList;
 };
 
 #endif // MSTERRORREPORTER_H

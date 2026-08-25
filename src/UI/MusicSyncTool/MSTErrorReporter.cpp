@@ -1,12 +1,3 @@
-/**
- * @file MSTErrorReporter.cpp
- * @brief 错误报告与操作结果展示类的实现
- * @details 实现错误对话框弹出、错误列表管理和操作结果展示
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "MSTErrorReporter.h"
 
 #include <QMessageBox>
@@ -16,16 +7,10 @@
 #include "../../Core/SettingEntity.h"
 #include "../OperationResult/OperationResult.h"
 
-/**
- * @brief 构造函数
- */
 MSTErrorReporter::MSTErrorReporter(QWidget* parentWidget, MSTTableManager* tableManager, QObject* parent)
 	: QObject(parent), parentWidget(parentWidget), tableManager(tableManager) {
 }
 
-/**
- * @brief 根据错误类型弹出错误对话框
- */
 void MSTErrorReporter::popError(const AppErrorType type) const {
 	switch (type) {
 	case AppErrorType::NO_AUDIO:
@@ -64,9 +49,6 @@ void MSTErrorReporter::popError(const AppErrorType type) const {
 	}
 }
 
-/**
- * @brief 添加文件操作错误到错误列表
- */
 void MSTErrorReporter::addToErrorList(const QString& file, const FileErrorType error) {
 	switch (error) {
 	case FileErrorType::DUPLICATE:
@@ -81,9 +63,6 @@ void MSTErrorReporter::addToErrorList(const QString& file, const FileErrorType e
 	}
 }
 
-/**
- * @brief 添加加载错误到错误列表
- */
 void MSTErrorReporter::addToErrorList(const QString& file, const LoadErrorType error) {
 	switch (error) {
 	case LoadErrorType::FILE_NOT_SCANNABLE:
@@ -95,9 +74,6 @@ void MSTErrorReporter::addToErrorList(const QString& file, const LoadErrorType e
 	}
 }
 
-/**
- * @brief 显示操作结果对话框
- */
 void MSTErrorReporter::showOperationResult(const OperationType type) {
 	const auto resultDialog = new OperationResult();
 	switch (type) {

@@ -1,20 +1,11 @@
-/**
- * @file StringSimilarity.cpp
- * @brief 字符串相似度计算模块的实现
- * @details 实现KMP模式匹配、CJK字符处理、编辑距离计算等字符串相似度算法
- * @author FunnyAWM
- * @version 2.3.0
- * @date 2024
- */
-
 #include "StringSimilarity.h"
 #include <algorithm>
 #include <QVector>
 
 namespace StringSimilarity {
 
-	/// 默认相似度阈值
-	constexpr float similarityThreshold = 0.8f;
+	// 默认相似度阈值
+	constexpr float similarityThreshold = 0.85f;
 
 	/**
 	 * @brief 构建KMP算法的next数组（失效函数）
@@ -227,6 +218,11 @@ namespace StringSimilarity {
 	 * @return 是否匹配
 	 */
 	bool fuzzyMatch(const QString& str1, const QString& str2) {
+		// 空字符串不参与匹配，避免无元数据文件互相误报
+		if (str1.isEmpty() || str2.isEmpty()) {
+			return false;
+		}
+
 		// 先检查精确匹配
 		if (str1 == str2) {
 			return true;
