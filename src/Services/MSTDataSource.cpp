@@ -11,6 +11,11 @@
 #include "Logger.h"
 #include "../Core/MSTTagUtils.h"
 
+namespace {
+	/// @brief 当前数据库 schema 版本；结构变更时递增并补充对应迁移步骤
+	constexpr int schemaVersion = 1;
+}
+
 QSqlQuery& MSTDataSource::threadQuery() const {
 	QSqlQuery*& query = threadQueries.localData();
 	if (query == nullptr) {
@@ -31,36 +36,103 @@ void MSTDataSource::setPath(const QString& path_) { this->path = path_; }
 
 void MSTDataSource::setConnectionName(const QString& connectionName) { connection = connectionName; }
 
-bool MSTDataSource::openDB(const QString& path_) {
-	QMutexLocker locker(&dbMutex);
-	db = QSqlDatabase::addDatabase("QSQLITE", connection);
+bool MSTDataSource::openDatabaseFile(const QString& dir) {
+	// 连接名固定：重复 addDatabase 会丢弃既有连接，使已创建的查询对象失效，
+	// 因此复用同一连接，仅切换数据库文件
+	if (!QSqlDatabase::contains(connection)) {
+		db = QSqlDatabase::addDatabase("QSQLITE", connection);
+	}
+	else {
+		db = QSqlDatabase::database(connection, false);
+		db.close();
+	}
 
-	db.setDatabaseName(QDir(path_).filePath("musicInfo.db"));
+	db.setDatabaseName(QDir(dir).filePath("musicInfo.db"));
 
 	if (!db.open()) {
 		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
 	return true;
+}
+
+bool MSTDataSource::openDB(const QString& path_) {
+	QMutexLocker locker(&dbMutex);
+	return openDatabaseFile(path_);
 }
 
 bool MSTDataSource::openDB() {
 	QMutexLocker locker(&dbMutex);
-	db = QSqlDatabase::addDatabase("QSQLITE", connection);
-
-	db.setDatabaseName(QDir(path).filePath("musicInfo.db"));
-
-	if (!db.open()) {
-		Logger::Warn("Error opening database:" + db.lastError().text());
-		return false;
-	}
-	return true;
+	return openDatabaseFile(path);
 }
 
 void MSTDataSource::initTable() {
 	QMutexLocker locker(&dbMutex);
-	threadQuery().exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
-		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)");
+	QSqlQuery& query = threadQuery();
+	if (!query.exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
+		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)")) {
+		Logger::Error("Error creating music table:" + query.lastError().text());
+		return;
+	}
+
+	const int version = userVersion();
+	if (version >= schemaVersion) {
+		return;
+	}
+	// v0 -> v1：历史库可能缺少后续版本新增的列，逐列补齐（幂等）
+	ensureColumn("musicInfo", "title", "TEXT");
+	ensureColumn("musicInfo", "artist", "TEXT");
+	ensureColumn("musicInfo", "album", "TEXT");
+	ensureColumn("musicInfo", "genre", "TEXT");
+	ensureColumn("musicInfo", "year", "INT");
+	ensureColumn("musicInfo", "track", "INT");
+	ensureColumn("musicInfo", "favorite", "BOOL");
+	ensureColumn("musicInfo", "ruleHit", "BOOL");
+	ensureColumn("musicInfo", "fileName", "TEXT");
+	setUserVersion(schemaVersion);
+	Logger::Info("Music database schema migrated to version " + QString::number(schemaVersion));
+}
+
+int MSTDataSource::userVersion() {
+	QSqlQuery& query = threadQuery();
+	if (!query.exec("PRAGMA user_version") || !query.next()) {
+		Logger::Warn("Failed to read schema version:" + query.lastError().text());
+		return 0;
+	}
+	return query.value(0).toInt();
+}
+
+void MSTDataSource::setUserVersion(const int version) {
+	QSqlQuery& query = threadQuery();
+	// PRAGMA 不支持绑定参数；版本号来自本文件常量，不存在注入面
+	if (!query.exec("PRAGMA user_version = " + QString::number(version))) {
+		Logger::Warn("Failed to write schema version:" + query.lastError().text());
+	}
+}
+
+bool MSTDataSource::ensureColumn(const QString& tableName, const QString& columnName, const QString& definition) {
+	QSqlQuery& query = threadQuery();
+	query.prepare("PRAGMA table_info(" + tableName + ")");
+	if (!query.exec()) {
+		Logger::Error("Failed to read table info:" + query.lastError().text());
+		return false;
+	}
+	bool columnExists = false;
+	while (query.next()) {
+		if (query.value(1).toString().compare(columnName, Qt::CaseInsensitive) == 0) {
+			columnExists = true;
+			break;
+		}
+	}
+	if (columnExists) {
+		return true;
+	}
+	if (!query.exec("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + definition)) {
+		Logger::Error("Failed to add column " + columnName + ":" + query.lastError().text());
+		return false;
+	}
+	Logger::Info("Schema migration: added column " + columnName);
+	return true;
 }
 
 void MSTDataSource::closeDB() {

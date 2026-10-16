@@ -150,7 +150,8 @@ QStringList QueryItem::findDuplicatesInSorted(const QList<QueryItem>& items) {
 	// 从索引 1 开始，避免首项与自身比较
 	qsizetype i = 1;
 	while (i < items.size()) {
-		if (items[i - 1] != items[i]) {
+		// QueryItem 只定义了 operator==，这里用取反表达不等
+		if (!(items[i - 1] == items[i])) {
 			++i;
 			continue;
 		}

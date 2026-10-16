@@ -41,6 +41,18 @@ class MSTDataSource final : public QObject {
 	/// @brief 转义 LIKE 模式中的通配符，避免用户输入的 % 与 _ 被当作通配符
 	[[nodiscard]] static QString escapeLikePattern(const QString& text);
 
+	/// @brief 打开（或复用）指定目录下的 musicInfo.db，调用方必须已持有 dbMutex
+	[[nodiscard]] bool openDatabaseFile(const QString& dir);
+
+	/// @brief 读取 SQLite user_version，作为 schema 版本号
+	[[nodiscard]] int userVersion();
+
+	/// @brief 写入 SQLite user_version
+	void setUserVersion(int version);
+
+	/// @brief 旧库缺少列时补列，幂等；调用方必须已持有 dbMutex
+	[[nodiscard]] bool ensureColumn(const QString& tableName, const QString& columnName, const QString& definition);
+
 public:
 	[[nodiscard]] int getPageSize() const;
 

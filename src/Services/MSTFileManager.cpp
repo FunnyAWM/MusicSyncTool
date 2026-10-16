@@ -121,7 +121,9 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
     };
     
     bool diskFull = false;
-    for (const QString& file : fileList) {
+    // 用下标遍历：进度回调需要序号，indexOf 在大批量列表上是 O(n²) 且遇到重名会取错位置
+    for (qsizetype index = 0; index < fileList.size(); ++index) {
+        const QString& file = fileList.at(index);
         // 文件名以 ":<规则命中标记>" 结尾（见 MSTMainWindow::on_copyTo*_clicked），
         // 用最后一个冒号切分；缺少该后缀时按整体文件名处理，避免 at() 越界抛异常
         const qsizetype separator = file.lastIndexOf(':');
@@ -183,7 +185,7 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
             continue;
         }
 
-        reportProgress(fileList.indexOf(file));
+        reportProgress(index);
     }
 
     // 收尾补一次进度，避免节流导致进度条停在中间

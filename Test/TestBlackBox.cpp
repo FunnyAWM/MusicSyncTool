@@ -8,8 +8,11 @@ void TestBlackBox::init() {
     ds->setConnectionName(QString("bb_%1").arg(conn));
     ds->setPath(dbPath); QVERIFY(ds->openDB()); ds->initTable();
     QDir::setCurrent(tmp->path());
+    // 运行时文件锚定到临时目录，避免写入程序目录
+    MSTSettingsManager::setBaseDir(tmp->path());
 }
 void TestBlackBox::cleanup() {
+    MSTSettingsManager::setBaseDir(QString());
     QDir::setCurrent(origCwd);
     if (ds) { ds->closeDB(); delete ds; ds = nullptr; }
     QString cn = QString("bb_%1").arg(conn);

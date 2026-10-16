@@ -7,8 +7,11 @@ void TestMSTSettingsManager::init() {
     origCwd = QDir::currentPath();
     tmp = new QTemporaryDir(); QVERIFY(tmp->isValid());
     QDir::setCurrent(tmp->path());
+    // 运行时文件锚定到临时目录，避免写入程序目录
+    MSTSettingsManager::setBaseDir(tmp->path());
 }
 void TestMSTSettingsManager::cleanup() {
+    MSTSettingsManager::setBaseDir(QString());
     QDir::setCurrent(origCwd);
     delete tmp; tmp = nullptr;
 }

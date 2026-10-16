@@ -1,5 +1,6 @@
 #include "MSTSettingsManager.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -9,8 +10,32 @@
 #include "Logger.h"
 #include "../Data/LyricIgnoreRule.h"
 
+namespace {
+	/// @brief 测试注入的基准目录；为空时使用 applicationDirPath()
+	QString configuredBaseDir;
+}
+
+QString MSTSettingsManager::baseDir() {
+	if (configuredBaseDir.isEmpty()) {
+		return QCoreApplication::applicationDirPath();
+	}
+	return configuredBaseDir;
+}
+
+void MSTSettingsManager::setBaseDir(const QString& dir) {
+	configuredBaseDir = dir;
+}
+
+QString MSTSettingsManager::settingsFilePath() {
+	return QDir(baseDir()).filePath("settings.json");
+}
+
+QString MSTSettingsManager::logDirPath() {
+	return QDir(baseDir()).filePath("log");
+}
+
 void MSTSettingsManager::createDefaultSettings() {
-	QFile file("settings.json");
+	QFile file(settingsFilePath());
 	if (!file.open(QIODevice::WriteOnly)) {
 		Logger::Error("Failed to create default settings file");
 		return;
@@ -28,7 +53,7 @@ void MSTSettingsManager::createDefaultSettings() {
 }
 
 bool MSTSettingsManager::loadSettings(SettingsData& entity) {
-	QFile file("settings.json");
+	QFile file(settingsFilePath());
 	if (!file.open(QIODevice::ReadOnly)) {
 		Logger::Warn("No settings file found, creating default setting file named settings.json");
 		file.close();
@@ -67,9 +92,10 @@ bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 }
 
 bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
-	QFile file("settings.json");
+	QFile file(settingsFilePath());
 	if (!file.open(QIODevice::WriteOnly)) {
-		Logger::Fatal("Error opening settings file");
+		// 设置写入失败属于可恢复错误，不应终止进程
+		Logger::Error("Error opening settings file");
 		return false;
 	}
 	QJsonObject obj;
@@ -98,7 +124,7 @@ bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
 QDateTime MSTSettingsManager::getDateFromLog(const QString& logFilePath) {
 	QFile file(logFilePath);
 	QDateTime dateTime;
-	const QString logDir = QCoreApplication::applicationDirPath() + "/log";
+	const QString logDir = logDirPath();
 	const QDir dir(logDir);
 	if (!dir.exists()) {
 		// ReSharper disable once CppExpressionWithoutSideEffects
@@ -135,30 +161,28 @@ void MSTSettingsManager::writeLog(const QString& logFilePath, const QDateTime& d
  *          格式为 "lastScan - <路径片段>.log"
  */
 QString MSTSettingsManager::buildLogFileName(const QString& path) {
-	QStringList pathForLog = path.split("/");
-	QString logFilePath = "lastScan";
-	if (!pathForLog[0].isEmpty()) {
+	// 先归一化分隔符，避免 Windows 的原生反斜杠被当作单个路径片段
+	QStringList pathForLog = QDir::fromNativeSeparators(path).split("/", Qt::SkipEmptyParts);
+	QString logFileName = "lastScan";
+	if (!pathForLog.isEmpty()) {
 		pathForLog[0].remove(":");
 	}
-	else {
-		pathForLog.removeFirst();
-	}
 	for (const QString& pathSegment : pathForLog) {
-		logFilePath += " - " + pathSegment;
+		logFileName += " - " + pathSegment;
 	}
-	logFilePath += ".log";
-	logFilePath = QCoreApplication::applicationDirPath() + "/log/" + logFilePath;
-	return logFilePath;
+	logFileName += ".log";
+	return QDir(logDirPath()).filePath(logFileName);
 }
 
 void MSTSettingsManager::cleanLog() {
-	const QDir logDir("log");
-	if (!logDir.exists()) {
+	const QString logDir = logDirPath();
+	const QDir dir(logDir);
+	if (!dir.exists()) {
 		return;
 	}
-	QStringList logFiles = logDir.entryList(QDir::Files);
-	for (QString& logFile : logFiles) {
-		QFile file("log/" + logFile);
+	const QStringList logFiles = dir.entryList(QDir::Files);
+	for (const QString& logFile : logFiles) {
+		QFile file(dir.filePath(logFile));
 		file.remove();
 	}
 }
