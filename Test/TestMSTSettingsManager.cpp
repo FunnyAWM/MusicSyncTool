@@ -119,19 +119,21 @@ void TestMSTSettingsManager::saveAndLoadThemeAndLog() {
 }
 
 void TestMSTSettingsManager::legacyFileKeepsDefaults() {
-    // 旧版本设置文件没有主题与日志键：加载后必须保留结构体默认值，而不是被置成 0
+    // 旧版本设置文件只有部分键：缺键必须保留结构体默认值，而不是被置成 0 等非法编码
     {
         QFile f("settings.json");
         QVERIFY(f.open(QIODevice::WriteOnly));
-        f.write("{\"ignoreLyric\":true,\"sortBy\":2,\"orderBy\":17,\"language\":\"en_US\"}");
+        f.write("{\"ignoreLyric\":true,\"language\":\"en_US\"}");
         f.close();
     }
     SettingsData loaded{};
     QVERIFY(MSTSettingsManager::loadSettings(loaded));
     QCOMPARE(loaded.ignoreLyric, true);
-    QCOMPARE(loaded.sortBy, static_cast<short>(2));
     QCOMPARE(loaded.language, QString("en_US"));
-    QCOMPARE(loaded.themeMode, PROPERTIES::toShort(PROPERTIES::ThemeMode::LIGHT));
-    QCOMPARE(loaded.accentColor, PROPERTIES::toShort(PROPERTIES::AccentColor::GREEN));
+    const SettingsData defaults;
+    QCOMPARE(loaded.sortBy, defaults.sortBy);
+    QCOMPARE(loaded.orderBy, defaults.orderBy);
+    QCOMPARE(loaded.themeMode, defaults.themeMode);
+    QCOMPARE(loaded.accentColor, defaults.accentColor);
     QCOMPARE(loaded.logToFile, false);
 }

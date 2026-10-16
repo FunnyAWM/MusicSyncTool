@@ -74,12 +74,12 @@ bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	}
 	QJsonObject obj = settings.object();
 	entity.ignoreLyric = obj["ignoreLyric"].toBool();
-	entity.sortBy = static_cast<short>(obj["sortBy"].toInt());
-	entity.orderBy = static_cast<short>(obj["orderBy"].toInt());
 	entity.language = obj["language"].toString();
 	entity.favoriteTag = obj["favoriteTag"].toString();
 	entity.recursiveScan = obj["recursiveScan"].toBool();
-	// 旧版本设置文件缺少这些键时保留结构体默认值，避免出现非法编码
+	// 旧版本设置文件可能缺少键：缺键时保留结构体默认值，避免编码被置成 0 等非法值
+	entity.sortBy = obj.contains("sortBy") ? static_cast<short>(obj["sortBy"].toInt()) : entity.sortBy;
+	entity.orderBy = obj.contains("orderBy") ? static_cast<short>(obj["orderBy"].toInt()) : entity.orderBy;
 	entity.themeMode = obj.contains("themeMode") ? static_cast<short>(obj["themeMode"].toInt()) : entity.themeMode;
 	entity.accentColor = obj.contains("accentColor") ? static_cast<short>(obj["accentColor"].toInt()) : entity.accentColor;
 	entity.logToFile = obj["logToFile"].toBool();

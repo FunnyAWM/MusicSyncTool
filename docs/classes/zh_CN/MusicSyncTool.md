@@ -123,7 +123,7 @@ src/
 线程与锁：
 
 - 所有数据库访问都在 `dbMutex` 保护下进行；事务边界（批量写入）必须整体持锁，否则其他线程的语句会混入事务；
-- `QSqlQuery` 通过 `QThreadStorage` 做到每线程一个实例，禁止跨线程共享查询对象；
+- `QSqlQuery` 按线程 id 索引做到每线程一个实例，禁止跨线程共享查询对象；**不使用 `QThreadStorage`**：主线程的线程局部数据在 `QThreadStorage` 对象销毁时不会被清理，槽位 id 会被后续实例复用，新实例会取到上一个实例遗留的、绑定在已关闭连接上的查询对象；这些查询对象随 `closeDB()` 与析构显式释放；
 - 批量写入 `addMusicBatch` 失败时回滚并返回 `false`，同时通过输出参数回传失败文件；
 - 设置分页大小 `pageSize`（默认 200）、`updateFavoriteBatch` / `updateRuleHitBatch` 做收藏与规则命中状态的批量落库。
 
@@ -171,7 +171,7 @@ schema 与迁移：
 - `baseDir()` 默认取 `QCoreApplication::applicationDirPath()`，不依赖进程工作目录；测试可用 `setBaseDir()` 重定向到临时目录，传空串恢复默认；
 - `settingsFilePath()` = `baseDir()/settings.json`；`logDirPath()` = `baseDir()/log`；
 - `createDefaultSettings()` 从 `SettingsData` 的成员默认值生成默认文件，保证结构体与文件口径一致；
-- `loadSettings(entity)` 读取时对新增键做“缺键保留默认值”处理（`themeMode`、`accentColor`、`logToFile`），旧版本设置文件因此无需手工升级；加载失败会生成默认文件并返回 `false`；
+- `loadSettings(entity)` 读取时对缺键做“保留结构体默认值”处理（`sortBy`、`orderBy`、`themeMode`、`accentColor`），旧版本设置文件因此无需手工升级，也不会被写成 0 等非法编码；加载失败会生成默认文件并返回 `false`；
 - `saveSettings(entity)` 写入全部键与 `rules` 数组；写入失败只记录错误并返回 `false`，不终止进程；
 - 日志相关：`getDateFromLog` / `writeLog` / `buildLogFileName` / `cleanLog`。
 

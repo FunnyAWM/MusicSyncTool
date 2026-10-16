@@ -37,6 +37,9 @@ void MSTDataSource::releaseThreadQueries() {
 }
 
 MSTDataSource::~MSTDataSource() {
+	// 与所有数据库访问互斥后再释放各线程的查询对象，避免删除其它线程正在使用的对象。
+	// 调用方仍需保证扫描/复制任务已经结束（主窗口在析构前等待 QFutureWatcher）
+	QMutexLocker locker(&dbMutex);
 	releaseThreadQueries();
 }
 

@@ -123,7 +123,7 @@ Each music directory owns one SQLite connection (`<dir>/musicInfo.db`); the clas
 Threading and locking:
 
 - All database access happens under `dbMutex`; transaction boundaries (batch writes) must be held by a single lock scope, otherwise statements from other threads leak into the transaction;
-- `QSqlQuery` instances are per-thread through `QThreadStorage`; sharing a query object across threads is forbidden;
+- `QSqlQuery` instances are indexed per thread id so that each thread owns one, and sharing a query object across threads is forbidden; **`QThreadStorage` is deliberately not used**: main-thread thread-local data is not cleaned up when the `QThreadStorage` object is destroyed, its slot id is reused by later instances, and a new instance would pick up the query object left behind by a previous instance (bound to an already closed connection). These query objects are released explicitly by `closeDB()` and by the destructor;
 - `addMusicBatch` rolls back and returns `false` on failure, reporting the failed file names through an output parameter;
 - Exposes the page size (`pageSize`, default 200) and batch updates `updateFavoriteBatch` / `updateRuleHitBatch` for favourite and rule-hit state.
 
@@ -171,7 +171,7 @@ Single owner of the runtime files (`settings.json`, `log/`).
 - `baseDir()` defaults to `QCoreApplication::applicationDirPath()` and never depends on the process working directory; tests can redirect it with `setBaseDir()` (empty string restores the default);
 - `settingsFilePath()` = `baseDir()/settings.json`; `logDirPath()` = `baseDir()/log`;
 - `createDefaultSettings()` generates the default file from the `SettingsData` member defaults, keeping the struct and the file in sync;
-- `loadSettings(entity)` keeps struct defaults for keys missing from older files (`themeMode`, `accentColor`, `logToFile`), so old settings files need no manual upgrade; on failure it creates the default file and returns `false`;
+- `loadSettings(entity)` keeps the struct defaults for keys missing from older files (`sortBy`, `orderBy`, `themeMode`, `accentColor`), so old settings files need no manual upgrade and never end up with invalid codes such as 0; on failure it creates the default file and returns `false`;
 - `saveSettings(entity)` writes all keys plus the `rules` array; a failed write only logs an error and returns `false`, it never terminates the process;
 - Log helpers: `getDateFromLog` / `writeLog` / `buildLogFileName` / `cleanLog`.
 

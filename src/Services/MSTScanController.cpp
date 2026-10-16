@@ -224,6 +224,11 @@ void MSTScanController::setFavorite(const PathType path,
 		emit scanCurrent(static_cast<int>(progressOffset + i));
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(
 			QDir(dataSource.getPath()).filePath(filesToScan.at(i)));
+		// 与 addMusicBatch 一致：标签无法读取的文件单独报错，不让它在 FileRef 上做无意义访问
+		if (fileRef.isNull() || fileRef.tag() == nullptr) {
+			emit loadErrorOccurred(filesToScan.at(i), PROPERTIES::LoadErrorType::TAG_READ_ERROR);
+			continue;
+		}
 		FavoriteUpdate favResult;
 		favResult.fileName = filesToScan.at(i);
 		favResult.isFavorite = fileRef.properties().contains(favoriteTag.toStdString().c_str());
