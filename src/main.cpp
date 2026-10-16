@@ -1,35 +1,18 @@
 #include "Core/SingleInstance.h"
+#include "Services/Logger.h"
+#include "Services/MSTSettingsManager.h"
 #include "UI/MusicSyncTool/MSTMainWindow.h"
-
-#include <QFile>
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
 
-	// Load stylesheets in order: base → mode → accent theme
-
-	QFile baseStyle(":/MusicSyncTool/base-style.qss");
-	QString styleSheet;
-	if (baseStyle.open(QFile::ReadOnly | QFile::Text)) {
-		styleSheet = baseStyle.readAll();
-		baseStyle.close();
+	// 先加载设置：主题需要在创建窗口前应用，日志开关需要在产生日志前生效
+	SettingsData entity;
+	if (!MSTSettingsManager::loadSettings(entity)) {
+		Logger::Warn("Settings file missing or invalid, default settings created");
 	}
-
-	// Mode: style-light.qss or style-dark-mode.qss
-	QFile modeStyle(":/MusicSyncTool/style-light.qss");
-	if (modeStyle.open(QFile::ReadOnly | QFile::Text)) {
-		styleSheet += "\n" + modeStyle.readAll();
-		modeStyle.close();
-	}
-
-	// Accent theme: style.qss (blue), style-green.qss, style-purple.qss, style-dark.qss
-	QFile themeStyle(":/MusicSyncTool/style-green.qss");
-	if (themeStyle.open(QFile::ReadOnly | QFile::Text)) {
-		styleSheet += "\n" + themeStyle.readAll();
-		themeStyle.close();
-	}
-
-	a.setStyleSheet(styleSheet);
+	Logger::setLogToFile(entity.logToFile);
+	MSTMainWindow::applyTheme(entity);
 
 	MSTMainWindow w;
 #if defined(_WIN64) or defined(_WIN32)

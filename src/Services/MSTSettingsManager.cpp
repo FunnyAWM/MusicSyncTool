@@ -40,14 +40,19 @@ void MSTSettingsManager::createDefaultSettings() {
 		Logger::Error("Failed to create default settings file");
 		return;
 	}
+	// 默认值集中取自 SettingsData 的成员默认值，保证结构体与文件口径一致
+	const SettingsData defaults;
 	QJsonObject obj;
-	obj["ignoreLyric"] = false;
-	obj["sortBy"] = PROPERTIES::toShort(PROPERTIES::SortByEnum::TITLE);
-	obj["orderBy"] = PROPERTIES::toShort(PROPERTIES::OrderByEnum::ASC);
-	obj["language"] = "";
-	obj["favoriteTag"] = "";
+	obj["ignoreLyric"] = defaults.ignoreLyric;
+	obj["sortBy"] = defaults.sortBy;
+	obj["orderBy"] = defaults.orderBy;
+	obj["language"] = defaults.language;
+	obj["favoriteTag"] = defaults.favoriteTag;
 	obj["rules"] = QJsonArray();
-	obj["recursiveScan"] = false;
+	obj["recursiveScan"] = defaults.recursiveScan;
+	obj["themeMode"] = defaults.themeMode;
+	obj["accentColor"] = defaults.accentColor;
+	obj["logToFile"] = defaults.logToFile;
 	file.write(QJsonDocument(obj).toJson());
 	file.close();
 }
@@ -74,6 +79,10 @@ bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	entity.language = obj["language"].toString();
 	entity.favoriteTag = obj["favoriteTag"].toString();
 	entity.recursiveScan = obj["recursiveScan"].toBool();
+	// 旧版本设置文件缺少这些键时保留结构体默认值，避免出现非法编码
+	entity.themeMode = obj.contains("themeMode") ? static_cast<short>(obj["themeMode"].toInt()) : entity.themeMode;
+	entity.accentColor = obj.contains("accentColor") ? static_cast<short>(obj["accentColor"].toInt()) : entity.accentColor;
+	entity.logToFile = obj["logToFile"].toBool();
 	QList<LyricIgnoreRule> rules;
 	QJsonArray rulesArray = obj["rules"].toArray();
 	for (QJsonValue rule : rulesArray) {
@@ -105,6 +114,9 @@ bool MSTSettingsManager::saveSettings(const SettingsData& entity) {
 	obj["language"] = entity.language;
 	obj["favoriteTag"] = entity.favoriteTag;
 	obj["recursiveScan"] = entity.recursiveScan;
+	obj["themeMode"] = entity.themeMode;
+	obj["accentColor"] = entity.accentColor;
+	obj["logToFile"] = entity.logToFile;
 	QJsonArray rulesArray;
 	for (const auto& rule : entity.rules) {
 		QJsonObject ruleObj;

@@ -125,7 +125,13 @@ public:
 	void getMusic(PathType path, unsigned short page) const;
 	void popError(AppErrorType type) const;
 	QStringList getDuplicatedMusic(PathType);
-	void showSettings() const;
+	void showSettings();
+
+	/**
+	 * @brief 按设置拼接 base → mode → accent 三段样式表并应用到整个应用
+	 * @details 启动时在创建主窗口之前调用，切换主题时即时重载
+	 */
+	static void applyTheme(const SettingsData& entity);
 	void copyMusic(const QString&, const QStringList&, const QString&);
 	/// @brief 启动复制任务并防止并发复制
 	void startCopy(const QString& source, const QStringList& fileList, const QString& target);

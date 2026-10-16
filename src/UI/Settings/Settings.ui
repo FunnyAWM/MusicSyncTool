@@ -24,6 +24,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="logToFileBox">
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;打开此选项后，日志将追加写入程序目录下的 log/lastRun.log，便于排查问题。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>记录日志到文件</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">

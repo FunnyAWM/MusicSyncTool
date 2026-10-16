@@ -13,6 +13,14 @@ Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent
 	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
 	this->setWindowModality(Qt::ApplicationModal);
 
+	// 主题下拉：itemData 直接存 PROPERTIES 编码，避免依赖下拉项顺序
+	ui.themeLD->addItem(tr("明亮"), static_cast<int>(PROPERTIES::toShort(ThemeMode::LIGHT)));
+	ui.themeLD->addItem(tr("暗色"), static_cast<int>(PROPERTIES::toShort(ThemeMode::DARK)));
+	ui.themeColor->addItem(tr("蓝色"), static_cast<int>(PROPERTIES::toShort(AccentColor::BLUE)));
+	ui.themeColor->addItem(tr("绿色"), static_cast<int>(PROPERTIES::toShort(AccentColor::GREEN)));
+	ui.themeColor->addItem(tr("紫色"), static_cast<int>(PROPERTIES::toShort(AccentColor::PURPLE)));
+	ui.themeColor->addItem(tr("深色"), static_cast<int>(PROPERTIES::toShort(AccentColor::DARK)));
+
 	// 从实体加载设置到UI控件
 	setIgnoreLyricToUI(entity.ignoreLyric);
 	setSortByToUI(entity.sortBy);
@@ -20,6 +28,8 @@ Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent
 	setLanguageToUI(entity.language);
 	setFavoriteTagToUI(entity.favoriteTag);
 	setRecursiveScanToUI(entity.recursiveScan);
+	setLogToFileToUI(entity.logToFile);
+	setThemeToUI(entity.themeMode, entity.accentColor);
 
 	// 加载忽略规则列表
 	QList<LyricIgnoreRule> rules = entity.rules;
@@ -49,12 +59,16 @@ SettingsData Settings::getSettings() {
 
 	target.language = ui.languageComboBox->currentText();
 	target.favoriteTag = ui.favoriteTagEdit->text();
+	// 递归扫描此前只写不读，导致配置永远为初始值
+	target.recursiveScan = ui.recursiveScan->isChecked();
+	target.logToFile = ui.logToFileBox->isChecked();
+	target.themeMode = static_cast<short>(ui.themeLD->currentData().toInt());
+	target.accentColor = static_cast<short>(ui.themeColor->currentData().toInt());
 
 	// 设置规则字符串并复制规则列表
 	for (auto& rule : entity.rules) {
 		rule.setRulesStr();
 	}
-	// ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
 	target.rules = this->entity.rules;
 	return target;
 }
@@ -138,6 +152,25 @@ void Settings::setOrderByToUI(short orderBy) {
 void Settings::setRecursiveScanToUI(const bool recursiveScan) {
 	entity.recursiveScan = recursiveScan;
 	ui.recursiveScan->setChecked(recursiveScan);
+}
+
+void Settings::setLogToFileToUI(const bool logToFile) {
+	entity.logToFile = logToFile;
+	ui.logToFileBox->setChecked(logToFile);
+}
+
+void Settings::setThemeToUI(const short themeMode, const short accentColor) {
+	entity.themeMode = themeMode;
+	entity.accentColor = accentColor;
+
+	const int modeIndex = ui.themeLD->findData(static_cast<int>(entity.themeMode));
+	if (modeIndex >= 0) {
+		ui.themeLD->setCurrentIndex(modeIndex);
+	}
+	const int accentIndex = ui.themeColor->findData(static_cast<int>(entity.accentColor));
+	if (accentIndex >= 0) {
+		ui.themeColor->setCurrentIndex(accentIndex);
+	}
 }
 
 void Settings::setIgnoreRulesToUI(QList<LyricIgnoreRule>& rules) {

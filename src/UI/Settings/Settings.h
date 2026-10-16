@@ -32,6 +32,11 @@ public:
 	
 	void setRecursiveScanToUI(bool recursiveScan);
 
+	void setLogToFileToUI(bool logToFile);
+
+	/// @brief 将明暗模式与强调色写入界面下拉框
+	void setThemeToUI(short themeMode, short accentColor);
+
 	void setIgnoreRulesToUI(QList<LyricIgnoreRule>& rules);
 
 public slots:

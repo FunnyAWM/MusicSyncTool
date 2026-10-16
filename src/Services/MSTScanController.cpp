@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <ctime>
+#include <utility>
+#include <QDirIterator>
 #include <QFile>
 #include <QFileDevice>
 #include <QMetaObject>
@@ -77,23 +79,32 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 	MSTDataSource& dataSource = getDataSource(path);
 
 	if (page == 1) {
-		bool newFileFound = false;
 		Logger::Info("Scanning started");
+		// 扫描一开始就显示加载页：即使没有新增文件，收藏与规则也要重新比对
+		emit scanStart();
 		const QString dirPath = getPath(path);
 		const QString logFilePath = MSTSettingsManager::buildLogFileName(dirPath);
 		QDateTime dateTime = MSTSettingsManager::getDateFromLog(logFilePath);
 		const QDir dir(dirPath);
 
 		dataSource.initTable();
-		QStringList newFileList = dir.entryList(QDir::Files);
-		for (const QString& file : newFileList) {
-			if (!MSTFileManager::isFormatSupported(file)) {
-				newFileList.removeOne(file);
+		QStringList dirFileList;
+		if (entity.recursiveScan) {
+			// 递归扫描：记录相对音乐根目录的路径，保留子目录结构
+			QDirIterator iterator(dirPath, QDir::Files, QDirIterator::Subdirectories);
+			while (iterator.hasNext()) {
+				dirFileList.append(dir.relativeFilePath(iterator.next()));
 			}
 		}
-		if (!newFileList.isEmpty()) {
-			emit scanStart();
-			newFileFound = true;
+		else {
+			dirFileList = dir.entryList(QDir::Files);
+		}
+		// 过滤非音频文件与数据库文件（原实现在遍历中删除元素，会漏掉相邻项）
+		QStringList newFileList;
+		for (const QString& file : std::as_const(dirFileList)) {
+			if (file != "musicInfo.db" && MSTFileManager::isFormatSupported(file)) {
+				newFileList.append(file);
+			}
 		}
 		QList<QueryItem> storedDbItems = dataSource.getAll({PROPERTIES::QueryRows::FILENAME});
 		QStringList oldFileList;
@@ -132,18 +143,28 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 
 		if (!dataSource.deleteMusic(deleteList)) {
 			emit errorOccurred(AppErrorType::DB_ERROR);
+			emit scanFinished();
 			return;
 		}
 
-		// 构建需要扫描标签/规则的文件列表（增量：新文件 + 修改过的旧文件）
+		// 第一段进度：逐文件比对修改时间（原实现此阶段没有任何进度反馈）
+		const int compareTotal = static_cast<int>(existingFiles.size());
+		emit scanTotal(compareTotal);
 		QStringList filesToScan = newFileList;
+		int compared = 0;
 		for (const auto& file : existingFiles) {
 			if (QFile(dir.filePath(file)).fileTime(QFileDevice::FileModificationTime) > dateTime) {
 				filesToScan.append(file);
 			}
+			++compared;
+			// 每 20 个文件上报一次，避免高频信号冲刷事件队列
+			if (compared % 20 == 0) {
+				emit scanCurrent(compared);
+			}
 		}
-		
-		// 全局总进度 = 添加文件 + 收藏扫描 + 规则扫描
+		emit scanCurrent(compareTotal);
+
+		// 第二段进度 = 添加文件 + 收藏扫描 + 规则扫描
 		const int globalTotal = static_cast<int>(newFileList.size() + filesToScan.size() + filesToScan.size());
 		emit scanTotal(globalTotal);
 		int globalProgress = 0;
@@ -152,6 +173,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		if (!dataSource.addMusicBatch(newFileList, failedFiles)) {
 			Logger::Error("Failed to write scanned music into database");
 			emit errorOccurred(AppErrorType::DB_ERROR);
+			emit scanFinished();
 			return;
 		}
 		for (const QString& file : failedFiles) {
@@ -173,9 +195,8 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		Logger::Info("Rule scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		dateTime = QDateTime::currentDateTime();
 		MSTSettingsManager::writeLog(logFilePath, dateTime);
-		if (newFileFound) {
-			emit scanFinished();
-		}
+		// 扫描结束必须关闭加载页，否则界面会停留在加载状态
+		emit scanFinished();
 		const clock_t end = clock();
 		Logger::Info(
 			"Scanning finished in " + QString::number(static_cast<double>(end - start) / CLOCKS_PER_SEC) + " seconds");

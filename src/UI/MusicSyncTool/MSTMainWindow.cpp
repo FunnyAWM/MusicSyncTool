@@ -143,6 +143,11 @@ void MSTMainWindow::connectSlots() {
 	connect(scanController, &MSTScanController::scanFinished, loading, &LoadingPage::stopPage);
 	connect(scanController, &MSTScanController::scanTotal, loading, &LoadingPage::setTotal);
 	connect(scanController, &MSTScanController::scanCurrent, loading, &LoadingPage::setProgress);
+	// 复制任务的进度与扫描共用加载页，此前这几个回调没有任何接收者
+	connect(this, &MSTMainWindow::started, loading, &LoadingPage::showPage);
+	connect(this, &MSTMainWindow::total, loading, &LoadingPage::setTotal);
+	connect(this, &MSTMainWindow::current, loading, &LoadingPage::setProgress);
+	connect(this, &MSTMainWindow::finished, loading, &LoadingPage::stopPage);
 	connect(errorReporter, &MSTErrorReporter::requestRefreshMusic, this, [this](PathType path, unsigned short page) {
 		if (tableManager->isFavoriteOnly(path)) {
 			tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy),
@@ -207,24 +212,70 @@ QStringList MSTMainWindow::getDuplicatedMusic(const PathType path) {
 	return dupeList;
 }
 
-void MSTMainWindow::showSettings() const {
-	const auto page = new Settings(entity);
-	connect(page, SIGNAL(confirmPressed(SettingsData)), this, SLOT(saveSettings(SettingsData)));
+void MSTMainWindow::showSettings() {
+	// 挂到主窗口下并设置关闭即销毁，避免标题栏关闭时窗口泄漏
+	const auto page = new Settings(entity, this);
+	page->setAttribute(Qt::WA_DeleteOnClose);
+	connect(page, &Settings::confirmPressed, this, &MSTMainWindow::saveSettings);
 	page->show();
+}
+
+/**
+ * @details base-style.qss 定义基础样式，mode 决定明暗，accent 决定强调色；
+ *          文件缺失时跳过该段，保证界面仍可用
+ */
+void MSTMainWindow::applyTheme(const SettingsData& entity) {
+	QString modeStylePath = ":/MusicSyncTool/style-light.qss";
+	if (toThemeMode(entity.themeMode) == ThemeMode::DARK) {
+		modeStylePath = ":/MusicSyncTool/style-dark-mode.qss";
+	}
+
+	QString accentStylePath = ":/MusicSyncTool/style.qss";
+	switch (toAccentColor(entity.accentColor)) {
+	case AccentColor::GREEN:
+		accentStylePath = ":/MusicSyncTool/style-green.qss";
+		break;
+	case AccentColor::PURPLE:
+		accentStylePath = ":/MusicSyncTool/style-purple.qss";
+		break;
+	case AccentColor::DARK:
+		accentStylePath = ":/MusicSyncTool/style-dark.qss";
+		break;
+	case AccentColor::BLUE:
+	default:
+		break;
+	}
+
+	QString styleSheet;
+	const QStringList stylePaths = {":/MusicSyncTool/base-style.qss", modeStylePath, accentStylePath};
+	for (const QString& stylePath : stylePaths) {
+		QFile styleFile(stylePath);
+		if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
+			styleSheet += styleFile.readAll();
+			styleSheet += "\n";
+			styleFile.close();
+		}
+	}
+	qApp->setStyleSheet(styleSheet);
 }
 
 void MSTMainWindow::saveSettings(const SettingsData& entityParam) {
 	if (!MSTSettingsManager::saveSettings(entityParam)) {
-		Logger::Fatal("Error opening settings file");
+		// 不终止进程：设置写入失败只影响本次保存
+		Logger::Error("Error opening settings file");
 		QMessageBox::critical(this, tr("错误"), tr("无法打开设置文件"));
 		return;
 	}
-	const int previousSortBy = this->entity.sortBy;
-	const int previousOrderBy = this->entity.orderBy;
-	const QList<LyricIgnoreRule> previousRules = this->entity.rules;
-	const QString previousFavoriteTag = this->entity.favoriteTag;
+	const SettingsData previous = this->entity;
 	this->entity = entityParam;
-	if (previousSortBy != entityParam.sortBy || previousOrderBy != entityParam.orderBy) {
+
+	if (previous.themeMode != entityParam.themeMode || previous.accentColor != entityParam.accentColor) {
+		MSTMainWindow::applyTheme(entityParam);
+	}
+	if (previous.logToFile != entityParam.logToFile) {
+		Logger::setLogToFile(entityParam.logToFile);
+	}
+	if (previous.sortBy != entityParam.sortBy || previous.orderBy != entityParam.orderBy) {
 		if (local.getPath() != "") {
 			scanController->resetScan(PathType::LOCAL);
 			getMusic(PathType::LOCAL, 1);
@@ -234,7 +285,9 @@ void MSTMainWindow::saveSettings(const SettingsData& entityParam) {
 			getMusic(PathType::REMOTE, 1);
 		}
 	}
-	if (previousRules != entity.rules || entityParam.favoriteTag != previousFavoriteTag) {
+	// 规则、收藏标签与递归开关都会改变扫描结果，需要重新扫描
+	if (previous.rules != entity.rules || entityParam.favoriteTag != previous.favoriteTag
+	    || entityParam.recursiveScan != previous.recursiveScan) {
 		MSTSettingsManager::cleanLog();
 		if (local.getPath() != "") {
 			scanController->resetScan(PathType::LOCAL);

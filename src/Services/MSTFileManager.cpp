@@ -144,6 +144,14 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
         const QFileInfo targetInfo(targetFile);
         const QString lyric = sourceInfo.dir().filePath(sourceInfo.completeBaseName() + ".lrc");
         const QString lyricTarget = targetInfo.dir().filePath(targetInfo.completeBaseName() + ".lrc");
+
+        // 递归扫描得到的相对路径可能带子目录，复制前先建好目标子目录
+        if (targetInfo.dir().path() != targetDir.path() && !targetInfo.dir().exists()
+            && !targetInfo.dir().mkpath(".")) {
+            Logger::Error("Error creating directory: " + targetInfo.absolutePath());
+            if (onError) onError(fileName, 2); // DISKFULL = 2
+            continue;
+        }
         
         if (QFile::exists(targetFile)) {
             Logger::Warn("File existed, skipping " + targetFile);

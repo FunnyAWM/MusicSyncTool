@@ -45,7 +45,8 @@ LyricIgnoreRule AddRuleWidget::getRules() const {
 }
 
 void AddRuleWidget::on_confirmButton_clicked() {
-	getRules().setRulesStr();
+	// 规则字符串由接收方（Settings::setIgnoreRulesToUI）统一生成，
+	// 此处对返回值调用 setRulesStr 只是作用于临时对象，不会生效
 	emit sendRules(getRules());
 	close();
 }

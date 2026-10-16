@@ -129,12 +129,23 @@ namespace PROPERTIES {
 	};
 
 	/**
-	 * @brief 日志文件输出枚举
-	 * 控制日志是否同时输出到文件
+	 * @brief 界面明暗模式
+	 * 决定加载哪一份 mode 样式表
 	 */
-	enum class LogToFile : uint8_t { 
-		ENABLE,   ///< 启用日志文件输出
-		DISABLE   ///< 禁用日志文件输出
+	enum class ThemeMode : uint8_t {
+		LIGHT = 0x21,   ///< 明亮模式（style-light.qss）
+		DARK = 0x22     ///< 暗色模式（style-dark-mode.qss）
+	};
+
+	/**
+	 * @brief 界面强调色主题
+	 * 决定加载哪一份 accent 样式表
+	 */
+	enum class AccentColor : uint8_t {
+		BLUE = 0x31,    ///< 蓝色（style.qss）
+		GREEN = 0x32,   ///< 绿色（style-green.qss）
+		PURPLE = 0x33,  ///< 紫色（style-purple.qss）
+		DARK = 0x34     ///< 深色（style-dark.qss）
 	};
 
 	/**
@@ -190,6 +201,58 @@ namespace PROPERTIES {
             default: return 0x11;
         }
     }
+	/**
+	 * @brief 将数值转换为明暗模式枚举
+	 * @param num 数值（0x21=明亮, 0x22=暗色）
+	 */
+	inline ThemeMode toThemeMode(const short num) {
+		switch (num) {
+		case 0x22: return ThemeMode::DARK;
+		case 0x21:
+		default: return ThemeMode::LIGHT;
+		}
+	}
+
+	/**
+	 * @brief 将明暗模式枚举转换为数值
+	 * @param mode 明暗模式
+	 */
+	inline short toShort(const ThemeMode mode) {
+		switch (mode) {
+		case ThemeMode::DARK: return 0x22;
+		case ThemeMode::LIGHT:
+		default: return 0x21;
+		}
+	}
+
+	/**
+	 * @brief 将数值转换为强调色枚举
+	 * @param num 数值（0x31=蓝, 0x32=绿, 0x33=紫, 0x34=深色）
+	 */
+	inline AccentColor toAccentColor(const short num) {
+		switch (num) {
+		case 0x32: return AccentColor::GREEN;
+		case 0x33: return AccentColor::PURPLE;
+		case 0x34: return AccentColor::DARK;
+		case 0x31:
+		default: return AccentColor::BLUE;
+		}
+	}
+
+	/**
+	 * @brief 将强调色枚举转换为数值
+	 * @param accent 强调色
+	 */
+	inline short toShort(const AccentColor accent) {
+		switch (accent) {
+		case AccentColor::GREEN: return 0x32;
+		case AccentColor::PURPLE: return 0x33;
+		case AccentColor::DARK: return 0x34;
+		case AccentColor::BLUE:
+		default: return 0x31;
+		}
+	}
+
 	/**
 	 * @brief 注册跨线程信号使用的枚举元类型
 	 * @details 后台任务经 QtConcurrent 发射信号到 GUI 线程时走排队连接，
