@@ -266,14 +266,6 @@ void MSTTableManager::setCurrentPage(const PathType path, const unsigned short p
 	currentPage[pathIndex(path)] = page;
 }
 
-unsigned short MSTTableManager::getTotalPage(const PathType path) const {
-	return totalPage[pathIndex(path)];
-}
-
-void MSTTableManager::setTotalPage(const PathType path, const unsigned short total) {
-	totalPage[pathIndex(path)] = total;
-}
-
 bool MSTTableManager::isFavoriteOnly(const PathType path) const {
 	return favoriteOnly[pathIndex(path)];
 }

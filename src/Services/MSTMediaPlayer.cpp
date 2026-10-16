@@ -1,5 +1,7 @@
 #include "MSTMediaPlayer.h"
 
+#include <QFileInfo>
+
 MSTMediaPlayer::MSTMediaPlayer(QObject* parent) {
     mediaPlayer.setParent(parent);
     audioOutput.setParent(parent);
@@ -29,15 +31,9 @@ void MSTMediaPlayer::pause() {
     mediaPlayer.pause();
 }
 
-void MSTMediaPlayer::stop() {
-    if (!isPlaying() || mediaPlayer.mediaStatus() == QMediaPlayer::NoMedia) {
-        return;
-    }
-    mediaPlayer.stop();
-}
-
 void MSTMediaPlayer::setNowPlaying(const QString& file) {
-    nowPlaying = file.split("/").last();
+    // 用 QFileInfo 取文件名，避免手写分隔符在非 Windows 平台失效
+    nowPlaying = QFileInfo(file).fileName();
     mediaPlayer.setSource(QUrl::fromLocalFile(file));
 }
 

@@ -4,6 +4,10 @@
 
 #include "../../Core/MusicProperties.h"
 
+// LyricIgnoreRule 不再继承 QObject，原先经它传递到本翻译单元的 PROPERTIES 名字改为显式引入
+using PROPERTIES::RuleField;
+using PROPERTIES::RuleType;
+
 AddRuleWidget::AddRuleWidget(QWidget* parent)
 	: QDialog(parent) {
 	ui.setupUi(this);

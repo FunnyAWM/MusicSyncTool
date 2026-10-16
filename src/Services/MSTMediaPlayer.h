@@ -19,8 +19,6 @@ public:
 	
 	void pause();
 	
-    void stop();
-    
 	void setNowPlaying(const QString& file);
 	
     QMediaPlayer* getMediaPlayer();

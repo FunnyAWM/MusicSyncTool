@@ -51,7 +51,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Services/MSTMediaPlayer.cpp
             src/Services/MSTScanController.cpp
             src/Services/MSTSettingsManager.cpp
-            src/Services/MSTTagScanner.cpp
     )
     set(SERVICES_HEADERS
             src/Services/Logger.h
@@ -60,7 +59,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             src/Services/MSTMediaPlayer.h
             src/Services/MSTScanController.h
             src/Services/MSTSettingsManager.h
-            src/Services/MSTTagScanner.h
     )
 
     # UI层 - 用户界面组件

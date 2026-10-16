@@ -6,6 +6,15 @@
 
 #include "../AddRuleWidget/AddRuleWidget.h"
 
+// LyricIgnoreRule 不再继承 QObject，原先经它传递到本翻译单元的 PROPERTIES 名字改为显式引入
+using PROPERTIES::AccentColor;
+using PROPERTIES::OrderByEnum;
+using PROPERTIES::SortByEnum;
+using PROPERTIES::ThemeMode;
+using PROPERTIES::toOrderBy;
+using PROPERTIES::toShort;
+using PROPERTIES::toSortBy;
+
 Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent) {
 	ui.setupUi(this);
 	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

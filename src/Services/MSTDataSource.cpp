@@ -80,15 +80,21 @@ void MSTDataSource::initTable() {
 		return;
 	}
 	// v0 -> v1：历史库可能缺少后续版本新增的列，逐列补齐（幂等）
-	ensureColumn("musicInfo", "title", "TEXT");
-	ensureColumn("musicInfo", "artist", "TEXT");
-	ensureColumn("musicInfo", "album", "TEXT");
-	ensureColumn("musicInfo", "genre", "TEXT");
-	ensureColumn("musicInfo", "year", "INT");
-	ensureColumn("musicInfo", "track", "INT");
-	ensureColumn("musicInfo", "favorite", "BOOL");
-	ensureColumn("musicInfo", "ruleHit", "BOOL");
-	ensureColumn("musicInfo", "fileName", "TEXT");
+	bool migrated = true;
+	migrated &= ensureColumn("musicInfo", "title", "TEXT");
+	migrated &= ensureColumn("musicInfo", "artist", "TEXT");
+	migrated &= ensureColumn("musicInfo", "album", "TEXT");
+	migrated &= ensureColumn("musicInfo", "genre", "TEXT");
+	migrated &= ensureColumn("musicInfo", "year", "INT");
+	migrated &= ensureColumn("musicInfo", "track", "INT");
+	migrated &= ensureColumn("musicInfo", "favorite", "BOOL");
+	migrated &= ensureColumn("musicInfo", "ruleHit", "BOOL");
+	migrated &= ensureColumn("musicInfo", "fileName", "TEXT");
+	if (!migrated) {
+		// 不写入版本号：下次启动会重试补齐，避免旧库被标记成已迁移却缺列
+		Logger::Warn("Music database schema migration incomplete, will retry on next launch");
+		return;
+	}
 	setUserVersion(schemaVersion);
 	Logger::Info("Music database schema migrated to version " + QString::number(schemaVersion));
 }

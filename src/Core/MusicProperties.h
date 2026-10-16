@@ -32,7 +32,9 @@ namespace PROPERTIES {
 	 * 文件复制操作中可能遇到的错误类型
 	 */
 	enum class FileErrorType : uint8_t { 
-		DUPLICATE,        ///< 重复文件
+		// 注意：不能命名为 DUPLICATE，Windows SDK 的 nb30.h 已把 DUPLICATE 定义成宏 0x06，
+		// 且 SingleInstance.h 会在 main.cpp 中最先引入 <Windows.h>，会导致枚举被宏替换而编译失败
+		DUPLICATE_FILE,   ///< 重复文件
 		LYRIC_NOT_FOUND,  ///< 歌词文件未找到 (Lyric Not Found)
 		DISKFULL          ///< 磁盘空间不足
 	};

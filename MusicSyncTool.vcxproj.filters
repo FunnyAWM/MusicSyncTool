@@ -127,9 +127,6 @@
     <QtMoc Include="src\Services\MSTScanController.h">
       <Filter>Header Files\Services</Filter>
     </QtMoc>
-    <QtMoc Include="src\Services\MSTTagScanner.h">
-      <Filter>Header Files\Services</Filter>
-    </QtMoc>
     <!-- UI -->
     <QtMoc Include="src\UI\AddRuleWidget\AddRuleWidget.h">
       <Filter>Header Files\UI\AddRuleWidget</Filter>
@@ -232,9 +229,6 @@
       <Filter>Source Files\Services</Filter>
     </ClCompile>
     <ClCompile Include="src\Services\MSTSettingsManager.cpp">
-      <Filter>Source Files\Services</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Services\MSTTagScanner.cpp">
       <Filter>Source Files\Services</Filter>
     </ClCompile>
     <!-- UI -->

@@ -26,7 +26,7 @@ private:
         ds->bindValue(":t",t); ds->bindValue(":a",a); ds->bindValue(":al",al);
         ds->bindValue(":g",g); ds->bindValue(":y",y); ds->bindValue(":tr",tr);
         ds->bindValue(":fn",fn); ds->bindValue(":fav",fav?1:0); ds->bindValue(":rh",rh?1:0);
-        ds->execQuery();
+        QVERIFY(ds->execQuery());
     }
 private Q_SLOTS:
     void openClose();

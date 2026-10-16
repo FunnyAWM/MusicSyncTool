@@ -80,7 +80,6 @@
     <ClInclude Include="..\src\Services\MSTFileManager.h" />
     <ClInclude Include="..\src\Services\MSTMediaPlayer.h" />
     <ClInclude Include="..\src\Services\MSTSettingsManager.h" />
-    <QtMoc Include="..\src\Services\MSTTagScanner.h" />
   </ItemGroup>
   <!-- Source Files -->
   <ItemGroup>
@@ -93,7 +92,6 @@
     <ClCompile Include="..\src\Services\MSTFileManager.cpp" />
     <ClCompile Include="..\src\Services\MSTMediaPlayer.cpp" />
     <ClCompile Include="..\src\Services\MSTSettingsManager.cpp" />
-    <ClCompile Include="..\src\Services\MSTTagScanner.cpp" />
   </ItemGroup>
   <!-- Test Implementation Files (included by main.cpp, not compiled directly) -->
   <ItemGroup>

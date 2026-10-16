@@ -7,6 +7,9 @@ namespace StringSimilarity {
 	// 默认相似度阈值
 	constexpr float similarityThreshold = 0.85f;
 
+	// CJK 字符串使用编辑距离相似度，阈值更严格
+	constexpr double cjkSimilarityThreshold = 0.85;
+
 	/**
 	 * @brief 构建KMP算法的next数组（失效函数）
 	 * @param pattern 模式串
@@ -179,32 +182,28 @@ namespace StringSimilarity {
 		const int len1 = str1.length();
 		const int len2 = str2.length();
 
-		// 创建DP表
-		QVector<QVector<int>> dp(len1 + 1, QVector<int>(len2 + 1));
-
-		// 初始化
-		for (int i = 0; i <= len1; ++i) {
-			dp[i][0] = i;
-		}
+		// 只保留上一行与当前行，空间复杂度由 O(len1*len2) 降到 O(len2)
+		QVector<int> previousRow(len2 + 1);
+		QVector<int> currentRow(len2 + 1);
 		for (int j = 0; j <= len2; ++j) {
-			dp[0][j] = j;
+			previousRow[j] = j;
 		}
 
-		// 填充DP表
 		for (int i = 1; i <= len1; ++i) {
+			currentRow[0] = i;
 			for (int j = 1; j <= len2; ++j) {
 				if (str1[i - 1] == str2[j - 1]) {
-					dp[i][j] = dp[i - 1][j - 1];
+					currentRow[j] = previousRow[j - 1];
 				}
 				else {
-					int min_val = qMin(dp[i - 1][j], dp[i][j - 1]);
-					min_val = qMin(min_val, dp[i - 1][j - 1]);
-					dp[i][j] = 1 + min_val;
+					const int minValue = qMin(qMin(previousRow[j], currentRow[j - 1]), previousRow[j - 1]);
+					currentRow[j] = 1 + minValue;
 				}
 			}
+			previousRow = currentRow;
 		}
 
-		const int editDistance = dp[len1][len2];
+		const int editDistance = previousRow[len2];
 		const int maxLen = qMax(len1, len2);
 
 		// 计算相似度：1 - (编辑距离 / 最大长度)
@@ -242,9 +241,9 @@ namespace StringSimilarity {
 				return true;
 			}
 
-			// 使用CJK特殊相似度算法（更严格的阈值0.85）
+			// 使用CJK特殊相似度算法（更严格的阈值）
 			const double similarity = cjkStringSimilarity(norm1, norm2);
-			return similarity >= 0.85;
+			return similarity >= cjkSimilarityThreshold;
 		}
 		else {
 			// 非CJK字符串使用KMP算法

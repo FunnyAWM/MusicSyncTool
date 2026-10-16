@@ -11,6 +11,14 @@
 #include "../../Services/MSTScanController.h"
 #include "../../Services/MSTSettingsManager.h"
 
+// LyricIgnoreRule 不再继承 QObject，原先经它传递到本翻译单元的 PROPERTIES 名字改为显式引入
+using PROPERTIES::AccentColor;
+using PROPERTIES::ThemeMode;
+using PROPERTIES::toAccentColor;
+using PROPERTIES::toOrderBy;
+using PROPERTIES::toSortBy;
+using PROPERTIES::toThemeMode;
+
 MSTMainWindow::MSTMainWindow(QWidget* parent) : // NOLINT(*-pro-type-member-init)
 	QMainWindow(parent), translator(new QTranslator(this)), loading(new LoadingPage()),
 	player(new MSTMediaPlayer(this)) {
@@ -118,12 +126,10 @@ void MSTMainWindow::connectSlots() {
 	connect(&local, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
 	connect(&remote, &MSTDataSource::currentProgress, loading, &LoadingPage::setProgress);
 	connect(this, &MSTMainWindow::copyFinished, errorReporter, &MSTErrorReporter::showOperationResult);
-	connect(&local, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
-	        &MSTErrorReporter::showOperationResult);
-	connect(&remote, QOverload<OperationType>::of(&MSTDataSource::loadFinished), errorReporter,
-	        &MSTErrorReporter::showOperationResult);
-	connect(this, &MSTMainWindow::addToErrorListConcurrent, errorReporter,
-	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
+	// 扫描结束展示加载错误：此前 loadFinished 无人发射，加载错误只会静默堆积
+	connect(scanController, &MSTScanController::scanFinished, this, [this] {
+		errorReporter->showOperationResult(OperationType::LOAD);
+	});
 	connect(this, &MSTMainWindow::copyFinished, this, &MSTMainWindow::on_copyFinished);
 	connect(tableManager, &MSTTableManager::errorOccurred, errorReporter, &MSTErrorReporter::popError);
 	connect(tableManager, &MSTTableManager::requestLoadMusic, this, &MSTMainWindow::getMusic);
@@ -333,7 +339,7 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 		[this](const QString& fileName, const int errorType) {
 			switch (errorType) {
 			case 0: // DUPLICATE
-				emit fileCopyError(fileName, FileErrorType::DUPLICATE);
+				emit fileCopyError(fileName, FileErrorType::DUPLICATE_FILE);
 				break;
 			case 1: // LNF
 				emit fileCopyError(fileName, FileErrorType::LYRIC_NOT_FOUND);
@@ -360,11 +366,6 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 			emit this->total(total);
 		}
 	);
-}
-
-[[nodiscard]]
-QString MSTMainWindow::getLanguage() const {
-	return entity.language;
 }
 
 void MSTMainWindow::setAvailableSpace(const PathType path) const {
@@ -396,7 +397,7 @@ void MSTMainWindow::on_actionLocal_triggered(bool triggered) {
 	errorReporter->showOperationResult(OperationType::LOAD);
 }
 
-void MSTMainWindow::on_actionSettings_triggered(bool triggered) const { showSettings(); }
+void MSTMainWindow::on_actionSettings_triggered(bool triggered) { showSettings(); }
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void MSTMainWindow::on_actionAbout_triggered(bool triggered) {
 	// NOLINT(*-convert-member-functions-to-static)

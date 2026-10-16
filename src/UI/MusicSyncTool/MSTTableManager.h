@@ -88,10 +88,6 @@ public:
 
 	void setCurrentPage(PathType path, unsigned short page);
 
-	[[nodiscard]] unsigned short getTotalPage(PathType path) const;
-
-	void setTotalPage(PathType path, unsigned short total);
-
 	[[nodiscard]] bool isFavoriteOnly(PathType path) const;
 
 	void setFavoriteOnly(PathType path, bool value);

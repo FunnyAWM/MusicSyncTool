@@ -9,8 +9,24 @@
 #include <QVariant>
 #include <type_traits>
 
-#include "MSTTagScanner.h"
+#include "../Core/MusicProperties.h"
 #include "../Data/QueryItem.h"
+
+/// @brief 收藏状态批量更新项
+struct FavoriteUpdate {
+	QString fileName;
+	bool isFavorite;
+};
+
+/// @brief 规则命中状态批量更新项
+struct RuleHitUpdate {
+	QString fileName;
+	bool isRuleHit;
+};
+
+using PROPERTIES::OrderByEnum;
+using PROPERTIES::QueryRows;
+using PROPERTIES::SortByEnum;
 
 class MSTDataSource final : public QObject {
 	Q_OBJECT
@@ -162,12 +178,6 @@ public:
 	[[nodiscard]] bool getRuleHit(const QString& fileName);
 
 signals:
-	void loadStarted();
-
-	void loadFinished();
-
-	void loadFinished(OperationType operation);
-
 	/// @brief 总条目数；跨线程排队投递，参数用 int 保证元类型在 moc 侧可解析
 	void totalSize(int size);
 

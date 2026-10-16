@@ -263,10 +263,6 @@ void MSTScanController::setRuleHit(const PathType path, const QList<LyricIgnoreR
 	dataSource.updateRuleHitBatch(results);
 }
 
-MSTTagScanner* MSTScanController::getTagScanner() {
-	return &tagScanner;
-}
-
 /**
  * @details 从数据库读取指定页码的音乐数据并填充表格，
  *          用于已完成扫描后的翻页操作，避免重复扫描目录

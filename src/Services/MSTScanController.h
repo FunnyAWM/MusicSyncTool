@@ -7,7 +7,6 @@
 #include <QObject>
 #include <QString>
 
-#include "MSTTagScanner.h"
 #include "../Core/MusicProperties.h"
 #include "../Core/SettingEntity.h"
 #include "../Data/LyricIgnoreRule.h"
@@ -33,7 +32,6 @@ private:
 	MSTDataSource& localDataSource;
 	MSTDataSource& remoteDataSource;
 	MSTTableManager* tableManager;
-	MSTTagScanner tagScanner;
 	/// @brief 已扫描标记：工作线程写入、GUI 线程读取/复位，故用原子量
 	std::atomic<bool> scanned[2] = {false, false};
 	/// @brief 持有扫描任务的 QFuture，保证窗口析构前任务已结束
@@ -55,8 +53,6 @@ public:
 
 	void setRuleHit(PathType path, const QList<LyricIgnoreRule>& rules,
 	                const QStringList& filesToFilter, qsizetype progressOffset);
-
-	[[nodiscard]] MSTTagScanner* getTagScanner();
 
 	void resetScan(PathType path);
 

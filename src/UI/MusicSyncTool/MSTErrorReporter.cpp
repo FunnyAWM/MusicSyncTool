@@ -51,7 +51,7 @@ void MSTErrorReporter::popError(const AppErrorType type) const {
 
 void MSTErrorReporter::addToErrorList(const QString& file, const FileErrorType error) {
 	switch (error) {
-	case FileErrorType::DUPLICATE:
+	case FileErrorType::DUPLICATE_FILE:
 		errorList.append(tr("复制") + file + tr("失败：文件已存在"));
 		break;
 	case FileErrorType::LYRIC_NOT_FOUND:

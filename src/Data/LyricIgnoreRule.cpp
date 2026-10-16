@@ -1,27 +1,22 @@
 #include "LyricIgnoreRule.h"
 
+#include <QCoreApplication>
+#include <utility>
+
+using namespace PROPERTIES;
+
+namespace {
+	/**
+	 * @brief 规则字符串译文
+	 * @details 类已改为纯值类型，不再继承 QObject，因此不能使用 tr()；
+	 *          这里使用与原先相同的翻译上下文 "LyricIgnoreRule"
+	 */
+	QString ruleTr(const char* text) { return QCoreApplication::translate("LyricIgnoreRule", text); }
+}
+
 LyricIgnoreRule::LyricIgnoreRule(const RuleType ruleType, const RuleField ruleField,
                                  QString ruleName)
 	: ruleType(ruleType), ruleField(ruleField), ruleName(std::move(ruleName)) {
-}
-
-LyricIgnoreRule::LyricIgnoreRule(const LyricIgnoreRule& other) {
-	ruleType = other.ruleType;
-	ruleField = other.ruleField;
-	ruleName = other.ruleName;
-	ruleTypeStr = other.ruleTypeStr;
-	ruleFieldStr = other.ruleFieldStr;
-}
-
-LyricIgnoreRule& LyricIgnoreRule::operator=(const LyricIgnoreRule& other) {
-	if (this != &other) {
-		ruleType = other.ruleType;
-		ruleField = other.ruleField;
-		ruleName = other.ruleName;
-		ruleTypeStr = other.ruleTypeStr;
-		ruleFieldStr = other.ruleFieldStr;
-	}
-	return *this;
 }
 
 [[nodiscard]] RuleType LyricIgnoreRule::getRuleType() const {
@@ -44,11 +39,11 @@ LyricIgnoreRule& LyricIgnoreRule::operator=(const LyricIgnoreRule& other) {
 QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 	switch (rules) {
 	case RuleField::TITLE:
-		return tr("名称");      // 标题
+		return ruleTr("名称");      // 标题
 	case RuleField::ARTIST:
-		return tr("艺术家");    // 艺术家
+		return ruleTr("艺术家");    // 艺术家
 	case RuleField::ALBUM:
-		return tr("专辑");      // 专辑
+		return ruleTr("专辑");      // 专辑
 	case RuleField::NONE:
 		return "";
 	default:
@@ -64,9 +59,9 @@ QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 QString LyricIgnoreRule::ignoreRulesToString(const RuleType rules) {
 	switch (rules) {
 	case RuleType::INCLUDES:
-		return tr("包含");      // 包含匹配
+		return ruleTr("包含");      // 包含匹配
 	case RuleType::EXCLUDES:
-		return tr("排除");      // 排除匹配
+		return ruleTr("排除");      // 排除匹配
 	default:
 		return "";
 	}

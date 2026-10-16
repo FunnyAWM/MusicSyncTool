@@ -135,7 +135,6 @@ public:
 	void copyMusic(const QString&, const QStringList&, const QString&);
 	/// @brief 启动复制任务并防止并发复制
 	void startCopy(const QString& source, const QStringList& fileList, const QString& target);
-	[[nodiscard]] QString getLanguage() const;
 	void setAvailableSpace(PathType) const;
 
 public slots:
@@ -146,7 +145,7 @@ public slots:
 	void on_actionExit_triggered(bool);
 	void on_actionLocal_triggered(bool);
 	void on_actionRemote_triggered(bool);
-	void on_actionSettings_triggered(bool) const;
+	void on_actionSettings_triggered(bool);
 	void on_copyToLocal_clicked();
 	void on_copyToRemote_clicked();
 	void on_favoriteOnlyLocal_clicked() const;
@@ -177,13 +176,11 @@ public slots:
 	void applyTablePage(PathType path, QList<QueryItem> items, unsigned short page, unsigned short totalPages);
 
 signals:
-	void addToErrorListConcurrent(QString, LoadErrorType);
 	void copyFinished(OperationType);
 	/// @brief 复制过程中的文件错误，经排队连接回到 GUI 线程登记
 	void fileCopyError(QString fileName, FileErrorType error);
 	void current(int current);
 	void finished();
-	void loadFinished(OperationType);
 	void started();
 	void total(int total);
 };
