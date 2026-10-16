@@ -144,3 +144,15 @@ bool QueryItem::operator==(const QueryItem& other) const {
 	// 判断条件：必须有核心字段匹配且总分达到阈值
 	return hasCoreMatch && threshold >= similarityThreshold;
 }
+
+QStringList QueryItem::findDuplicatesInSorted(const QList<QueryItem>& items) {
+	QStringList duplicates;
+	// 从索引 1 开始，避免首项与自身比较
+	for (qsizetype i = 1; i < items.size(); ++i) {
+		if (items[i - 1] == items[i]) {
+			duplicates.append(items[i - 1].getFileName());
+			duplicates.append(items[i].getFileName());
+		}
+	}
+	return duplicates;
+}

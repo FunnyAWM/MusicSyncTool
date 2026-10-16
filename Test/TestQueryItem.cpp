@@ -86,3 +86,38 @@ void TestQueryItem::equality_empty() {
     QueryItem c("T", "A", "B", "G", 2024u, 1u, "c.mp3");
     QVERIFY(!(a == c));
 }
+
+void TestQueryItem::findDuplicates_empty() {
+    QueryItem::setSimilarityThreshold(5);
+    QCOMPARE(QueryItem::findDuplicatesInSorted({}).size(), 0);
+}
+
+void TestQueryItem::findDuplicates_single() {
+    QueryItem::setSimilarityThreshold(5);
+    // 单项列表不得与自身比较而误报
+    QList<QueryItem> items{QueryItem("Song", "Artist", "Album", "Rock", 2024u, 1u, "a.mp3")};
+    QCOMPARE(QueryItem::findDuplicatesInSorted(items).size(), 0);
+}
+
+void TestQueryItem::findDuplicates_adjacentPair() {
+    QueryItem::setSimilarityThreshold(5);
+    QList<QueryItem> items{
+        QueryItem("Song", "Artist", "Album", "Rock", 2024u, 1u, "a.mp3"),
+        QueryItem("Song", "Artist", "Album", "Rock", 2024u, 1u, "b.mp3")
+    };
+    const QStringList dupes = QueryItem::findDuplicatesInSorted(items);
+    QCOMPARE(dupes.size(), 2);
+    QCOMPARE(dupes[0], QString("a.mp3"));
+    QCOMPARE(dupes[1], QString("b.mp3"));
+}
+
+void TestQueryItem::findDuplicates_nonAdjacentNotDetected() {
+    QueryItem::setSimilarityThreshold(5);
+    // 契约：仅比较相邻项，依赖调用方传入已排序列表
+    QList<QueryItem> items{
+        QueryItem("Song", "Artist", "Album", "Rock", 2024u, 1u, "a.mp3"),
+        QueryItem("Song", "Other", "Y", "Z", 1999u, 9u, "m.mp3"),
+        QueryItem("Song", "Artist", "Album", "Rock", 2024u, 1u, "b.mp3")
+    };
+    QCOMPARE(QueryItem::findDuplicatesInSorted(items).size(), 0);
+}

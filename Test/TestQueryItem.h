@@ -17,6 +17,10 @@ private Q_SLOTS:
     void equality_thresholdBoundary();
     void equality_noCoreMatch();
     void equality_empty();
+    void findDuplicates_empty();
+    void findDuplicates_single();
+    void findDuplicates_adjacentPair();
+    void findDuplicates_nonAdjacentNotDetected();
 };
 
 #endif

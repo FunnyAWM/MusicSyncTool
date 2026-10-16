@@ -1,6 +1,8 @@
 #ifndef QUERYITEM_H
 #define QUERYITEM_H
+#include <QList>
 #include <QString>
+#include <QStringList>
 
 /**
  * @brief 查询项类
@@ -58,6 +60,14 @@ public:
 	void setFileName(const QString& fileName_);
 	
 	bool operator==(const QueryItem& other) const;
+
+	/**
+	 * @brief 在已排序的列表中查找重复项
+	 * @details 仅比较相邻项，时间复杂度 O(n)，要求 items 已按标题排序
+	 * @param items 已排序的音乐列表
+	 * @return 重复项的文件名，成对出现（前一项、后一项）
+	 */
+	[[nodiscard]] static QStringList findDuplicatesInSorted(const QList<QueryItem>& items);
 };
 
 #endif // QUERYITEM_H

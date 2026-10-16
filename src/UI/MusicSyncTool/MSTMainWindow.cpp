@@ -192,15 +192,7 @@ QStringList MSTMainWindow::getDuplicatedMusic(const PathType path) {
 	ShowDupe duplicateDialog;
 	MSTDataSource& ds = path == PathType::LOCAL ? local : remote;
 	QList<QueryItem> items = ds.getAll();
-	const QueryItem* slow = &items.first();
-	QStringList dupeList;
-	for (const auto& fast : items) {
-		if (slow != nullptr && *slow == fast) {
-			dupeList.append(slow->getFileName());
-			dupeList.append(fast.getFileName());
-		}
-		slow = &fast;
-	}
+	const QStringList dupeList = QueryItem::findDuplicatesInSorted(items);
 	for (const auto& i : dupeList) {
 		Logger::Info(
 			"Found duplicated music named " + i + " at " + (
