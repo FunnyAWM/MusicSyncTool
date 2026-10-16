@@ -15,24 +15,26 @@ int main(int argc, char* argv[]) {
 	MSTMainWindow::applyTheme(entity);
 
 	MSTMainWindow w;
-#if defined(_WIN64) or defined(_WIN32)
-	HANDLE hMutex;
-	if (!singleInstance(hMutex)) {
-#else
-    const int fd = singleInstance();
-	if (fd == -1) {
+	// 单实例载体按平台分派：Windows 为互斥量句柄，Linux/macOS 为锁文件描述符
+#if defined(_WIN32) || defined(_WIN64)
+	HANDLE hMutex = nullptr;
+	const bool isFirstInstance = singleInstance(hMutex);
+#elif defined(__linux__) || defined(__APPLE__)
+	const int fd = singleInstance();
+	const bool isFirstInstance = fd != -1;
 #endif
+	if (!isFirstInstance) {
 		w.popError(AppErrorType::RUNNING);
 		return 1;
 	}
 	w.show();
 	a.exec(); // NOLINT(readability-static-accessed-through-instance)
-#if defined(_WIN64) or defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64)
 	ReleaseMutex(hMutex);
 	CloseHandle(hMutex);
 	hMutex = nullptr;
-#elif defined(__linux)
-    close(fd);
+#elif defined(__linux__) || defined(__APPLE__)
+	close(fd);
 #endif
 	return 0;
 }

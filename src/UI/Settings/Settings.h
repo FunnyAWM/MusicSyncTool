@@ -42,7 +42,7 @@ public:
 public slots:
 	void on_confirmButton_clicked();
 	
-	void on_addRule_clicked() const;
+	void on_addRule_clicked();
 	
 	void on_deleteSelectedRule_clicked();
 	

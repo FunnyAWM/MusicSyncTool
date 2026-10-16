@@ -85,9 +85,10 @@ void MSTMainWindow::loadSettings() {
 void MSTMainWindow::loadLanguage() {
 	QFile file(QApplication::applicationDirPath() + "/translations/langinfo.json");
 	if (!file.open(QIODevice::ReadOnly)) {
+		// 语言配置缺失只影响翻译，提示用户后继续以默认语言运行
 		errorReporter->popError(AppErrorType::NO_LANGUAGE);
-		Logger::Fatal("Error opening langinfo.json:" + file.errorString());
-		exit(EXIT_FAILURE);
+		Logger::Error("Error opening langinfo.json:" + file.errorString());
+		return;
 	}
 	const QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
 	file.close();
@@ -98,8 +99,11 @@ void MSTMainWindow::loadLanguage() {
 		}
 		QJsonObject langObj = lang.toObject();
 		if (langObj["lang"].toString() == entity.language) {
-			if (!translator->load("translations/" + langObj["fileName"].toString())) {
-				Logger::Warn("Failed to load translation: " + langObj["fileName"].toString());
+			// 翻译文件路径锚定程序目录，避免依赖进程工作目录
+			const QString translationPath = QApplication::applicationDirPath() + "/translations/"
+				+ langObj["fileName"].toString();
+			if (!translator->load(translationPath)) {
+				Logger::Warn("Failed to load translation: " + translationPath);
 			}
 			break;
 		}
@@ -171,14 +175,17 @@ void MSTMainWindow::openFolder(const PathType path) {
 		local.setPath(dir);
 		localManager = std::make_shared<MSTFileManager>(MSTFileManager(dir));
 		if (!local.openDB()) {
-			exit(EXIT_FAILURE);
+			// 数据库打不开只影响该目录，提示用户而不是直接终止进程
+			Logger::Error("Failed to open local database at " + dir);
+			errorReporter->popError(AppErrorType::DB_ERROR);
 		}
 	}
 	else {
 		remote.setPath(dir);
 		remoteManager = std::make_shared<MSTFileManager>(MSTFileManager(dir));
 		if (!remote.openDB()) {
-			exit(EXIT_FAILURE);
+			Logger::Error("Failed to open remote database at " + dir);
+			errorReporter->popError(AppErrorType::DB_ERROR);
 		}
 	}
 }

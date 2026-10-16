@@ -1,19 +1,19 @@
-#ifndef LINUXSINGLEINSTANCE_H
-#define LINUXSINGLEINSTANCE_H
+#ifndef SINGLEINSTANCE_H
+#define SINGLEINSTANCE_H
 #include <QCoreApplication>
 #include "../Services/Logger.h"
 
-// 根据平台选择所需的系统头文件
-#if defined(_WIN32) or defined(_WIN64)
+// 平台差异集中在 Core 垫片内：Windows 用命名互斥量，Linux/macOS 用 /tmp 锁文件
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
-#elif defined(__linux)
+#elif defined(__linux__) || defined(__APPLE__)
 #include <QString>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
 
-#if defined(_WIN32) or defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
 /**
  * @brief Windows平台的单实例检查函数
  * @param mutex 互斥量句柄的引用，用于返回创建的互斥量
@@ -34,13 +34,14 @@ inline bool singleInstance(HANDLE& mutex) {
     return true;  // 表示这是第一个实例
 }
 
-#elif defined(__linux)
+#elif defined(__linux__) || defined(__APPLE__)
 /**
- * @brief Linux平台的单实例检查函数
+ * @brief Linux/macOS平台的单实例检查函数
  * @return 成功时返回文件描述符，失败时返回-1
  * @details 使用文件锁来确保应用程序只运行一个实例。
  *          在/tmp目录下创建以应用程序名称命名的.lock文件，
- *          并对该文件加写锁来防止多实例运行
+ *          并对该文件加写锁来防止多实例运行。
+ *          两个平台都提供 fcntl 文件锁，可用同一实现
  */
 inline int singleInstance() {
     // 构建锁文件路径：/tmp/应用程序名.lock
@@ -72,8 +73,9 @@ inline int singleInstance() {
     
     // 截断文件并写入当前进程ID
     ftruncate(fd, 0);
-    result = static_cast<int>(write(fd, QString::number(getpid()).toStdString().c_str(), 
-                                   QString::number(getpid()).length()));
+    const QString pidText = QString::number(getpid());
+    result = static_cast<int>(write(fd, pidText.toStdString().c_str(),
+                                   static_cast<size_t>(pidText.length())));
     if (result == -1) {
         Logger::Warn("Failed to write lock file: " + lockFileBuilder);
         close(fd);
@@ -84,4 +86,4 @@ inline int singleInstance() {
 }
 #endif
 
-#endif // LINUXSINGLEINSTANCE_H
+#endif // SINGLEINSTANCE_H

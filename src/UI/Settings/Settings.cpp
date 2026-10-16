@@ -103,8 +103,10 @@ void Settings::setSortByToUI(short sortBy) {
 void Settings::setLanguageToUI(QString language) {
 	auto file = QFile(QCoreApplication::applicationDirPath() + "/translations/langinfo.json");
 	if (!file.open(QIODevice::ReadOnly)) {
+		// 语言配置缺失只影响语言下拉框，提示后保持原有语言
 		QMessageBox::critical(this, tr("错误"), tr("无法打开语言文件"));
-		Logger::Fatal("Error opening langinfo.json: " + file.errorString());
+		Logger::Error("Error opening langinfo.json: " + file.errorString());
+		return;
 	}
 	const QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
 	QJsonArray langArray = langinfo.array();
@@ -194,8 +196,10 @@ void Settings::on_confirmButton_clicked() {
 	this->deleteLater();
 }
 
-void Settings::on_addRule_clicked() const {
-	const auto widget = new AddRuleWidget();
+void Settings::on_addRule_clicked() {
+	// 挂到设置窗口下并设置关闭即销毁，避免每次添加规则都泄漏一个窗口
+	const auto widget = new AddRuleWidget(this);
+	widget->setAttribute(Qt::WA_DeleteOnClose);
 	connect(widget, &AddRuleWidget::sendRules, this, &Settings::addRule);
 	widget->show();
 }

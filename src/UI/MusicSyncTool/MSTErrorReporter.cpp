@@ -75,26 +75,23 @@ void MSTErrorReporter::addToErrorList(const QString& file, const LoadErrorType e
 }
 
 void MSTErrorReporter::showOperationResult(const OperationType type) {
-	const auto resultDialog = new OperationResult();
-	switch (type) {
-	case OperationType::COPY:
-		resultDialog->setWindowTitle(tr("复制结果"));
-		break;
-	case OperationType::LOAD:
-		resultDialog->setWindowTitle(tr("加载结果"));
-		break;
-	}
-
-	if (errorList.isEmpty()) {
-		delete resultDialog;
-	}
-	else {
+	// 无错误时不弹窗；有错误时用栈对象展示，避免此前 new 出来的对话框泄漏
+	if (!errorList.isEmpty()) {
+		OperationResult resultDialog;
+		switch (type) {
+		case OperationType::COPY:
+			resultDialog.setWindowTitle(tr("复制结果"));
+			break;
+		case OperationType::LOAD:
+			resultDialog.setWindowTitle(tr("加载结果"));
+			break;
+		}
 		QString errorString;
-		for (QString& error : errorList) {
+		for (const QString& error : errorList) {
 			errorString += error + "\n";
 		}
-		resultDialog->setText(errorString);
-		resultDialog->exec();
+		resultDialog.setText(errorString);
+		resultDialog.exec();
 		errorList.clear();
 	}
 

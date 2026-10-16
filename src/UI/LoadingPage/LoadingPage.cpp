@@ -1,7 +1,9 @@
 #include "LoadingPage.h"
+#include <algorithm>
 #include <cmath>
-#include <ctime>
+#include <QRandomGenerator>
 #include "../MusicSyncTool/MSTMainWindow.h"
+#include "../../Services/Logger.h"
 
 LoadingPage::LoadingPage(QWidget* parent) : QWidget(parent), total(0) {
 	ui.setupUi(this);
@@ -16,19 +18,26 @@ void LoadingPage::setTitle(const QString& title) const {
 }
 
 void LoadingPage::setRandomTitle() const {
-	srand(static_cast<unsigned>(time(nullptr)));
 	QFile file(":/MusicSyncTool/titles.txt");
-	if (file.open(QIODevice::ReadOnly)) {
-		QTextStream stream(&file);
-		const int totalTitle = stream.readLine().toInt();
-		const int titleIndex = rand() % totalTitle;
-		for (int i = 0; i < titleIndex; i++) {
-			stream.readLine();
-		}
-		const QString title = stream.readLine();
-		setTitle(title);
-		file.close();
+	if (!file.open(QIODevice::ReadOnly)) {
+		Logger::Warn("Failed to open titles.txt, keeping default loading title");
+		return;
 	}
+	QTextStream stream(&file);
+	bool titleCountValid = false;
+	const int totalTitle = stream.readLine().toInt(&titleCountValid);
+	if (!titleCountValid || totalTitle <= 0) {
+		// 首行为非法数量时不做取模，避免除零
+		Logger::Warn("Invalid title count in titles.txt, keeping default loading title");
+		file.close();
+		return;
+	}
+	const int titleIndex = QRandomGenerator::global()->bounded(totalTitle);
+	for (int i = 0; i < titleIndex; i++) {
+		stream.readLine();
+	}
+	setTitle(stream.readLine());
+	file.close();
 }
 
 void LoadingPage::showPage() {
@@ -42,7 +51,13 @@ void LoadingPage::stopPage() {
 }
 
 void LoadingPage::setProgress(const int value) const {
-	ui.progressBar->setValue(static_cast<int>(std::round(static_cast<double>(value) / static_cast<double>(total) * 100.0)));
+	if (total <= 0) {
+		// 总数未知或为 0 时不做除法，避免出现 NaN 进度
+		ui.progressBar->setValue(0);
+		return;
+	}
+	const double percent = static_cast<double>(value) / static_cast<double>(total) * 100.0;
+	ui.progressBar->setValue(std::clamp(static_cast<int>(std::round(percent)), 0, 100));
 }
 
 void LoadingPage::setTotal(const int total_) {
