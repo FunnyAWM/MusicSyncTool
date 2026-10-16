@@ -17,14 +17,15 @@ public:
 
 private:
     Ui::LoadingPageClass ui;
-    qsizetype total;
+    int total;
 
 public slots:
     void showPage();
     
-    void setTotal(qsizetype total_);
+    // 进度计数统一用 int：跨线程排队信号的可注册元类型，避免 qsizetype 在 moc 侧解析失败
+    void setTotal(int total_);
     
-    void setProgress(qsizetype value) const;
+    void setProgress(int value) const;
     
     void stopPage();
 };

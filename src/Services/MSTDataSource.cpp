@@ -1,12 +1,25 @@
 #include "MSTDataSource.h"
 
+#include <algorithm>
 #include <QDir>
 #include <QFile>
+#include <QMap>
+#include <QMutexLocker>
 #include <QRegularExpression>
 #include <QSqlError>
 #include <taglib/fileref.h>
 #include "Logger.h"
 #include "../Core/MSTTagUtils.h"
+
+QSqlQuery& MSTDataSource::threadQuery() const {
+	QSqlQuery*& query = threadQueries.localData();
+	if (query == nullptr) {
+		// 每线程独立查询对象：QSqlDatabase 连接由 dbMutex 串行化，
+		// 但 QSqlQuery 本身不可跨线程共享
+		query = new QSqlQuery(db);
+	}
+	return *query;
+}
 
 int MSTDataSource::getPageSize() const { return pageSize; }
 
@@ -19,6 +32,7 @@ void MSTDataSource::setPath(const QString& path_) { this->path = path_; }
 void MSTDataSource::setConnectionName(const QString& connectionName) { connection = connectionName; }
 
 bool MSTDataSource::openDB(const QString& path_) {
+	QMutexLocker locker(&dbMutex);
 	db = QSqlDatabase::addDatabase("QSQLITE", connection);
 
 	db.setDatabaseName(QDir(path_).filePath("musicInfo.db"));
@@ -27,11 +41,11 @@ bool MSTDataSource::openDB(const QString& path_) {
 		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
-	query = QSqlQuery(db);
 	return true;
 }
 
 bool MSTDataSource::openDB() {
+	QMutexLocker locker(&dbMutex);
 	db = QSqlDatabase::addDatabase("QSQLITE", connection);
 
 	db.setDatabaseName(QDir(path).filePath("musicInfo.db"));
@@ -40,53 +54,76 @@ bool MSTDataSource::openDB() {
 		Logger::Warn("Error opening database:" + db.lastError().text());
 		return false;
 	}
-	query = QSqlQuery(db);
 	return true;
 }
 
 void MSTDataSource::initTable() {
-	query.exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
+	QMutexLocker locker(&dbMutex);
+	threadQuery().exec("CREATE TABLE IF NOT EXISTS musicInfo (title TEXT, artist TEXT, album TEXT, genre TEXT, year INT, "
 		"track INT, favorite BOOL, ruleHit BOOL, fileName TEXT)");
 }
 
 void MSTDataSource::closeDB() {
+	QMutexLocker locker(&dbMutex);
 	if (db.isOpen()) {
 		db.close();
 	}
 }
 
-void MSTDataSource::prepareStatement(const QString& sqlStatement) { query.prepare(sqlStatement); }
+void MSTDataSource::prepareStatement(const QString& sqlStatement) {
+	QMutexLocker locker(&dbMutex);
+	threadQuery().prepare(sqlStatement);
+}
 
-void MSTDataSource::execQuery() { query.exec(); }
+bool MSTDataSource::execQuery() {
+	QMutexLocker locker(&dbMutex);
+	return threadQuery().exec();
+}
 
 void MSTDataSource::updateFavoriteBatch(const QList<FavoriteUpdate>& updates) {
-	query.exec("BEGIN TRANSACTION");
-	for (const auto& update : updates) {
-		prepareStatement("UPDATE musicInfo SET favorite = :fav WHERE fileName = :fileName");
-		bindValue(":fav", update.isFavorite);
-		bindValue(":fileName", update.fileName);
-		execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	if (!query.exec("BEGIN TRANSACTION")) {
+		Logger::Error("Error beginning favorite transaction:" + query.lastError().text());
+		return;
 	}
-	query.exec("COMMIT");
+	for (const auto& update : updates) {
+		query.prepare("UPDATE musicInfo SET favorite = :fav WHERE fileName = :fileName");
+		query.bindValue(":fav", update.isFavorite);
+		query.bindValue(":fileName", update.fileName);
+		if (!query.exec()) {
+			Logger::Error("Error updating favorite state:" + query.lastError().text());
+			query.exec("ROLLBACK");
+			return;
+		}
+	}
+	if (!query.exec("COMMIT")) {
+		Logger::Error("Error committing favorite updates:" + query.lastError().text());
+		query.exec("ROLLBACK");
+	}
 }
 
 void MSTDataSource::updateRuleHitBatch(const QList<RuleHitUpdate>& updates) {
-	query.exec("BEGIN TRANSACTION");
-	for (const auto& update : updates) {
-		prepareStatement("UPDATE musicInfo SET ruleHit = :ruleHit WHERE fileName = :fileName");
-		bindValue(":ruleHit", update.isRuleHit);
-		bindValue(":fileName", update.fileName);
-		execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	if (!query.exec("BEGIN TRANSACTION")) {
+		Logger::Error("Error beginning rule hit transaction:" + query.lastError().text());
+		return;
 	}
-	query.exec("COMMIT");
-}
-
-void MSTDataSource::beginTransaction() {
-	query.exec("BEGIN TRANSACTION");
-}
-
-void MSTDataSource::commitTransaction() {
-	query.exec("COMMIT");
+	for (const auto& update : updates) {
+		query.prepare("UPDATE musicInfo SET ruleHit = :ruleHit WHERE fileName = :fileName");
+		query.bindValue(":ruleHit", update.isRuleHit);
+		query.bindValue(":fileName", update.fileName);
+		if (!query.exec()) {
+			Logger::Error("Error updating rule hit state:" + query.lastError().text());
+			query.exec("ROLLBACK");
+			return;
+		}
+	}
+	if (!query.exec("COMMIT")) {
+		Logger::Error("Error committing rule hit updates:" + query.lastError().text());
+		query.exec("ROLLBACK");
+	}
 }
 
 /**
@@ -97,6 +134,8 @@ QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	if (fileNames.isEmpty()) {
 		return {};
 	}
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
 
 	// 构建参数化 IN 子句：WHERE fileName IN (:f0, :f1, ...)
 	QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (";
@@ -106,11 +145,14 @@ QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	}
 	sql += paramNames.join(",") + ") ORDER BY title ASC";
 
-	prepareStatement(sql);
+	query.prepare(sql);
 	for (int i = 0; i < fileNames.size(); i++) {
-		bindValue(":f" + QString::number(i), fileNames.at(i));
+		query.bindValue(":f" + QString::number(i), fileNames.at(i));
 	}
-	execQuery();
+	if (!query.exec()) {
+		Logger::Error("Error querying by file names:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> items;
 	while (query.next()) {
@@ -175,12 +217,18 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 	sql.chop(2);
 	sql += " FROM musicInfo ORDER BY title ASC";
 
-	prepareStatement(sql);
-	execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare(sql);
+	if (!query.exec()) {
+		Logger::Error("Error querying all music:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> items;
-	QueryItem currentRow;
 	while (query.next()) {
+		// 每条记录使用独立对象，避免上一行的残留字段串入下一行
+		QueryItem currentRow;
 		for (int i = 0; i < rowMap.size(); i++) {
 			switch (rowMap[i]) {
 			case QueryRows::TITLE:
@@ -221,44 +269,11 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 	return items;
 }
 
-QStringList MSTDataSource::addMusic(const QStringList& files) {
-	QStringList failedFileList;
-
-	for (const QString& file : files) {
-		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(path + "/" + file);
-
-		if (fileRef.isNull()) {
-			failedFileList.append(file);
-			Logger::Warn("Failed to add file" + file);
-			continue;
-		}
-
-		const TagLib::Tag* tag = fileRef.tag();
-
-		prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
-			":artist, :album, :genre, :year, :track, :fileName)");
-		bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
-		bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
-		bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
-		bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
-		bindValue(":year", QString::number(tag->year()));
-		bindValue(":track", QString::number(tag->track()));
-		bindValue(":fileName", file);
-
-		if (!query.exec()) {
-			Logger::Warn("Error inserting data into database: " + query.lastError().text());
-			failedFileList.append(file);
-		}
-	}
-	return failedFileList;
-}
-
-bool MSTDataSource::addMusic(const QString& file) {
-	if (file.isEmpty()) {
-		return false;
-	}
-
-	const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(path + "/" + file);
+/**
+ * @details 单文件写入：读取标签并插入一条记录，供低层调用与测试使用
+ */
+bool MSTDataSource::insertMusic(const QString& file) {
+	const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(QDir(path).filePath(file));
 
 	if (fileRef.isNull()) {
 		return false;
@@ -266,15 +281,16 @@ bool MSTDataSource::addMusic(const QString& file) {
 
 	const TagLib::Tag* tag = fileRef.tag();
 
-	prepareStatement("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
+	QSqlQuery& query = threadQuery();
+	query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
 		":artist, :album, :genre, :year, :track, :fileName)");
-	bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
-	bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
-	bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
-	bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
-	bindValue(":year", QString::number(tag->year()));
-	bindValue(":track", QString::number(tag->track()));
-	bindValue(":fileName", file);
+	query.bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
+	query.bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
+	query.bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
+	query.bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
+	query.bindValue(":year", QString::number(tag->year()));
+	query.bindValue(":track", QString::number(tag->track()));
+	query.bindValue(":fileName", file);
 
 	if (!query.exec()) {
 		Logger::Warn("Error inserting data into database: " + query.lastError().text());
@@ -283,10 +299,75 @@ bool MSTDataSource::addMusic(const QString& file) {
 	return true;
 }
 
+bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedFiles) {
+	if (files.isEmpty()) {
+		return true;
+	}
+	// 整批写入在同一把锁内完成，其他线程的语句不会混入事务边界
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+
+	if (!query.exec("BEGIN TRANSACTION")) {
+		Logger::Error("Error beginning insert transaction:" + query.lastError().text());
+		return false;
+	}
+
+	for (const QString& file : files) {
+		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(QDir(path).filePath(file));
+		if (fileRef.isNull() || fileRef.tag() == nullptr) {
+			failedFiles.append(file);
+			Logger::Warn("Failed to read tags of file: " + file);
+			continue;
+		}
+		const TagLib::Tag* tag = fileRef.tag();
+		query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
+			":artist, :album, :genre, :year, :track, :fileName)");
+		query.bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
+		query.bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
+		query.bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
+		query.bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
+		query.bindValue(":year", QString::number(tag->year()));
+		query.bindValue(":track", QString::number(tag->track()));
+		query.bindValue(":fileName", file);
+		if (!query.exec()) {
+			failedFiles.append(file);
+			Logger::Warn("Error inserting data into database: " + query.lastError().text());
+		}
+	}
+
+	if (!query.exec("COMMIT")) {
+		Logger::Error("Error committing inserted data:" + query.lastError().text());
+		query.exec("ROLLBACK");
+		return false;
+	}
+	return true;
+}
+
+QStringList MSTDataSource::addMusic(const QStringList& files) {
+	QStringList failedFileList;
+	// 复用批量写入路径，保证事务与持锁语义一致
+	if (!addMusicBatch(files, failedFileList)) {
+		return files;
+	}
+	return failedFileList;
+}
+
+bool MSTDataSource::addMusic(const QString& file) {
+	if (file.isEmpty()) {
+		return false;
+	}
+	QMutexLocker locker(&dbMutex);
+	return insertMusic(file);
+}
+
 int MSTDataSource::getCount() {
-	prepareStatement("SELECT COUNT(*) FROM musicInfo");
-	execQuery();
-	query.next();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare("SELECT COUNT(*) FROM musicInfo");
+	if (!query.exec() || !query.next()) {
+		Logger::Error("Error counting music:" + query.lastError().text());
+		return 0;
+	}
 	return query.value(0).toInt();
 }
 
@@ -319,12 +400,17 @@ QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, co
 
 	sql += "LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize);
 
-	prepareStatement(sql);
-	execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare(sql);
+	if (!query.exec()) {
+		Logger::Error("Error querying page data:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> result;
-	auto item = QueryItem();
 	while (query.next()) {
+		QueryItem item;
 		item.setTitle(query.value(0).toString());
 		item.setArtist(query.value(1).toString());
 		item.setAlbum(query.value(2).toString());
@@ -337,10 +423,15 @@ QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, co
 }
 
 QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
-	prepareStatement("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' OR "
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' OR "
 		"artist LIKE '%' || :text || '%' OR album LIKE '%' || :text || '%'");
-	bindValue(":text", text);
-	execQuery();
+	query.bindValue(":text", text);
+	if (!query.exec()) {
+		Logger::Error("Error searching music:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> items;
 	while (query.next()) {
@@ -352,27 +443,37 @@ QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
 }
 
 QStringList MSTDataSource::getFileNameByMetadata(const QList<QueryItem>& items) {
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
 	QStringList fileList;
 	for (const QueryItem& item : items) {
-		prepareStatement("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");
-		bindValue(":title", item.getTitle());
-		bindValue(":artist", item.getArtist());
-		bindValue(":album", item.getAlbum());
-		execQuery();
-		query.next();
-		fileList.append(query.value(0).toString());
+		query.prepare("SELECT fileName FROM musicInfo WHERE title = :title AND artist = :artist AND album = :album");
+		query.bindValue(":title", item.getTitle());
+		query.bindValue(":artist", item.getArtist());
+		query.bindValue(":album", item.getAlbum());
+		if (!query.exec()) {
+			Logger::Error("Error querying file name by metadata:" + query.lastError().text());
+			continue;
+		}
+		// 元数据可能对应多条记录：全部返回，避免重复项被静默吞掉
+		while (query.next()) {
+			fileList.append(query.value(0).toString());
+		}
 	}
 	return fileList;
 }
 
 QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const SortByEnum sortBy,
                                             const OrderByEnum orderBy) {
-	// emit loadStarted();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
 
 	// 获取收藏音乐的真实总数（不带LIMIT，用于分页计算）
-	prepareStatement("SELECT COUNT(*) FROM musicInfo WHERE favorite = 1");
-	execQuery();
-	query.next();
+	query.prepare("SELECT COUNT(*) FROM musicInfo WHERE favorite = 1");
+	if (!query.exec() || !query.next()) {
+		Logger::Error("Error counting favorite music:" + query.lastError().text());
+		return {};
+	}
 	const int size = query.value(0).toInt();
 	lastFavoriteCount = size;
 	emit totalSize(size);
@@ -399,13 +500,16 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 	}
 	sql += "LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize);
 
-	prepareStatement(sql);
-	execQuery();
+	query.prepare(sql);
+	if (!query.exec()) {
+		Logger::Error("Error querying favorite music:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> items;
-	QueryItem item;
 	int i = 0;
 	while (query.next()) {
+		QueryItem item;
 		emit currentProgress(i);
 		item.setTitle(query.value(0).toString());
 		item.setArtist(query.value(1).toString());
@@ -416,7 +520,6 @@ QList<QueryItem> MSTDataSource::getFavorite(const unsigned short pageNum, const 
 		items.append(item);
 		i++;
 	}
-	// emit loadFinished();
 	return items;
 }
 
@@ -444,12 +547,17 @@ QList<QueryItem> MSTDataSource::getRuleHit(const unsigned short pageNum, const S
 	}
 	sql += "LIMIT " + QString::number(pageSize) + " OFFSET " + QString::number((pageNum - 1) * pageSize);
 
-	prepareStatement(sql);
-	execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare(sql);
+	if (!query.exec()) {
+		Logger::Error("Error querying rule hit music:" + query.lastError().text());
+		return {};
+	}
 
 	QList<QueryItem> items;
-	QueryItem item;
 	while (query.next()) {
+		QueryItem item;
 		item.setTitle(query.value(0).toString());
 		item.setArtist(query.value(1).toString());
 		item.setAlbum(query.value(2).toString());
@@ -466,10 +574,12 @@ bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 		return true; // 空列表视为成功
 	}
 
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
 	// 使用std::all_of检查所有文件是否都删除成功
-	return std::all_of(fileList.begin(), fileList.end(), [this](const QString& file) {
-		prepareStatement("DELETE FROM musicInfo WHERE fileName = :fileName");
-		bindValue(":fileName", file);
+	return std::all_of(fileList.begin(), fileList.end(), [&query, this](const QString& file) {
+		query.prepare("DELETE FROM musicInfo WHERE fileName = :fileName");
+		query.bindValue(":fileName", file);
 		if (!query.exec()) {
 			Logger::Error("Error deleting data from database:" + query.lastError().text());
 			return false;
@@ -479,12 +589,17 @@ bool MSTDataSource::deleteMusic(const QStringList& fileList) {
 }
 
 bool MSTDataSource::getRuleHit(const QString& fileName) {
-	prepareStatement("SELECT ruleHit FROM musicInfo WHERE fileName = :fileName");
-	bindValue(":fileName", fileName);
-	execQuery();
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare("SELECT ruleHit FROM musicInfo WHERE fileName = :fileName");
+	query.bindValue(":fileName", fileName);
+	if (!query.exec()) {
+		Logger::Error("Error reading rule hit state:" + query.lastError().text());
+		return false;
+	}
 
 	if (query.next()) {
-		QVariant value = query.value(0);
+		const QVariant value = query.value(0);
 		return !value.isNull() && value.toBool(); // 如果规则命中状态不为NULL且为true，返回true
 	}
 	return false; // 如果没有找到记录，默认返回false

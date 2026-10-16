@@ -1,6 +1,7 @@
 #ifndef MUSICPROPERTIES_H
 #define MUSICPROPERTIES_H
 #include <cstdint>
+#include <QMetaType>
 
 /**
  * @brief 音乐属性命名空间
@@ -189,5 +190,26 @@ namespace PROPERTIES {
             default: return 0x11;
         }
     }
+	/**
+	 * @brief 注册跨线程信号使用的枚举元类型
+	 * @details 后台任务经 QtConcurrent 发射信号到 GUI 线程时走排队连接，
+	 *          参数类型必须已注册到元对象系统，否则连接在运行期静默失效。
+	 *          幂等，可在多个构造函数中重复调用。
+	 */
+	inline void registerMetatypes() {
+		qRegisterMetaType<PathType>("PROPERTIES::PathType");
+		qRegisterMetaType<LoadErrorType>("PROPERTIES::LoadErrorType");
+		qRegisterMetaType<AppErrorType>("PROPERTIES::AppErrorType");
+		qRegisterMetaType<OperationType>("PROPERTIES::OperationType");
+		qRegisterMetaType<FileErrorType>("PROPERTIES::FileErrorType");
+	}
 } // namespace PROPERTIES
+
+// 供 QtConcurrent 工作线程向 GUI 线程排队投递信号参数使用
+Q_DECLARE_METATYPE(PROPERTIES::PathType)
+Q_DECLARE_METATYPE(PROPERTIES::LoadErrorType)
+Q_DECLARE_METATYPE(PROPERTIES::AppErrorType)
+Q_DECLARE_METATYPE(PROPERTIES::OperationType)
+Q_DECLARE_METATYPE(PROPERTIES::FileErrorType)
+
 #endif // MUSICPROPERTIES_H

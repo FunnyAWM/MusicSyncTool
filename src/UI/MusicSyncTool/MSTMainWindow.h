@@ -3,16 +3,16 @@
 #define MUSICSYNCTOOL_H
 
 // 标准库头文件
+#include <atomic>
 #include <memory>
 
 // Qt核心模块
-#include <QAtomicInt>
-#include <QAtomicPointer>
 #include <QAudioOutput>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
 #include <QFuture>
+#include <QFutureWatcher>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMainWindow>
@@ -102,16 +102,19 @@ private:
 	
 	// 媒体播放控制器
 	MSTMediaController* mediaController;
-	
+
 	// 状态管理
-	QAtomicPointer<bool> copyOperationInProgress;
-	
+	/// @brief 复制任务进行中标记：工作线程与 GUI 线程都会访问
+	std::atomic<bool> copyOperationInProgress{false};
+	/// @brief 持有复制任务的 QFuture，保证窗口析构前任务已结束
+	QFutureWatcher<void> copyWatcher;
+
 	// 配置和常量
 	SettingsData entity;
 
 public:
 	explicit MSTMainWindow(QWidget* parent = nullptr);
-	
+
 	~MSTMainWindow() override;
 	void initDatabase();
 	void initUI();
@@ -124,6 +127,8 @@ public:
 	QStringList getDuplicatedMusic(PathType);
 	void showSettings() const;
 	void copyMusic(const QString&, const QStringList&, const QString&);
+	/// @brief 启动复制任务并防止并发复制
+	void startCopy(const QString& source, const QStringList& fileList, const QString& target);
 	[[nodiscard]] QString getLanguage() const;
 	void setAvailableSpace(PathType) const;
 
@@ -132,7 +137,7 @@ public slots:
 	void on_actionClean_log_files_triggered(bool);
 	void on_actionDupeLocal_triggered(bool);
 	void on_actionDupeRemote_triggered(bool);
-	[[noreturn]] void on_actionExit_triggered(bool);
+	void on_actionExit_triggered(bool);
 	void on_actionLocal_triggered(bool);
 	void on_actionRemote_triggered(bool);
 	void on_actionSettings_triggered(bool) const;
@@ -156,17 +161,25 @@ public slots:
 	void on_volumeSlider_sliderMoved(int) const;
 	void on_volumeSlider_sliderPressed() const;
 	void on_volumeSlider_valueChanged(int) const;
-	void on_copyFinished(OperationType) const;
+	void on_copyFinished(OperationType);
 	void saveSettings(const SettingsData&);
+
+	/**
+	 * @brief 在 GUI 线程刷新音乐表格
+	 * @details 扫描任务在工作线程完成取数，表格控件只能在 GUI 线程更新
+	 */
+	void applyTablePage(PathType path, QList<QueryItem> items, unsigned short page, unsigned short totalPages);
 
 signals:
 	void addToErrorListConcurrent(QString, LoadErrorType);
 	void copyFinished(OperationType);
-	void current(qsizetype current);
+	/// @brief 复制过程中的文件错误，经排队连接回到 GUI 线程登记
+	void fileCopyError(QString fileName, FileErrorType error);
+	void current(int current);
 	void finished();
 	void loadFinished(OperationType);
 	void started();
-	void total(qsizetype total);
+	void total(int total);
 };
 
 // QT_END_NAMESPACE

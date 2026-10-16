@@ -1,9 +1,11 @@
 #ifndef MSTDATASOURCE_H
 #define MSTDATASOURCE_H
 
+#include <QMutex>
 #include <QDateTime>
 #include <QSqlQuery>
 #include <QString>
+#include <QThreadStorage>
 #include <QVariant>
 #include <type_traits>
 
@@ -16,9 +18,25 @@ class MSTDataSource final : public QObject {
 	QString path;
 	QString connection;
 	QSqlDatabase db;
-	QSqlQuery query;
+	/**
+	 * @brief 串行化数据库访问
+	 * @details 扫描走 QtConcurrent 工作线程，与 GUI 线程共用同一 SQLite 连接；
+	 *          所有访问都必须持有该锁，事务边界（批量写入）必须整体持锁
+	 */
+	mutable QMutex dbMutex;
+	/// @brief 每线程独立的查询对象，避免共享 QSqlQuery 实例成员导致的数据竞争
+	mutable QThreadStorage<QSqlQuery*> threadQueries;
 	int pageSize = 200;
 	int lastFavoriteCount = 0;
+
+	/**
+	 * @brief 取当前线程的查询对象
+	 * @details 调用方必须已持有 dbMutex（低层 prepare/bind/exec 接口除外，见其说明）
+	 */
+	[[nodiscard]] QSqlQuery& threadQuery() const;
+
+	/// @brief 写入单条记录（读取标签后插入），调用方必须已持有 dbMutex
+	[[nodiscard]] bool insertMusic(const QString& file);
 
 public:
 	[[nodiscard]] int getPageSize() const;
@@ -53,16 +71,22 @@ public:
 
 	void closeDB();
 
+	/**
+	 * @brief 准备 SQL 语句
+	 * @details 低层接口，供构建一次性语句（测试或维护脚本）使用。
+	 *          仅适用于单线程调用序列：prepare -> bindValue -> execQuery
+	 */
 	void prepareStatement(const QString& sqlStatement);
 
 	/**
-	 * @brief 绑定参数值到预处理语句
+	 * @brief 绑定参数值到当前线程的预处理语句
 	 * @tparam T 参数类型
 	 * @param placeholder 参数占位符
 	 * @param value 参数值
 	 */
 	template <class T>
 	void bindValue(const QString& placeholder, const T& value) {
+		QSqlQuery& query = threadQuery();
 		if constexpr (std::is_convertible_v<const T&, QVariant>) {
 			query.bindValue(placeholder, value);
 		}
@@ -71,15 +95,21 @@ public:
 		}
 	}
 
-	void execQuery();
+	/// @brief 执行当前线程的预处理语句，返回是否成功
+	[[nodiscard]] bool execQuery();
 
 	void updateFavoriteBatch(const QList<FavoriteUpdate>& updates);
 
 	void updateRuleHitBatch(const QList<RuleHitUpdate>& updates);
 
-	void beginTransaction();
-
-	void commitTransaction();
+	/**
+	 * @brief 批量写入新音乐（单事务、整体持锁）
+	 * @param files 待写入的文件名列表
+	 * @param failedFiles 输出参数：写入失败的文件名
+	 * @return 全部写入成功返回 true；失败时已回滚并返回 false
+	 * @details 批量写入必须在同一把锁内完成后，其他线程的语句才不会混入事务边界
+	 */
+	[[nodiscard]] bool addMusicBatch(const QStringList& files, QStringList& failedFiles);
 
 	QList<QueryItem> getByFileNames(const QStringList& fileNames);
 
@@ -112,9 +142,10 @@ signals:
 
 	void loadFinished(OperationType operation);
 
-	void totalSize(qsizetype size);
+	/// @brief 总条目数；跨线程排队投递，参数用 int 保证元类型在 moc 侧可解析
+	void totalSize(int size);
 
-	void currentProgress(qsizetype progress);
+	void currentProgress(int progress);
 };
 
 #endif // MSTDATASOURCE_H

@@ -1,4 +1,5 @@
 #include "LoadingPage.h"
+#include <cmath>
 #include <ctime>
 #include "../MusicSyncTool/MSTMainWindow.h"
 
@@ -40,10 +41,10 @@ void LoadingPage::stopPage() {
 	close();
 }
 
-void LoadingPage::setProgress(const qsizetype value) const {
+void LoadingPage::setProgress(const int value) const {
 	ui.progressBar->setValue(static_cast<int>(std::round(static_cast<double>(value) / static_cast<double>(total) * 100.0)));
 }
 
-void LoadingPage::setTotal(const qsizetype total_) {
+void LoadingPage::setTotal(const int total_) {
 	this->total = total_;
 }

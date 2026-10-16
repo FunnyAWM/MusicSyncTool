@@ -11,10 +11,6 @@
 #include "../../Services/MSTScanController.h"
 #include "../../Services/MSTSettingsManager.h"
 
-#if defined(__linux)
-#include <unistd.h>
-#endif
-
 MSTMainWindow::MSTMainWindow(QWidget* parent) : // NOLINT(*-pro-type-member-init)
 	QMainWindow(parent), translator(new QTranslator(this)), loading(new LoadingPage()),
 	player(new MSTMediaPlayer(this)) {
@@ -49,13 +45,15 @@ MSTMainWindow::MSTMainWindow(QWidget* parent) : // NOLINT(*-pro-type-member-init
 }
 
 MSTMainWindow::~MSTMainWindow() {
+	// 先等待后台任务结束，再销毁它们会访问的对象（表格、错误报告器、数据源）
+	copyWatcher.waitForFinished();
+	scanController->waitForFinished();
 	if (local.isOpen()) {
 		local.closeDB();
 	}
 	if (remote.isOpen()) {
 		remote.closeDB();
 	}
-	delete copyOperationInProgress;
 	delete scanController;
 	delete mediaController;
 	delete errorReporter;
@@ -134,6 +132,12 @@ void MSTMainWindow::connectSlots() {
 	connect(scanController, &MSTScanController::errorOccurred, errorReporter, &MSTErrorReporter::popError);
 	connect(scanController, &MSTScanController::loadErrorOccurred, errorReporter,
 	        QOverload<const QString&, LoadErrorType>::of(&MSTErrorReporter::addToErrorList));
+	// 扫描任务在工作线程取数，表格刷新统一回到 GUI 线程
+	connect(scanController, &MSTScanController::tablePageReady, this, &MSTMainWindow::applyTablePage);
+	// 复制任务的文件错误经排队连接回到 GUI 线程登记，避免跨线程写错误列表
+	connect(this, &MSTMainWindow::fileCopyError, errorReporter,
+	        QOverload<const QString&, FileErrorType>::of(&MSTErrorReporter::addToErrorList));
+	connect(&copyWatcher, &QFutureWatcher<void>::finished, this, [this] { copyOperationInProgress.store(false); });
 	// 扫描控制器加载页面管理
 	connect(scanController, &MSTScanController::scanStart, loading, &LoadingPage::showPage);
 	connect(scanController, &MSTScanController::scanFinished, loading, &LoadingPage::stopPage);
@@ -265,17 +269,20 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 		[this](const int index) {
 			emit current(index);
 		},
-		// 错误回调
+		// 错误回调（运行于工作线程，只发信号，登记由 GUI 线程完成）
 		[this](const QString& fileName, const int errorType) {
 			switch (errorType) {
 			case 0: // DUPLICATE
-				errorReporter->addToErrorList(fileName, FileErrorType::DUPLICATE);
+				emit fileCopyError(fileName, FileErrorType::DUPLICATE);
 				break;
 			case 1: // LNF
-				errorReporter->addToErrorList(fileName, FileErrorType::LYRIC_NOT_FOUND);
+				emit fileCopyError(fileName, FileErrorType::LYRIC_NOT_FOUND);
 				break;
 			case 2: // DISKFULL
-				errorReporter->addToErrorList(fileName, FileErrorType::DISKFULL);
+				emit fileCopyError(fileName, FileErrorType::DISKFULL);
+				break;
+			default:
+				Logger::Warn("Unknown copy error type: " + QString::number(errorType) + " for " + fileName);
 				break;
 			}
 		},
@@ -354,8 +361,7 @@ void MSTMainWindow::on_copyToRemote_clicked() {
 	for (QString& file : fileList) {
 		file = file + ":" + (local.getRuleHit(file) ? "1" : "0"); // 添加规则命中状态
 	}
-	QFuture<void> future = QtConcurrent::run(&MSTMainWindow::copyMusic, this, local.getPath(), fileList,
-	                                         remote.getPath());
+	startCopy(local.getPath(), fileList, remote.getPath());
 }
 
 void MSTMainWindow::on_copyToLocal_clicked() {
@@ -375,8 +381,19 @@ void MSTMainWindow::on_copyToLocal_clicked() {
 	for (QString& file : fileList) {
 		file = file + ":" + (remote.getRuleHit(file) ? "1" : "0"); // 添加规则命中状态
 	}
-	QFuture<void> future = QtConcurrent::run(&MSTMainWindow::copyMusic, this, remote.getPath(), fileList,
-	                                         local.getPath());
+	startCopy(remote.getPath(), fileList, local.getPath());
+}
+
+/**
+ * @details 复制任务由 copyWatcher 持有，窗口析构时会等待其结束；
+ *          同一时间只允许一个复制任务，避免进度与错误列表互相干扰
+ */
+void MSTMainWindow::startCopy(const QString& source, const QStringList& fileList, const QString& target) {
+	if (copyOperationInProgress.exchange(true)) {
+		Logger::Warn("Copy operation already in progress, request ignored");
+		return;
+	}
+	copyWatcher.setFuture(QtConcurrent::run(&MSTMainWindow::copyMusic, this, source, fileList, target));
 }
 
 void MSTMainWindow::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(PathType::LOCAL); }
@@ -409,7 +426,8 @@ void MSTMainWindow::on_tableWidgetRemote_cellDoubleClicked(const int row, int co
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void MSTMainWindow::on_actionExit_triggered(bool triggered) {
-	exit(EXIT_SUCCESS);
+	// 走正常关闭流程：触发析构，等待后台任务结束后再释放资源
+	close();
 } // NOLINT(*-convert-member-functions-to-static)
 
 void MSTMainWindow::on_actionClean_log_files_triggered(bool triggered) {
@@ -472,11 +490,22 @@ void MSTMainWindow::on_volumeSlider_sliderMoved(const int position) const {
 
 void MSTMainWindow::on_volumeSlider_valueChanged(const int position) const { on_volumeSlider_sliderMoved(position); }
 
-void MSTMainWindow::on_copyFinished(OperationType op) const {
+void MSTMainWindow::on_copyFinished(OperationType op) {
+	copyOperationInProgress.store(false);
 	if (local.getPath() != "") {
 		setAvailableSpace(PathType::LOCAL);
 	}
 	if (remote.getPath() != "") {
 		setAvailableSpace(PathType::REMOTE);
 	}
+}
+
+/**
+ * @details 扫描任务在工作线程完成取数后发出 tablePageReady，
+ *          由本槽在 GUI 线程更新表格内容、页码标签与滚动位置
+ */
+void MSTMainWindow::applyTablePage(const PathType path, const QList<QueryItem> items,
+                                   const unsigned short page, const unsigned short totalPages) {
+	tableManager->populateTable(path, items, page, totalPages);
+	tableManager->scrollToTop(path);
 }

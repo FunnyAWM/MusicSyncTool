@@ -1,6 +1,7 @@
 #ifndef QUERYITEM_H
 #define QUERYITEM_H
 #include <QList>
+#include <QMetaType>
 #include <QString>
 #include <QStringList>
 
@@ -69,5 +70,8 @@ public:
 	 */
 	[[nodiscard]] static QStringList findDuplicatesInSorted(const QList<QueryItem>& items);
 };
+
+Q_DECLARE_METATYPE(QueryItem)
+Q_DECLARE_METATYPE(QList<QueryItem>)
 
 #endif // QUERYITEM_H

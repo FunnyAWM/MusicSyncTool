@@ -26,6 +26,9 @@ MSTScanController::MSTScanController(MSTDataSource& localDataSource,
 	  localDataSource(localDataSource),
 	  remoteDataSource(remoteDataSource),
 	  tableManager(tableManager) {
+	// 扫描任务在工作线程发射信号回 GUI 线程，参数类型必须已注册
+	PROPERTIES::registerMetatypes();
+	qRegisterMetaType<QList<QueryItem>>("QList<QueryItem>");
 }
 
 MSTDataSource& MSTScanController::getDataSource(const PathType path) const {
@@ -39,17 +42,33 @@ QString MSTScanController::getPath(const PathType path) const {
 /**
  * @details 根据扫描标记决定执行完整扫描还是仅加载页面数据。
  *          已完成过扫描的路径将直接加载页面，避免翻页时重复扫描。
+ *          扫描任务串行执行，并由 scanWatcher 持有 future，保证析构前任务已结束。
  */
 void MSTScanController::startScan(const PathType path, const unsigned short page, const SettingsData& entity) {
 	if (localDataSource.getPath().isEmpty() && remoteDataSource.getPath().isEmpty()) {
 		Logger::Warn("No path selected");
 		return;
 	}
+	if (scanWatcher.isRunning()) {
+		scanWatcher.waitForFinished();
+	}
+	// 页码与过滤状态属于 GUI 状态，在 GUI 线程设置，工作线程不再触碰
+	tableManager->setCurrentPage(path, page);
+	tableManager->setFavoriteOnly(path, false);
 	const int idx = static_cast<int>(path);
-	if (scanned[idx]) {
-		QtConcurrent::run(&MSTScanController::loadPage, this, path, page, entity);
-	} else {
-		QtConcurrent::run(&MSTScanController::scanConcurrent, this, path, page, entity);
+	if (scanned[idx].load()) {
+		scanWatcher.setFuture(QtConcurrent::run(&MSTScanController::loadPage, this, path, page, entity));
+	}
+	else {
+		scanWatcher.setFuture(QtConcurrent::run(&MSTScanController::scanConcurrent, this, path, page, entity));
+	}
+}
+
+bool MSTScanController::isScanRunning() const { return scanWatcher.isRunning(); }
+
+void MSTScanController::waitForFinished() {
+	if (scanWatcher.isRunning()) {
+		scanWatcher.waitForFinished();
 	}
 }
 
@@ -57,8 +76,6 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 	const clock_t start = clock();
 	MSTDataSource& dataSource = getDataSource(path);
 
-	tableManager->setCurrentPage(path, page);
-	tableManager->setFavoriteOnly(path, false);
 	if (page == 1) {
 		bool newFileFound = false;
 		Logger::Info("Scanning started");
@@ -127,30 +144,31 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		}
 		
 		// 全局总进度 = 添加文件 + 收藏扫描 + 规则扫描
-		const qsizetype globalTotal = newFileList.size() + filesToScan.size() + filesToScan.size();
+		const int globalTotal = static_cast<int>(newFileList.size() + filesToScan.size() + filesToScan.size());
 		emit scanTotal(globalTotal);
-		qsizetype globalProgress = 0;
-		// 添加新文件到数据库（事务包裹批量写入）
-		dataSource.beginTransaction();
-		for (int i = 0; i < newFileList.size(); i++) {
-			emit scanCurrent(globalProgress + i);
-			const QString file = newFileList.at(i);
-			if (!dataSource.addMusic(file)) {
-				Logger::Warn("Error adding music: " + file);
-				emit loadErrorOccurred(file, LoadErrorType::FILE_NOT_SCANNABLE);
-			}
+		int globalProgress = 0;
+		// 添加新文件到数据库（单事务整体持锁写入）
+		QStringList failedFiles;
+		if (!dataSource.addMusicBatch(newFileList, failedFiles)) {
+			Logger::Error("Failed to write scanned music into database");
+			emit errorOccurred(AppErrorType::DB_ERROR);
+			return;
 		}
+		for (const QString& file : failedFiles) {
+			Logger::Warn("Error adding music: " + file);
+			emit loadErrorOccurred(file, LoadErrorType::FILE_NOT_SCANNABLE);
+		}
+		globalProgress += static_cast<int>(newFileList.size());
+		emit scanCurrent(globalProgress);
 		clock_t endPhase = clock();
 		Logger::Info("Basic scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 
-		dataSource.commitTransaction();
-		globalProgress += newFileList.size();
 		setFavorite(path, filesToScan, entity.favoriteTag, globalProgress);
-		globalProgress += filesToScan.size();
+		globalProgress += static_cast<int>(filesToScan.size());
 		endPhase = clock();
 		Logger::Info("Favorite scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		setRuleHit(path, entity.rules, filesToScan, globalProgress);
-		globalProgress += filesToScan.size();
+		globalProgress += static_cast<int>(filesToScan.size());
 		endPhase = clock();
 		Logger::Info("Rule scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		dateTime = QDateTime::currentDateTime();
@@ -162,12 +180,14 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		Logger::Info(
 			"Scanning finished in " + QString::number(static_cast<double>(end - start) / CLOCKS_PER_SEC) + " seconds");
 	}
-	scanned[static_cast<int>(path)] = true;
+	scanned[static_cast<int>(path)].store(true);
 	const QList<QueryItem> tableData = dataSource.getMusicToTable(page, PROPERTIES::toSortBy(entity.sortBy),
 		PROPERTIES::toOrderBy(entity.orderBy));
-	const unsigned short totalPages = static_cast<unsigned short>(dataSource.getCount() / dataSource.getPageSize() + 1);
-	tableManager->populateTable(path, tableData, page, totalPages);
-	emit tableManager->requestScroll(path);
+	// 总页数向上取整；总数为 0 时至少显示 1 页，避免出现 "1/0"
+	const int musicCount = dataSource.getCount();
+	const unsigned short totalPages = static_cast<unsigned short>(qMax(
+		1, (musicCount + dataSource.getPageSize() - 1) / dataSource.getPageSize()));
+	emit tablePageReady(path, tableData, page, totalPages);
 }
 
 void MSTScanController::setFavorite(const PathType path,
@@ -180,7 +200,7 @@ void MSTScanController::setFavorite(const PathType path,
 	// 逐文件扫描标签判定收藏状态并报告进度
 	QList<FavoriteUpdate> results;
 	for (qsizetype i = 0; i < filesToScan.size(); i++) {
-		emit scanCurrent(progressOffset + i);
+		emit scanCurrent(static_cast<int>(progressOffset + i));
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(dataSource.getPath() + "/" + filesToScan.at(i));
 		FavoriteUpdate favResult;
 		favResult.fileName = filesToScan.at(i);
@@ -201,7 +221,7 @@ void MSTScanController::setRuleHit(const PathType path, const QList<LyricIgnoreR
 	// 逐项扫描规则命中状态并报告进度
 	QList<RuleHitUpdate> results;
 	for (qsizetype i = 0; i < items.size(); i++) {
-		emit scanCurrent(progressOffset + i);
+		emit scanCurrent(static_cast<int>(progressOffset + i));
 		const auto& item = items.at(i);
 		RuleHitUpdate ruleResult;
 		ruleResult.fileName = item.getFileName();
@@ -234,14 +254,16 @@ void MSTScanController::loadPage(const PathType path, const unsigned short page,
 	emit scanTotal(dataSource.getPageSize());
 	const QList<QueryItem> tableData = dataSource.getMusicToTable(page, PROPERTIES::toSortBy(entity.sortBy),
 		PROPERTIES::toOrderBy(entity.orderBy));
-	const unsigned short totalPages = static_cast<unsigned short>(dataSource.getCount() / dataSource.getPageSize() + 1);
-	tableManager->populateTable(path, tableData, page, totalPages);
-	emit tableManager->requestScroll(path);
+	// 总页数向上取整；总数为 0 时至少显示 1 页，避免出现 "1/0"
+	const int musicCount = dataSource.getCount();
+	const unsigned short totalPages = static_cast<unsigned short>(qMax(
+		1, (musicCount + dataSource.getPageSize() - 1) / dataSource.getPageSize()));
+	emit tablePageReady(path, tableData, page, totalPages);
 }
 
 /**
  * @details 清除指定路径的已扫描标记，使下次startScan调用触发完整扫描
  */
 void MSTScanController::resetScan(const PathType path) {
-	scanned[static_cast<int>(path)] = false;
+	scanned[static_cast<int>(path)].store(false);
 }

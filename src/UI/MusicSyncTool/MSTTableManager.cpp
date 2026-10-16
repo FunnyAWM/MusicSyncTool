@@ -64,6 +64,11 @@ void MSTTableManager::fillTableWithItems(QTableWidget* table,
 void MSTTableManager::scrollToTop(const PathType path) const {
 	QTableWidget* targetTable = getTable(path);
 	QTableWidgetItem const* item = targetTable->item(0, 0);
+	if (item == nullptr) {
+		// 空表（0 条结果）时没有可滚动项，直接复位滚动条
+		targetTable->scrollToTop();
+		return;
+	}
 	targetTable->scrollToItem(item, QAbstractItemView::PositionAtTop);
 }
 
