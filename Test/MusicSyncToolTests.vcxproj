@@ -73,7 +73,7 @@
     <ClInclude Include="..\src\Core\SingleInstance.h" />
     <ClInclude Include="..\src\Core\StringSimilarity.h" />
     <ClInclude Include="..\src\Core\MSTTagUtils.h" />
-    <QtMoc Include="..\src\Data\LyricIgnoreRule.h" />
+    <ClInclude Include="..\src\Data\LyricIgnoreRule.h" />
     <ClInclude Include="..\src\Data\QueryItem.h" />
     <ClInclude Include="..\src\Services\Logger.h" />
     <QtMoc Include="..\src\Services\MSTDataSource.h" />

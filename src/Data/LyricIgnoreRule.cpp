@@ -5,15 +5,6 @@
 
 using namespace PROPERTIES;
 
-namespace {
-	/**
-	 * @brief 规则字符串译文
-	 * @details 类已改为纯值类型，不再继承 QObject，因此不能使用 tr()；
-	 *          这里使用与原先相同的翻译上下文 "LyricIgnoreRule"
-	 */
-	QString ruleTr(const char* text) { return QCoreApplication::translate("LyricIgnoreRule", text); }
-}
-
 LyricIgnoreRule::LyricIgnoreRule(const RuleType ruleType, const RuleField ruleField,
                                  QString ruleName)
 	: ruleType(ruleType), ruleField(ruleField), ruleName(std::move(ruleName)) {
@@ -37,13 +28,15 @@ LyricIgnoreRule::LyricIgnoreRule(const RuleType ruleType, const RuleField ruleFi
  * @return 对应的中文字符串
  */
 QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
+	// 类已改为纯值类型，不能再用 tr()；上下文保持 "LyricIgnoreRule" 以复用既有译文。
+	// 这里必须写字面量，否则 lupdate 无法抽取这些文案
 	switch (rules) {
 	case RuleField::TITLE:
-		return ruleTr("名称");      // 标题
+		return QCoreApplication::translate("LyricIgnoreRule", "名称");      // 标题
 	case RuleField::ARTIST:
-		return ruleTr("艺术家");    // 艺术家
+		return QCoreApplication::translate("LyricIgnoreRule", "艺术家");    // 艺术家
 	case RuleField::ALBUM:
-		return ruleTr("专辑");      // 专辑
+		return QCoreApplication::translate("LyricIgnoreRule", "专辑");      // 专辑
 	case RuleField::NONE:
 		return "";
 	default:
@@ -59,9 +52,9 @@ QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 QString LyricIgnoreRule::ignoreRulesToString(const RuleType rules) {
 	switch (rules) {
 	case RuleType::INCLUDES:
-		return ruleTr("包含");      // 包含匹配
+		return QCoreApplication::translate("LyricIgnoreRule", "包含");      // 包含匹配
 	case RuleType::EXCLUDES:
-		return ruleTr("排除");      // 排除匹配
+		return QCoreApplication::translate("LyricIgnoreRule", "排除");      // 排除匹配
 	default:
 		return "";
 	}
