@@ -148,11 +148,22 @@ bool QueryItem::operator==(const QueryItem& other) const {
 QStringList QueryItem::findDuplicatesInSorted(const QList<QueryItem>& items) {
 	QStringList duplicates;
 	// 从索引 1 开始，避免首项与自身比较
-	for (qsizetype i = 1; i < items.size(); ++i) {
-		if (items[i - 1] == items[i]) {
-			duplicates.append(items[i - 1].getFileName());
-			duplicates.append(items[i].getFileName());
+	qsizetype i = 1;
+	while (i < items.size()) {
+		if (items[i - 1] != items[i]) {
+			++i;
+			continue;
 		}
+		// 相邻相等即构成重复组：整组文件各记录一次，避免 3 项以上时重复登记
+		const qsizetype groupStart = i - 1;
+		qsizetype groupEnd = i;
+		while (groupEnd + 1 < items.size() && items[groupEnd] == items[groupEnd + 1]) {
+			++groupEnd;
+		}
+		for (qsizetype j = groupStart; j <= groupEnd; ++j) {
+			duplicates.append(items[j].getFileName());
+		}
+		i = groupEnd + 1;
 	}
 	return duplicates;
 }

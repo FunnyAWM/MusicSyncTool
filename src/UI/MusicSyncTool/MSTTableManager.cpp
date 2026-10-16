@@ -87,24 +87,14 @@ void MSTTableManager::searchMusic(const PathType path, const QString& text) {
 	favoriteOnly[idx] = false;
 	currentPage[idx] = 1;
 
-	const QList<QueryItem> allItems = dataSource.searchMusic(text);
-	const int total = allItems.size();
+	// 命中计数与分页数据都在 SQL 层完成，避免整库命中结果进入内存
+	const int total = dataSource.getSearchCount(text);
 	totalPage[idx] = total > 0 ? static_cast<unsigned short>((total + PAGESIZE - 1) / PAGESIZE) : 1;
 	getPageLabel(path)->setText(
 		QString::number(currentPage[idx]) + "/" + QString::number(totalPage[idx]));
 
-	const int start = 0;
-	const int count = qMin(static_cast<int>(PAGESIZE), total - start);
-	targetTable->clearContents();
-	targetTable->setRowCount(count);
-	for (int i = 0; i < count; i++) {
-		targetTable->setItem(i, 0, new QTableWidgetItem(allItems.at(start + i).getTitle()));
-		targetTable->setItem(i, 1, new QTableWidgetItem(allItems.at(start + i).getArtist()));
-		targetTable->setItem(i, 2, new QTableWidgetItem(allItems.at(start + i).getAlbum()));
-		targetTable->setItem(i, 3, new QTableWidgetItem(allItems.at(start + i).getGenre()));
-		targetTable->setItem(i, 4, new QTableWidgetItem(allItems.at(start + i).getYear() != 0 ? QString::number(allItems.at(start + i).getYear()) : ""));
-		targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(allItems.at(start + i).getTrack())));
-	}
+	const QList<QueryItem> pageItems = dataSource.searchMusic(text, currentPage[idx]);
+	fillTableWithItems(targetTable, pageItems, static_cast<int>(pageItems.size()));
 }
 
 void MSTTableManager::loadSearchPage(const PathType path) {
@@ -112,24 +102,13 @@ void MSTTableManager::loadSearchPage(const PathType path) {
 	MSTDataSource& dataSource = getDataSource(path);
 	QTableWidget* targetTable = getTable(path);
 
-	const QList<QueryItem> allItems = dataSource.searchMusic(searchText[idx]);
-	const int total = allItems.size();
+	const int total = dataSource.getSearchCount(searchText[idx]);
 	totalPage[idx] = total > 0 ? static_cast<unsigned short>((total + PAGESIZE - 1) / PAGESIZE) : 1;
 	getPageLabel(path)->setText(
 		QString::number(currentPage[idx]) + "/" + QString::number(totalPage[idx]));
 
-	const int start = (currentPage[idx] - 1) * PAGESIZE;
-	const int count = qMin(static_cast<int>(PAGESIZE), total - start);
-	targetTable->clearContents();
-	targetTable->setRowCount(count);
-	for (int i = 0; i < count; i++) {
-		targetTable->setItem(i, 0, new QTableWidgetItem(allItems.at(start + i).getTitle()));
-		targetTable->setItem(i, 1, new QTableWidgetItem(allItems.at(start + i).getArtist()));
-		targetTable->setItem(i, 2, new QTableWidgetItem(allItems.at(start + i).getAlbum()));
-		targetTable->setItem(i, 3, new QTableWidgetItem(allItems.at(start + i).getGenre()));
-		targetTable->setItem(i, 4, new QTableWidgetItem(allItems.at(start + i).getYear() != 0 ? QString::number(allItems.at(start + i).getYear()) : ""));
-		targetTable->setItem(i, 5, new QTableWidgetItem(QString::number(allItems.at(start + i).getTrack())));
-	}
+	const QList<QueryItem> pageItems = dataSource.searchMusic(searchText[idx], currentPage[idx]);
+	fillTableWithItems(targetTable, pageItems, static_cast<int>(pageItems.size()));
 }
 
 QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
@@ -137,19 +116,21 @@ QStringList MSTTableManager::getSelectedMusic(const PathType path) const {
 	if (table->rowCount() == 0) {
 		return {};
 	}
-	QSet<int> selectedRows;
+	// 按行号升序收集，保证返回顺序与界面上看到的顺序一致
+	QList<int> selectedRows;
 	for (int i = 0; i < table->rowCount(); i++) {
-		if (table->item(i, 0)->isSelected()) {
-			selectedRows.insert(i);
+		const QTableWidgetItem* const firstColumn = table->item(i, 0);
+		if (firstColumn != nullptr && firstColumn->isSelected()) {
+			selectedRows.append(i);
 		}
 	}
-	if (selectedRows.empty()) {
+	if (selectedRows.isEmpty()) {
 		return {};
 	}
 	QStringList titleList;
 	QStringList artistList;
 	QStringList albumList;
-	for (const int& i : selectedRows) {
+	for (const int i : selectedRows) {
 		titleList.append(table->item(i, 0)->text());
 		artistList.append(table->item(i, 1)->text());
 		albumList.append(table->item(i, 2)->text());

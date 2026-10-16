@@ -38,6 +38,9 @@ class MSTDataSource final : public QObject {
 	/// @brief 写入单条记录（读取标签后插入），调用方必须已持有 dbMutex
 	[[nodiscard]] bool insertMusic(const QString& file);
 
+	/// @brief 转义 LIKE 模式中的通配符，避免用户输入的 % 与 _ 被当作通配符
+	[[nodiscard]] static QString escapeLikePattern(const QString& text);
+
 public:
 	[[nodiscard]] int getPageSize() const;
 
@@ -120,6 +123,17 @@ public:
 	[[nodiscard]] bool addMusic(const QString& file);
 
 	QList<QueryItem> searchMusic(const QString& text);
+
+	/**
+	 * @brief 分页搜索
+	 * @param text 搜索文本
+	 * @param pageNum 页码（从 1 开始）
+	 * @details 命中结果在 SQL 层用 LIMIT/OFFSET 截断，避免整库命中结果进入内存
+	 */
+	QList<QueryItem> searchMusic(const QString& text, unsigned short pageNum);
+
+	/// @brief 搜索命中总数（用于分页计算）
+	[[nodiscard]] int getSearchCount(const QString& text);
 
 	QStringList getFileNameByMetadata(const QList<QueryItem>& items);
 

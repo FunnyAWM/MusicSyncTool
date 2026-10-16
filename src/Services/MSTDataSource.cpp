@@ -128,7 +128,7 @@ void MSTDataSource::updateRuleHitBatch(const QList<RuleHitUpdate>& updates) {
 
 /**
  * @details 使用 WHERE fileName IN (...) 让数据库做过滤，
- *          避免全表加载后再内存过滤
+ *          避免全表加载后再内存过滤；文件数超过单批占位符上限时按批查询
  */
 QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	if (fileNames.isEmpty()) {
@@ -137,34 +137,40 @@ QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	QMutexLocker locker(&dbMutex);
 	QSqlQuery& query = threadQuery();
 
-	// 构建参数化 IN 子句：WHERE fileName IN (:f0, :f1, ...)
-	QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (";
-	QStringList paramNames;
-	for (int i = 0; i < fileNames.size(); i++) {
-		paramNames << ":f" + QString::number(i);
-	}
-	sql += paramNames.join(",") + ") ORDER BY title ASC";
-
-	query.prepare(sql);
-	for (int i = 0; i < fileNames.size(); i++) {
-		query.bindValue(":f" + QString::number(i), fileNames.at(i));
-	}
-	if (!query.exec()) {
-		Logger::Error("Error querying by file names:" + query.lastError().text());
-		return {};
-	}
-
+	// SQLITE_MAX_VARIABLE_NUMBER 旧版本为 999，按 500 分批留出余量
+	constexpr qsizetype batchSize = 500;
 	QList<QueryItem> items;
-	while (query.next()) {
-		items.append(QueryItem(
-			query.value(0).toString(),
-			query.value(1).toString(),
-			query.value(2).toString(),
-			query.value(3).toString(),
-			query.value(4).toUInt(),
-			query.value(5).toUInt(),
-			query.value(6).toString()
-		));
+	for (qsizetype offset = 0; offset < fileNames.size(); offset += batchSize) {
+		const QStringList batch = fileNames.mid(offset, batchSize);
+
+		// 构建参数化 IN 子句：WHERE fileName IN (:f0, :f1, ...)
+		QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (";
+		QStringList paramNames;
+		for (qsizetype i = 0; i < batch.size(); i++) {
+			paramNames << ":f" + QString::number(i);
+		}
+		sql += paramNames.join(",") + ") ORDER BY title ASC";
+
+		query.prepare(sql);
+		for (qsizetype i = 0; i < batch.size(); i++) {
+			query.bindValue(":f" + QString::number(i), batch.at(i));
+		}
+		if (!query.exec()) {
+			Logger::Error("Error querying by file names:" + query.lastError().text());
+			continue;
+		}
+
+		while (query.next()) {
+			items.append(QueryItem(
+				query.value(0).toString(),
+				query.value(1).toString(),
+				query.value(2).toString(),
+				query.value(3).toString(),
+				query.value(4).toUInt(),
+				query.value(5).toUInt(),
+				query.value(6).toString()
+			));
+		}
 	}
 	return items;
 }
@@ -422,14 +428,72 @@ QList<QueryItem> MSTDataSource::getMusicToTable(const unsigned short pageNum, co
 	return result;
 }
 
+/**
+ * @details 转义 LIKE 模式中的通配符：% 与 _ 必须按字面匹配，
+ *          反斜杠本身也要转义；配合 SQL 的 ESCAPE '\' 使用
+ */
+QString MSTDataSource::escapeLikePattern(const QString& text) {
+	QString escaped = text;
+	escaped.replace("\\", "\\\\");
+	escaped.replace("%", "\\%");
+	escaped.replace("_", "\\_");
+	return escaped;
+}
+
 QList<QueryItem> MSTDataSource::searchMusic(const QString& text) {
+	if (text.isEmpty()) {
+		// 空关键字不返回整库结果，与表格层的处理保持一致
+		return {};
+	}
 	QMutexLocker locker(&dbMutex);
 	QSqlQuery& query = threadQuery();
-	query.prepare("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' OR "
-		"artist LIKE '%' || :text || '%' OR album LIKE '%' || :text || '%'");
-	query.bindValue(":text", text);
+	query.prepare("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' ESCAPE '\\' OR "
+		"artist LIKE '%' || :text || '%' ESCAPE '\\' OR album LIKE '%' || :text || '%' ESCAPE '\\'");
+	query.bindValue(":text", escapeLikePattern(text));
 	if (!query.exec()) {
 		Logger::Error("Error searching music:" + query.lastError().text());
+		return {};
+	}
+
+	QList<QueryItem> items;
+	while (query.next()) {
+		items.append(QueryItem(query.value(0).toString(), query.value(1).toString(), query.value(2).toString(),
+		                       query.value(3).toString(), query.value(4).toUInt(), query.value(5).toUInt(),
+		                       query.value(6).toString()));
+	}
+	return items;
+}
+
+int MSTDataSource::getSearchCount(const QString& text) {
+	if (text.isEmpty()) {
+		return 0;
+	}
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare("SELECT COUNT(*) FROM musicInfo WHERE title LIKE '%' || :text || '%' ESCAPE '\\' OR "
+		"artist LIKE '%' || :text || '%' ESCAPE '\\' OR album LIKE '%' || :text || '%' ESCAPE '\\'");
+	query.bindValue(":text", escapeLikePattern(text));
+	if (!query.exec() || !query.next()) {
+		Logger::Error("Error counting search results:" + query.lastError().text());
+		return 0;
+	}
+	return query.value(0).toInt();
+}
+
+QList<QueryItem> MSTDataSource::searchMusic(const QString& text, const unsigned short pageNum) {
+	if (text.isEmpty()) {
+		return {};
+	}
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	query.prepare("SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE title LIKE '%' || :text || '%' ESCAPE '\\' OR "
+		"artist LIKE '%' || :text || '%' ESCAPE '\\' OR album LIKE '%' || :text || '%' ESCAPE '\\' "
+		"ORDER BY title ASC LIMIT :limit OFFSET :offset");
+	query.bindValue(":text", escapeLikePattern(text));
+	query.bindValue(":limit", pageSize);
+	query.bindValue(":offset", (pageNum - 1) * pageSize);
+	if (!query.exec()) {
+		Logger::Error("Error searching music page:" + query.lastError().text());
 		return {};
 	}
 

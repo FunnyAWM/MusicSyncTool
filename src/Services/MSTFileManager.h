@@ -4,7 +4,8 @@
 #include <QStorageInfo>
 
 class MSTFileManager {
-	QStorageInfo storageInfo;
+	/// @brief 目标目录路径；存储信息每次使用时重新读取，避免过期快照
+	QString storagePath;
 
 public:
 	/// 支持的音频格式列表

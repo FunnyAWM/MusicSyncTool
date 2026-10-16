@@ -138,7 +138,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		// 构建需要扫描标签/规则的文件列表（增量：新文件 + 修改过的旧文件）
 		QStringList filesToScan = newFileList;
 		for (const auto& file : existingFiles) {
-			if (QFile(dirPath + "/" + file).fileTime(QFileDevice::FileModificationTime) > dateTime) {
+			if (QFile(dir.filePath(file)).fileTime(QFileDevice::FileModificationTime) > dateTime) {
 				filesToScan.append(file);
 			}
 		}
@@ -201,7 +201,8 @@ void MSTScanController::setFavorite(const PathType path,
 	QList<FavoriteUpdate> results;
 	for (qsizetype i = 0; i < filesToScan.size(); i++) {
 		emit scanCurrent(static_cast<int>(progressOffset + i));
-		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(dataSource.getPath() + "/" + filesToScan.at(i));
+		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(
+			QDir(dataSource.getPath()).filePath(filesToScan.at(i)));
 		FavoriteUpdate favResult;
 		favResult.fileName = filesToScan.at(i);
 		favResult.isFavorite = fileRef.properties().contains(favoriteTag.toStdString().c_str());

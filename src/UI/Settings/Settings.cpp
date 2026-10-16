@@ -1,5 +1,6 @@
 #include "Settings.h"
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QMessageBox>
 #include "../../Services/Logger.h"
 
@@ -64,7 +65,8 @@ void Settings::setIgnoreLyricToUI(const bool ignoreLyric) {
 }
 
 void Settings::setSortByToUI(short sortBy) {
-	if (sortBy < 0 || sortBy > 2) {
+	// 排序字段编码为 0x01=标题 / 0x02=艺术家 / 0x03=专辑（见 PROPERTIES::toShort），越界回退标题
+	if (sortBy < toShort(SortByEnum::TITLE) || sortBy > toShort(SortByEnum::ALBUM)) {
 		sortBy = toShort(SortByEnum::TITLE);
 	}
 	entity.sortBy = sortBy;
@@ -115,7 +117,8 @@ void Settings::setFavoriteTagToUI(const QString& favorite) {
 }
 
 void Settings::setOrderByToUI(short orderBy) {
-	if (orderBy < 0 || orderBy > 1) {
+	// 升降序编码为 0x11=升序 / 0x12=降序（见 PROPERTIES::toShort），越界回退升序
+	if (orderBy < toShort(OrderByEnum::ASC) || orderBy > toShort(OrderByEnum::DESC)) {
 		orderBy = toShort(OrderByEnum::ASC);
 	}
 	entity.orderBy = orderBy;
