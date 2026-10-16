@@ -94,3 +94,44 @@ void TestMSTSettingsManager::cleanLog() {
     MSTSettingsManager::cleanLog();
     QCOMPARE(QDir("log").entryList(QDir::Files).size(), 0);
 }
+
+void TestMSTSettingsManager::defaultsIncludeThemeAndLog() {
+    MSTSettingsManager::createDefaultSettings();
+    QFile f("settings.json"); QVERIFY(f.open(QIODevice::ReadOnly));
+    const QJsonObject o = QJsonDocument::fromJson(f.readAll()).object(); f.close();
+    const SettingsData defaults;
+    QCOMPARE(o["themeMode"].toInt(), static_cast<int>(defaults.themeMode));
+    QCOMPARE(o["accentColor"].toInt(), static_cast<int>(defaults.accentColor));
+    QCOMPARE(o["logToFile"].toBool(), false);
+}
+
+void TestMSTSettingsManager::saveAndLoadThemeAndLog() {
+    SettingsData orig;
+    orig.themeMode = PROPERTIES::toShort(PROPERTIES::ThemeMode::DARK);
+    orig.accentColor = PROPERTIES::toShort(PROPERTIES::AccentColor::PURPLE);
+    orig.logToFile = true;
+    QVERIFY(MSTSettingsManager::saveSettings(orig));
+    SettingsData loaded{};
+    QVERIFY(MSTSettingsManager::loadSettings(loaded));
+    QCOMPARE(loaded.themeMode, orig.themeMode);
+    QCOMPARE(loaded.accentColor, orig.accentColor);
+    QCOMPARE(loaded.logToFile, true);
+}
+
+void TestMSTSettingsManager::legacyFileKeepsDefaults() {
+    // 旧版本设置文件没有主题与日志键：加载后必须保留结构体默认值，而不是被置成 0
+    {
+        QFile f("settings.json");
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write("{\"ignoreLyric\":true,\"sortBy\":2,\"orderBy\":17,\"language\":\"en_US\"}");
+        f.close();
+    }
+    SettingsData loaded{};
+    QVERIFY(MSTSettingsManager::loadSettings(loaded));
+    QCOMPARE(loaded.ignoreLyric, true);
+    QCOMPARE(loaded.sortBy, static_cast<short>(2));
+    QCOMPARE(loaded.language, QString("en_US"));
+    QCOMPARE(loaded.themeMode, PROPERTIES::toShort(PROPERTIES::ThemeMode::LIGHT));
+    QCOMPARE(loaded.accentColor, PROPERTIES::toShort(PROPERTIES::AccentColor::GREEN));
+    QCOMPARE(loaded.logToFile, false);
+}

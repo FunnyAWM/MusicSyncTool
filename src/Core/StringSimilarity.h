@@ -12,7 +12,8 @@ namespace StringSimilarity {
 
 	std::vector<int> buildKMPNext(const QString& pattern);
 
-	bool kmpSimilarity(const QString& text, const QString& pattern, double threshold = 0.8);
+	/// @brief 使用 KMP 判断相似性；默认阈值与 StringSimilarity.cpp 中的 similarityThreshold 保持一致
+	bool kmpSimilarity(const QString& text, const QString& pattern, double threshold = 0.85);
 
 	bool isCJKChar(const QChar& ch);
 

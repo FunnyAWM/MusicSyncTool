@@ -29,6 +29,9 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     int status = 0;
 
+    // 可选：以类名作为第一个参数只运行该类（mst_tests.exe TestMSTDataSource），便于定位失败与 CI 分片
+    QString onlyClass = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QString();
+
     struct TestCase { const char* name; std::function<QObject*()> create; };
     const TestCase tests[] = {
         {"TestMusicProperties",    []{ return new TestMusicProperties(); }},
@@ -42,9 +45,26 @@ int main(int argc, char* argv[]) {
         {"TestBlackBox",           []{ return new TestBlackBox(); }},
     };
 
+    // 类名被识别时从 QTest 的参数里剔除（否则会被当成测试函数过滤器），其余选项照常透传
+    int firstArg = 1;
+    if (!onlyClass.isEmpty()) {
+        for (const auto& tc : tests) {
+            if (onlyClass == QLatin1String(tc.name)) {
+                firstArg = 2;
+                break;
+            }
+        }
+        if (firstArg == 1) {
+            onlyClass.clear();
+        }
+    }
+
     for (const auto& tc : tests) {
+        if (!onlyClass.isEmpty() && onlyClass != QLatin1String(tc.name)) {
+            continue;
+        }
         QObject* t = tc.create();
-        int r = QTest::qExec(t, argc, argv);
+        const int r = QTest::qExec(t, argc - firstArg + 1, argv + firstArg - 1);
         if (r != 0) {
             qWarning() << "FAILED:" << tc.name << "(exit code" << r << ")";
             status |= r;

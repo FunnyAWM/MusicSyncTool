@@ -134,3 +134,67 @@ void TestMSTDataSource::ruleHit() {
     auto r = ds->getRuleHit(1, SortByEnum::TITLE, OrderByEnum::ASC);
     QCOMPARE(r.size(), 1);
 }
+
+void TestMSTDataSource::schemaMigration_legacyTable() {
+    // 另开连接模拟旧库：只有 fileName 一列且 user_version 为 0
+    const QString legacyConn = QString("tds_legacy_%1").arg(conn);
+    {
+        MSTDataSource legacy;
+        legacy.setConnectionName(legacyConn);
+        legacy.setPath(dbPath);
+        QVERIFY(legacy.openDB());
+        legacy.prepareStatement("CREATE TABLE IF NOT EXISTS musicInfo (fileName TEXT)");
+        QVERIFY(legacy.execQuery());
+        legacy.prepareStatement("INSERT INTO musicInfo(fileName) VALUES('legacy.mp3')");
+        QVERIFY(legacy.execQuery());
+
+        legacy.initTable();
+        // 迁移补列后，按完整列写入必须成功
+        legacy.prepareStatement(
+            "INSERT INTO musicInfo(title,artist,album,genre,year,track,favorite,ruleHit,fileName) "
+            "VALUES('T','A','Al','G',2024,1,0,0,'migrated.mp3')");
+        QVERIFY(legacy.execQuery());
+        QCOMPARE(legacy.getCount(), 2);
+
+        // 幂等：重复调用不改变已有数据
+        legacy.initTable();
+        QCOMPARE(legacy.getCount(), 2);
+        legacy.closeDB();
+    }
+    QSqlDatabase::removeDatabase(legacyConn);
+}
+
+void TestMSTDataSource::searchMusic_escapesWildcards() {
+    insert("100%","A","B","G",2024,1,"p1.mp3");
+    insert("100x","A","B","G",2024,2,"p2.mp3");
+    insert("a_c","A","B","G",2024,3,"p3.mp3");
+    insert("abc","A","B","G",2024,4,"p4.mp3");
+
+    // '%' 按字面匹配：只命中标题真的含 % 的那条，不会命中 "100x"
+    const auto percent = ds->searchMusic("100%");
+    QCOMPARE(percent.size(), 1);
+    QCOMPARE(percent[0].getFileName(), QString("p1.mp3"));
+    QCOMPARE(ds->getSearchCount("100%"), 1);
+
+    // '_' 同理，不再匹配任意单字符
+    const auto underscore = ds->searchMusic("a_c");
+    QCOMPARE(underscore.size(), 1);
+    QCOMPARE(underscore[0].getFileName(), QString("p3.mp3"));
+
+    // 不带通配符时仍是子串匹配
+    QCOMPARE(ds->searchMusic("100").size(), 2);
+}
+
+void TestMSTDataSource::getByFileNames_chunked() {
+    insert("T0","A","B","G",2024,1,"f0.mp3");
+    insert("T600","A","B","G",2024,2,"f600.mp3");
+    insert("T1200","A","B","G",2024,3,"f1200.mp3");
+
+    QStringList names;
+    names.reserve(1201);
+    for (int i = 0; i <= 1200; ++i) names << QString("f%1.mp3").arg(i);
+
+    // 1201 个名字跨 3 个批次（每批 500），命中不得被批次边界截断或重复
+    const auto r = ds->getByFileNames(names);
+    QCOMPARE(r.size(), 3);
+}

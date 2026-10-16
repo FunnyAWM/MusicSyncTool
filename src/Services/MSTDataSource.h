@@ -3,9 +3,9 @@
 
 #include <QMutex>
 #include <QDateTime>
+#include <QHash>
 #include <QSqlQuery>
 #include <QString>
-#include <QThreadStorage>
 #include <QVariant>
 #include <type_traits>
 
@@ -40,8 +40,15 @@ class MSTDataSource final : public QObject {
 	 *          所有访问都必须持有该锁，事务边界（批量写入）必须整体持锁
 	 */
 	mutable QMutex dbMutex;
-	/// @brief 每线程独立的查询对象，避免共享 QSqlQuery 实例成员导致的数据竞争
-	mutable QThreadStorage<QSqlQuery*> threadQueries;
+	/**
+	 * @brief 每线程独立的查询对象，避免共享 QSqlQuery 实例成员导致的数据竞争
+	 * @details 不能使用 QThreadStorage：主线程的线程局部数据在 QThreadStorage 对象销毁时不会被清理，
+	 *          槽位 id 会被后续实例复用，新实例会直接取到上一个实例遗留的查询对象——它绑定在已关闭的连接上
+	 *          （表现为 "QSqlQuery::exec: database not open"，或把语句发到错误的库）。
+	 *          这里改为按线程 id 索引并随连接关闭显式释放。
+	 */
+	mutable QMutex threadQueryMutex;
+	mutable QHash<Qt::HANDLE, QSqlQuery*> threadQueries;
 	int pageSize = 200;
 	int lastFavoriteCount = 0;
 
@@ -50,6 +57,9 @@ class MSTDataSource final : public QObject {
 	 * @details 调用方必须已持有 dbMutex（低层 prepare/bind/exec 接口除外，见其说明）
 	 */
 	[[nodiscard]] QSqlQuery& threadQuery() const;
+
+	/// @brief 释放所有线程的查询对象；关闭连接与析构前调用，避免留下绑定到已关闭连接的查询
+	void releaseThreadQueries();
 
 	/// @brief 写入单条记录（读取标签后插入），调用方必须已持有 dbMutex
 	[[nodiscard]] bool insertMusic(const QString& file);
@@ -84,7 +94,7 @@ public:
 
 	explicit MSTDataSource() = default;
 
-	~MSTDataSource() override = default;
+	~MSTDataSource() override;
 
 	void setPath(const QString& path);
 

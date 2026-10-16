@@ -19,6 +19,10 @@ private Q_SLOTS:
     void toShort_orderBy();
     void sortBy_roundtrip();
     void orderBy_roundtrip();
+    void themeMode_roundtrip();
+    void themeMode_default();
+    void accentColor_roundtrip();
+    void accentColor_default();
 };
 
 #endif

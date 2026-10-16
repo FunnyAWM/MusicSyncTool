@@ -7,6 +7,7 @@
 #include <QMutexLocker>
 #include <QRegularExpression>
 #include <QSqlError>
+#include <QThread>
 #include <taglib/fileref.h>
 #include "Logger.h"
 #include "../Core/MSTTagUtils.h"
@@ -17,13 +18,26 @@ namespace {
 }
 
 QSqlQuery& MSTDataSource::threadQuery() const {
-	QSqlQuery*& query = threadQueries.localData();
+	QMutexLocker locker(&threadQueryMutex);
+	QSqlQuery*& query = threadQueries[QThread::currentThreadId()];
 	if (query == nullptr) {
 		// 每线程独立查询对象：QSqlDatabase 连接由 dbMutex 串行化，
 		// 但 QSqlQuery 本身不可跨线程共享
 		query = new QSqlQuery(db);
 	}
 	return *query;
+}
+
+void MSTDataSource::releaseThreadQueries() {
+	QMutexLocker locker(&threadQueryMutex);
+	for (QSqlQuery* query : threadQueries) {
+		delete query;
+	}
+	threadQueries.clear();
+}
+
+MSTDataSource::~MSTDataSource() {
+	releaseThreadQueries();
 }
 
 int MSTDataSource::getPageSize() const { return pageSize; }
@@ -143,6 +157,8 @@ bool MSTDataSource::ensureColumn(const QString& tableName, const QString& column
 
 void MSTDataSource::closeDB() {
 	QMutexLocker locker(&dbMutex);
+	// 先丢弃各线程缓存的查询对象：连接关闭后它们不再可用，留着会被后续实例误用
+	releaseThreadQueries();
 	if (db.isOpen()) {
 		db.close();
 	}

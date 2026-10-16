@@ -21,8 +21,6 @@ private:
     MSTDataSource *ds = nullptr;
     int conn = 0;
     QString dbPath, origCwd;
-    void init();
-    void cleanup();
     void insert(const QString &t, const QString &a, const QString &al,
                 const QString &g, int y, int tr, const QString &fn,
                 bool fav = false, bool rh = false) {
@@ -46,6 +44,9 @@ private:
             insert(s[i].t,s[i].a,s[i].al,"Pop",2024,i+1,QString("%1.mp3").arg(s[i].t).toLower(),s[i].f,s[i].r);
     }
 private Q_SLOTS:
+    // QTest 只调用私有槽形式的 init/cleanup，声明在 private: 下会被静默忽略，夹具将从不执行
+    void init();
+    void cleanup();
     void pagination_firstPage();
     void pagination_middlePage();
     void pagination_lastPage();

@@ -17,8 +17,6 @@ private:
     MSTDataSource *ds = nullptr;
     int conn = 0;
     QString dbPath;
-    void init();
-    void cleanup();
     void insert(const QString &t, const QString &a, const QString &al,
                 const QString &g, int y, int tr, const QString &fn,
                 bool fav = false, bool rh = false) {
@@ -29,6 +27,9 @@ private:
         QVERIFY(ds->execQuery());
     }
 private Q_SLOTS:
+    // QTest 只调用私有槽形式的 init/cleanup，声明在 private: 下会被静默忽略，夹具将从不执行
+    void init();
+    void cleanup();
     void openClose();
     void pageSize();
     void initTable();
@@ -46,6 +47,9 @@ private Q_SLOTS:
     void getMusicToTable_page();
     void favorite();
     void ruleHit();
+    void schemaMigration_legacyTable();
+    void searchMusic_escapesWildcards();
+    void getByFileNames_chunked();
 };
 
 #endif
