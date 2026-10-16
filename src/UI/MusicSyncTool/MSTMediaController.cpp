@@ -1,5 +1,6 @@
 #include "MSTMediaController.h"
 
+#include <QDir>
 #include <QLabel>
 #include <QPushButton>
 #include <QTableWidget>
@@ -99,9 +100,8 @@ void MSTMediaController::playSelectedTrack(const PathType path, const int row) {
 	}
 	nowPlaying = fileNames.at(0);
 
-	const QString filePath = (path == PathType::LOCAL
-		                          ? localDataSource.getPath()
-		                          : remoteDataSource.getPath()) + "/" + nowPlaying;
+	const QString basePath = path == PathType::LOCAL ? localDataSource.getPath() : remoteDataSource.getPath();
+	const QString filePath = QDir(basePath).filePath(nowPlaying);
 	player->setNowPlaying(filePath);
 
 	const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(filePath);
