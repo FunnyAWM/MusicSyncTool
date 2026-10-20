@@ -94,16 +94,28 @@ link     Qt6Test/Qt6Widgets/Qt6Multimedia/Qt6Concurrent/Qt6Sql/Qt6Gui/Qt6Core + 
 | `kmpSimilarity` 默认阈值 0.8 与 `fuzzyMatch` 使用的 0.85 不一致 | 直接调用默认阈值时行为与界面判定不一致 | 默认参数对齐 0.85 |
 | `Logger` 落盘开关/消息处理器安装无同步 | 工作线程日志与安装动作存在数据竞争 | 开关与处理器指针改原子量，安装段加锁 |
 
+### 2.6 MSBuild `ClCompile` 全量编译（Visual Studio 工程，Debug|x64，真实执行）
+
+```
+MSBuild.exe MusicSyncTool.vcxproj -t:ClCompile -p:Configuration=Debug -p:Platform=x64 \
+  -p:QtInstallDir=D:\Qt\6.8.3\msvc2022_64 -p:QtToolsPath=D:\Qt\6.8.3\msvc2022_64\bin
+```
+
+- 结果：`0 个错误`、`0 个警告`（`/W3 /permissive- /sdl`）；`StringSimilarity.cpp`、`MSTFileManager.cpp`、
+  `MSTTableManager.cpp` 等改动文件确认参与重新编译；
+- `-p:QtInstallDir` / `-p:QtToolsPath` 用于覆盖工程内联的 6.8.1 / 6.10.1 路径（本机仅装 6.8.3，见 §3.1）；
+- 仅编译、未链接：工程 `AdditionalLibraryDirectories` 仍指向不存在的 `D:\Qt\6.8.1\msvc2022_64\lib`。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
 
-### 3.1 Visual Studio 解决方案构建 —— 未执行
+### 3.1 Visual Studio 解决方案完整构建（含链接）—— 未执行
 
-工程内联了 Qt 头路径 `D:\Qt\6.8.1\msvc2022_64\include`，本机仅安装 6.8.3，且 Qt VS Tools 的 Qt 版本
-属于用户级设置（`.vs`），无法在无人值守环境下替代；因此本次没有执行 `MusicSyncTool.sln` 的
-Debug/Release 构建。作为替代，按 §2.1/§2.3 用与工程一致的编译选项完成了全部源码的语法校验与
-测试工程的完整编译 + 链接 + 运行。**发布前的 GUI 逐项人工验收仍建议在具备 Qt 6.8.x + vcpkg 的
+工程内联了 Qt 头/库路径 `D:\Qt\6.8.1\msvc2022_64`（Debug|x64 的 `QtInstall` 另写为 `6.10.1_msvc2022_64`），
+本机仅安装 6.8.3，且 Qt VS Tools 的 Qt 版本属于用户级设置（`.vs`），无法在无人值守环境下替代。
+本次通过 `-p:QtInstallDir` 覆盖完成了 §2.6 的编译阶段验证，但未执行 `MusicSyncTool.sln` 的
+Debug/Release **链接与运行**。**发布前的链接构建与 GUI 逐项人工验收仍建议在具备 Qt 6.8.x + vcpkg 的
 VS 环境中补做。**
 
 ### 3.2 Linux / macOS（CMake）—— 未执行
