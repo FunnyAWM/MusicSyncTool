@@ -60,25 +60,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         TestBlackBox.h
     )
 
-    # Test implementations (included by main.cpp, not compiled separately)
-    set(TEST_IMPL
-        TestMusicProperties.cpp
-        TestStringSimilarity.cpp
-        TestQueryItem.cpp
-        TestLyricIgnoreRule.cpp
-        TestMSTFileManager.cpp
-        TestMSTDataSource.cpp
-        TestMSTSettingsManager.cpp
-        TestIntegration.cpp
-        TestBlackBox.cpp
-    )
-
-    set_source_files_properties(${TEST_IMPL} PROPERTIES SKIP_AUTOMOC TRUE)
+    # 测试实现由 main.cpp 直接 #include（见 Test/main.cpp 顶部），
+    # 因此不能再把它们列为独立源文件，否则每个测试函数都会重复定义（multiple definition）。
+    # 与 Test/MusicSyncToolTests.vcxproj 只编译 main.cpp 的做法一致。
 
     qt_add_executable(MusicSyncToolTests
         main.cpp
         ${TEST_HEADERS}
-        ${TEST_IMPL}
         ${MAIN_SOURCES}
         ${MAIN_HEADERS}
     )

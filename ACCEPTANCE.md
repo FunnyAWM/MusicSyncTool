@@ -238,6 +238,20 @@ MSTScanController.cpp:59:(.text+0x30c): undefined reference to `MSTTableManager:
 
 **未验证**：Linux 上测试的运行结果仍待 runner 确认。
 
+### 2.13 CI 第五轮（run 39358112313）：测试实现被重复编译
+
+```
+FAILED: [code=1] Test/MusicSyncToolTests
+ld: TestMusicProperties.cpp.o: multiple definition of `TestMusicProperties::toSortBy_valid()';
+    main.cpp.o: first defined here
+```
+
+根因：`Test/main.cpp` 用 `#include "TestXxx.cpp"` 的方式把 9 个测试实现直接纳入，而 `Test/CMakeLists.txt` 又把同一批 `.cpp` 列进 `qt_add_executable`，于是每个测试函数被编译两次；`Test/MusicSyncToolTests.vcxproj` 只编译 `main.cpp`，所以 Windows 侧从未暴露。
+
+处置：从 `qt_add_executable` 去掉测试实现列表（连同已无意义的 `SKIP_AUTOMOC` 设置），只保留 `main.cpp` 与测试头文件（`TEST_HEADERS` 供 AUTOMOC 生成 moc）。
+
+**未验证**：本轮改动同样只能在 runner 上确认。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
