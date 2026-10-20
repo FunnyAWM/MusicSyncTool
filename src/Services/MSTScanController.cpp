@@ -144,30 +144,36 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 			return;
 		}
 
-		// 第一段进度：逐文件比对修改时间（原实现此阶段没有任何进度反馈）
+		// 比对阶段只做 fileTime 判定（纯 stat，无标签读取），先算完再一次性计入进度，
+		// 这样整个扫描只有一个分母，百分比不会因为切换分母而回退
 		const int compareTotal = static_cast<int>(existingFiles.size());
-		emit scanTotal(compareTotal);
 		QStringList filesToScan = newFileList;
-		int compared = 0;
 		for (const auto& file : std::as_const(existingFiles)) {
 			if (QFile(dir.filePath(file)).fileTime(QFileDevice::FileModificationTime) > dateTime) {
 				filesToScan.append(file);
 			}
-			++compared;
-			// 每 20 个文件上报一次，避免高频信号冲刷事件队列
-			if (compared % 20 == 0) {
-				emit scanCurrent(compared);
-			}
 		}
-		emit scanCurrent(compareTotal);
 
-		// 第二段进度 = 添加文件 + 收藏扫描 + 规则扫描
-		const int globalTotal = static_cast<int>(newFileList.size() + filesToScan.size() + filesToScan.size());
-		emit scanTotal(globalTotal);
-		int globalProgress = 0;
-		// 添加新文件到数据库（单事务整体持锁写入）
+		// 分母只累加实际会执行的阶段；收藏标签/规则为空时这两段整体跳过，
+		// 计入分母会让进度条永远停在 1/3 或 2/3（典型表现就是“进度条不动”）
+		const int addWork = static_cast<int>(newFileList.size());
+		const int favoriteWork = entity.favoriteTag.isEmpty() ? 0 : static_cast<int>(filesToScan.size());
+		const int ruleWork = entity.rules.isEmpty() ? 0 : static_cast<int>(filesToScan.size());
+		const int globalTotal = compareTotal + addWork + favoriteWork + ruleWork;
+		// 没有任何工作量时给 1：LoadingPage 在 total<=0 时会把进度条按在 0%
+		const int progressTotal = globalTotal > 0 ? globalTotal : 1;
+		emit scanTotal(progressTotal);
+		int globalProgress = compareTotal;
+		emit scanCurrent(globalProgress);
+		// 添加新文件到数据库（单事务整体持锁写入）：读标签是本阶段主要耗时，
+		// 逐文件回调让进度条在事务提交前就能推进，仍是 20 个一档限流
 		QStringList failedFiles;
-		if (!dataSource.addMusicBatch(newFileList, failedFiles)) {
+		const auto onInserted = [this, globalProgress, addWork](const int done) {
+			if (done % 20 == 0 || done == addWork) {
+				emit scanCurrent(globalProgress + done);
+			}
+		};
+		if (!dataSource.addMusicBatch(newFileList, failedFiles, onInserted)) {
 			Logger::Error("Failed to write scanned music into database");
 			emit errorOccurred(AppErrorType::DB_ERROR);
 			emit scanFinished();
@@ -177,16 +183,23 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 			Logger::Warn("Error adding music: " + file);
 			emit loadErrorOccurred(file, LoadErrorType::FILE_NOT_SCANNABLE);
 		}
-		globalProgress += static_cast<int>(newFileList.size());
+		globalProgress += addWork;
 		emit scanCurrent(globalProgress);
 		clock_t endPhase = clock();
 		Logger::Info("Basic scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 
-		setFavorite(path, filesToScan, entity.favoriteTag, globalProgress);
-		globalProgress += static_cast<int>(filesToScan.size());
+		if (favoriteWork > 0) {
+			setFavorite(path, filesToScan, entity.favoriteTag, globalProgress);
+			globalProgress += favoriteWork;
+			emit scanCurrent(globalProgress);
+		}
 		endPhase = clock();
 		Logger::Info("Favorite scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
-		setRuleHit(path, entity.rules, filesToScan, globalProgress);
+		if (ruleWork > 0) {
+			setRuleHit(path, entity.rules, filesToScan, globalProgress);
+			globalProgress += ruleWork;
+			emit scanCurrent(globalProgress);
+		}
 		endPhase = clock();
 		Logger::Info("Rule scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		dateTime = QDateTime::currentDateTime();

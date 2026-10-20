@@ -422,7 +422,8 @@ bool MSTDataSource::insertMusic(const QString& file) {
 	return true;
 }
 
-bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedFiles) {
+bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedFiles,
+                                  const std::function<void(int)>& onProgress) {
 	if (files.isEmpty()) {
 		return true;
 	}
@@ -439,24 +440,30 @@ bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedF
 	query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
 		":artist, :album, :genre, :year, :track, :fileName)");
 
+	// 已处理文件数：失败分支同样计数，回调值才与 files.size() 对齐，进度条不会停在中途
+	int processed = 0;
 	for (const QString& file : files) {
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(QDir(path).filePath(file));
 		if (fileRef.isNull() || fileRef.tag() == nullptr) {
 			failedFiles.append(file);
 			Logger::Warn("Failed to read tags of file: " + file);
-			continue;
 		}
-		const TagLib::Tag* tag = fileRef.tag();
-		query.bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
-		query.bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
-		query.bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
-		query.bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
-		query.bindValue(":year", QString::number(tag->year()));
-		query.bindValue(":track", QString::number(tag->track()));
-		query.bindValue(":fileName", file);
-		if (!query.exec()) {
-			failedFiles.append(file);
-			Logger::Warn("Error inserting data into database: " + query.lastError().text());
+		else {
+			const TagLib::Tag* tag = fileRef.tag();
+			query.bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
+			query.bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
+			query.bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));
+			query.bindValue(":genre", QString::fromUtf8(tag->genre().to8Bit(true)));
+			query.bindValue(":year", QString::number(tag->year()));
+			query.bindValue(":track", QString::number(tag->track()));
+			query.bindValue(":fileName", file);
+			if (!query.exec()) {
+				failedFiles.append(file);
+				Logger::Warn("Error inserting data into database: " + query.lastError().text());
+			}
+		}
+		if (onProgress) {
+			onProgress(++processed);
 		}
 	}
 

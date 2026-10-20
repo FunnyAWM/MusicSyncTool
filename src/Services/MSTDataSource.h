@@ -1,6 +1,7 @@
 #ifndef MSTDATASOURCE_H
 #define MSTDATASOURCE_H
 
+#include <functional>
 #include <QMutex>
 #include <QDateTime>
 #include <QHash>
@@ -147,10 +148,14 @@ public:
 	 * @brief 批量写入新音乐（单事务、整体持锁）
 	 * @param files 待写入的文件名列表
 	 * @param failedFiles 输出参数：写入失败的文件名
+	 * @param onProgress 可选进度回调：每个文件处理完（成功或失败）调用一次，参数为已处理文件数
 	 * @return 全部写入成功返回 true；失败时已回滚并返回 false
-	 * @details 批量写入必须在同一把锁内完成后，其他线程的语句才不会混入事务边界
+	 * @details 批量写入必须在同一把锁内完成后，其他线程的语句才不会混入事务边界。
+	 *          读标签是本阶段的主要耗时，逐文件回调让上层能在事务结束前显示进度；
+	 *          回调在持锁线程内同步执行，实现方不得在其中阻塞或调用数据库接口。
 	 */
-	[[nodiscard]] bool addMusicBatch(const QStringList& files, QStringList& failedFiles);
+	[[nodiscard]] bool addMusicBatch(const QStringList& files, QStringList& failedFiles,
+	                                 const std::function<void(int)>& onProgress = nullptr);
 
 	QList<QueryItem> getByFileNames(const QStringList& fileNames);
 

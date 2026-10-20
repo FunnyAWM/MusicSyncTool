@@ -124,7 +124,7 @@ src/
 
 - 所有数据库访问都在 `dbMutex` 保护下进行；事务边界（批量写入）必须整体持锁，否则其他线程的语句会混入事务；
 - `QSqlQuery` 按线程 id 索引做到每线程一个实例，禁止跨线程共享查询对象；**不使用 `QThreadStorage`**：主线程的线程局部数据在 `QThreadStorage` 对象销毁时不会被清理，槽位 id 会被后续实例复用，新实例会取到上一个实例遗留的、绑定在已关闭连接上的查询对象；这些查询对象随 `closeDB()` 与析构显式释放；
-- 批量写入 `addMusicBatch` 失败时回滚并返回 `false`，同时通过输出参数回传失败文件；
+- 批量写入 `addMusicBatch` 失败时回滚并返回 `false`，同时通过输出参数回传失败文件；可选进度回调 `onProgress(已处理文件数)` 在每个文件处理完（含失败）后同步调用，让上层在事务提交前也能报告进度——读标签是本阶段主要耗时，回调内不得阻塞或再访问数据库；
 - 设置分页大小 `pageSize`（默认 200）、`updateFavoriteBatch` / `updateRuleHitBatch` 做收藏与规则命中状态的批量落库。
 
 schema 与迁移：
@@ -157,7 +157,8 @@ schema 与迁移：
 - 扫描任务经 `QtConcurrent::run` 在工作线程执行，任务内**禁止**触碰 `QTableWidget`、`QLabel` 等 GUI 对象，也禁止直接使用共享的 `QSqlQuery` 实例成员；结果一律通过信号回 GUI 线程；
 - 信号：`scanStart`、`scanFinished`、`scanTotal(int)`、`scanCurrent(int)`、`errorOccurred(AppErrorType)`、`loadErrorOccurred(QString, LoadErrorType)`、`tablePageReady(PathType, QList<QueryItem>, unsigned short, unsigned short)`；
 - 持有 `QFutureWatcher<void> scanWatcher`，并通过 `isScanRunning()` / `waitForFinished()` 暴露任务状态，窗口析构前必须等待任务结束，避免任务访问已销毁对象；
-- `setFavorite` / `setRuleHit` 支持带进度偏移的批量标记，`resetScan` 复位“已扫描”标记（跨线程读写，故为 `std::atomic<bool>`）。
+- `setFavorite` / `setRuleHit` 支持带进度偏移的批量标记，`resetScan` 复位“已扫描”标记（跨线程读写，故为 `std::atomic<bool>`）；
+- 进度口径：整个扫描只用一个分母（比对存量文件 + 新增写入 + 实际执行的收藏/规则扫描），分母一次性发出后不再切换，避免百分比回退；`favoriteTag` 为空或规则为空时对应阶段整体跳过、不计入分母；批量写入经 `addMusicBatch` 的进度回调逐文件上报（20 个一档限流）。
 
 ### 4.3 `MSTFileManager`
 

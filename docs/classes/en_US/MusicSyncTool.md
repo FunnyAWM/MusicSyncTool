@@ -124,7 +124,7 @@ Threading and locking:
 
 - All database access happens under `dbMutex`; transaction boundaries (batch writes) must be held by a single lock scope, otherwise statements from other threads leak into the transaction;
 - `QSqlQuery` instances are indexed per thread id so that each thread owns one, and sharing a query object across threads is forbidden; **`QThreadStorage` is deliberately not used**: main-thread thread-local data is not cleaned up when the `QThreadStorage` object is destroyed, its slot id is reused by later instances, and a new instance would pick up the query object left behind by a previous instance (bound to an already closed connection). These query objects are released explicitly by `closeDB()` and by the destructor;
-- `addMusicBatch` rolls back and returns `false` on failure, reporting the failed file names through an output parameter;
+- `addMusicBatch` rolls back and returns `false` on failure, reporting the failed file names through an output parameter; its optional `onProgress(processed)` callback runs synchronously after every file (failed ones included), so callers can report progress before the transaction commits — tag reading dominates this phase, and the callback must not block or touch the database;
 - Exposes the page size (`pageSize`, default 200) and batch updates `updateFavoriteBatch` / `updateRuleHitBatch` for favourite and rule-hit state.
 
 Schema and migration:
@@ -157,7 +157,8 @@ The scheduler of the scan flow and the gatekeeper of concurrency discipline.
 - Scan jobs run on worker threads via `QtConcurrent::run`. Inside a job it is forbidden to touch GUI objects such as `QTableWidget` or `QLabel`, and forbidden to use shared `QSqlQuery` members; results always travel back to the GUI thread through signals;
 - Signals: `scanStart`, `scanFinished`, `scanTotal(int)`, `scanCurrent(int)`, `errorOccurred(AppErrorType)`, `loadErrorOccurred(QString, LoadErrorType)`, `tablePageReady(PathType, QList<QueryItem>, unsigned short, unsigned short)`;
 - It owns `QFutureWatcher<void> scanWatcher` and exposes `isScanRunning()` / `waitForFinished()`; the window must wait for the job before destruction so a running job never touches destroyed objects;
-- `setFavorite` / `setRuleHit` support batch marking with a progress offset; `resetScan` clears the "already scanned" flag (read/written across threads, hence `std::atomic<bool>`).
+- `setFavorite` / `setRuleHit` support batch marking with a progress offset; `resetScan` clears the "already scanned" flag (read/written across threads, hence `std::atomic<bool>`);
+- Progress contract: a scan uses exactly one denominator (compared existing files + inserted new files + the favourite/rule passes that actually run) which is emitted once and never switched, so the percentage never moves backwards; an empty `favoriteTag` or empty rule list skips that pass and excludes it from the denominator; batch inserts report per file through the `addMusicBatch` progress callback (throttled to one update per 20 files).
 
 ### 4.3 `MSTFileManager`
 

@@ -119,6 +119,38 @@ MSBuild.exe Test\MusicSyncToolTests.vcxproj -t:Rebuild -p:Configuration=Debug -p
 - 内存量级为构造层面推算，未做 heap profile：`QueryItem` 约 5 个 `QString` + 2 个整型，每首约两百字节量级，
   只取文件名一列则每首仅一个 `QString`；5000 首曲库的扫描阶段由约 1 MB 降到约 0.3 MB。**未实测，不计入验收结论。**
 
+### 2.8 扫描进度条不动的定位与修复后复跑（真实执行）
+
+- **现象**：加载页进度条在扫描期间停在 0% 或中途不再推进。
+- **定位**（代码走查 + `x64/Release/log/lastRun.log` 的扫描耗时记录）：
+  1. 最耗时的 `MSTDataSource::addMusicBatch`（逐文件读标签 + 单事务写库）**完全没有进度上报**；
+     首次扫描时该阶段占满整个扫描时长（日志中 5.039/5.041 秒两行几乎相同，全部落在这一阶段）；
+  2. `favoriteTag` 为空、规则列表为空时收藏/规则两段整体跳过，但原来的分母按 `新增 + 2×filesToScan`
+     计入，进度条最多推进到 1/3 就再无变化；
+  3. 比对阶段先发一个较小的分母 `compareTotal`，随后切换到不含它的 `globalTotal`，百分比会先到 100% 再回退。
+- **改动**：`addMusicBatch` 增加可选 `onProgress(已处理文件数)` 回调（失败文件同样计数，值与列表长度对齐）；
+  `MSTScanController::scanConcurrent` 改为整轮扫描只发一次分母（比对存量 + 新增写入 + 实际执行的收藏/规则段），
+  跳过阶段不计入分母，批量写入按 20 个一档上报。
+- **构建验证**：`MusicSyncTool.vcxproj` Debug|x64 全量 Rebuild、Release|x64 增量构建、
+  `Test\MusicSyncToolTests.vcxproj` Debug|x64 构建，三者均 **0 个错误 / 0 个警告**。
+- **单元测试**（`Test\x64\Debug\MusicSyncToolTests.exe`，`QT_QPA_PLATFORM=offscreen`，需临时把
+  `D:\Qt\6.8.3\msvc2022_64\bin` 与 vcpkg debug bin 加入 `PATH`，否则报 `STATUS_DLL_NOT_FOUND`）：
+
+| 测试类 | 结果 |
+| --- | --- |
+| TestMusicProperties | 16 passed, 0 failed |
+| TestStringSimilarity | 25 passed, 0 failed |
+| TestQueryItem | 16 passed, 0 failed |
+| TestLyricIgnoreRule | 12 passed, 0 failed |
+| TestMSTFileManager | 14 passed, 0 failed |
+| TestMSTDataSource | 23 passed, 0 failed |
+| TestMSTSettingsManager | 13 passed, 0 failed |
+| TestIntegration | 11 passed, 0 failed |
+| TestBlackBox | 30 passed, 0 failed |
+| **合计** | **160 passed, 0 failed** |
+
+- **未验证**：无交互桌面会话，未在真实曲库上目视确认进度条动画；万首级曲库下 20 个一档的上报密度是否平滑未实测。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
