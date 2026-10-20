@@ -27,9 +27,23 @@ if(NOT TagLib_FOUND)
         pkg_check_modules(TAGLIB QUIET IMPORTED_TARGET taglib)
     endif()
     if(TAGLIB_FOUND AND NOT TARGET TagLib::tag)
+        # taglib.pc 的 Cflags 是 -I<prefix>/include/taglib，而源码写的是 <taglib/tag.h>，
+        # 因此要同时保留父目录 <prefix>/include，否则 Linux 上会找不到头文件
+        set(_taglib_include_dirs "")
+        find_path(TagLib_INCLUDE_DIR NAMES taglib/tag.h)
+        if(TagLib_INCLUDE_DIR)
+            list(APPEND _taglib_include_dirs "${TagLib_INCLUDE_DIR}")
+        endif()
+        foreach(_dir IN LISTS TAGLIB_INCLUDE_DIRS)
+            list(APPEND _taglib_include_dirs "${_dir}")
+            get_filename_component(_parent "${_dir}" DIRECTORY)
+            list(APPEND _taglib_include_dirs "${_parent}")
+        endforeach()
+        list(REMOVE_DUPLICATES _taglib_include_dirs)
+
         add_library(TagLib::tag INTERFACE IMPORTED)
         set_target_properties(TagLib::tag PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${TAGLIB_INCLUDE_DIRS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${_taglib_include_dirs}"
             INTERFACE_LINK_LIBRARIES PkgConfig::TAGLIB
         )
         set(TagLib_VERSION "${TAGLIB_VERSION}")

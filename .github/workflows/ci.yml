@@ -60,8 +60,8 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
-        # qttools 提供 LinguistTools（qt_add_translations），qtmultimedia 是应用依赖
-        modules: 'qttools qtmultimedia'
+        # aqt 的 Linux/macOS 包不含 qttools，CMakeLists 已把 LinguistTools 降为可选
+        modules: 'qtmultimedia'
         cache: true
 
     - name: 构建应用与单元测试
@@ -103,7 +103,8 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
-        modules: 'qttools qtmultimedia'
+        # aqt 的 Linux/macOS 包不含 qttools，CMakeLists 已把 LinguistTools 降为可选
+        modules: 'qtmultimedia'
         cache: true
 
     - name: 构建单元测试
@@ -150,7 +151,8 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
-        modules: 'qttools qtmultimedia'
+        # aqt 的 Linux/macOS 包不含 qttools，CMakeLists 已把 LinguistTools 降为可选
+        modules: 'qtmultimedia'
         cache: true
 
     - name: 构建带覆盖率的测试

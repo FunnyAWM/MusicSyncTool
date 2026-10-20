@@ -26,7 +26,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(ZLIB)
     find_package(TagLib REQUIRED)
-    find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+    # LinguistTools 只在打包时需要生成 qm；aqt 的 Linux/macOS 包不含 qttools，
+    # 这里降为非必需，缺工具时跳过翻译目标而不是让整个构建失败
+    find_package(Qt6 QUIET COMPONENTS LinguistTools)
 
     # ==================== 项目源文件 ====================
     # Core层 - 核心基础类型与工具
@@ -129,7 +131,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
                 ${PROJECT_SOURCES}
         )
 
-        qt_add_translations(MusicSyncTool TS_FILES translations/Translation_en_US.ts translations/Translation_Wenyan.ts translations/Translation_zh_Hans.ts)
+        if (Qt6LinguistTools_FOUND)
+            qt_add_translations(MusicSyncTool TS_FILES translations/Translation_en_US.ts translations/Translation_Wenyan.ts translations/Translation_zh_Hans.ts)
+        else ()
+            message(STATUS "Qt LinguistTools not found: translation targets are skipped")
+        endif ()
         #[[     Define target properties for Android with Qt 6 as:
                 set_property(TARGET MusicSyncTool APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
                              ${CMAKE_CURRENT_SOURCE_DIR}/android)

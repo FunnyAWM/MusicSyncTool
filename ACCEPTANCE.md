@@ -177,7 +177,33 @@ MSBuild.exe Test\MusicSyncToolTests.vcxproj -t:Rebuild -p:Configuration=Debug -p
 - `ci.yml` 经 PyYAML 解析通过，job 为 `linux-test / macos-test / coverage / code-quality`；
 - 本次未改动 C++ 源码，`MusicSyncTool.vcxproj` 的 Debug/Release 构建（§2.7 结论）不受影响，未重复执行。
 
-**未验证**：本机无 Linux/macOS 环境与 Docker，工作流改动只能在推送后由 runner 实际执行验证；`qttools` 模块名与 `ubuntu-24.04` 上的 Qt 6.8.3 依赖完整性同样只有推送后才能确认。
+**未验证**：本机无 Linux/macOS 环境与 Docker，工作流改动只能在推送后由 runner 实际执行验证。
+
+### 2.10 CI 第二轮（run 39356681196）：所有 job 挂在“安装 Qt”
+
+上一轮的三类问题已消失（配置阶段不再报 TagLib / QtConcurrent / Windows 拒绝），新失败点提前到装 Qt 这一步：
+
+```
+INFO    : aqt install-qt linux desktop 6.8.3 --autodesktop --outputdir ... --modules qttools qtmultimedia
+ERROR   : The packages ['qttools'] were not found while parsing XML of package information!
+```
+
+本机用 aqtinstall 复核了 6.8.3 的模块清单：
+
+```
+python -m aqt list-qt linux desktop --arch 6.8.3                 → linux_gcc_64
+python -m aqt list-qt linux desktop --modules 6.8.3 linux_gcc_64 → debug_info qt3d qt5compat qtcharts ...
+```
+
+列表中**没有 `qttools`**：Qt 6 的 LinguistTools（lrelease/lupdate）不在 aqt 的可选模块里，上一轮加 `qttools` 是想当然。
+
+处置：
+
+- 根 `CMakeLists.txt` 把 `find_package(Qt6 COMPONENTS LinguistTools)` 降为 `QUIET`，找到才调 `qt_add_translations`，否则打印提示并跳过——qm 生成只在打包时必需，不该让构建失败；
+- 工作流三处 `modules` 去掉 `qttools`，只保留 `qtmultimedia`；
+- 顺带修正 `FindTagLib.cmake` 的 pkg-config 分支：`taglib.pc` 的 `Cflags` 是 `-I<prefix>/include/taglib`，而源码写的是 `#include <taglib/…>`，必须同时保留父目录 `<prefix>/include`，否则 Linux 上仍会找不到头文件（本地用等价逻辑验证展开结果为 `…/include/taglib;…/include`）。
+
+**未验证**：Linux 上整包构建（含 UI 层）与测试运行、macOS 的 Test 构建，仍只有推送后由 runner 给出结论。
 
 ---
 
