@@ -37,9 +37,7 @@ QString LyricIgnoreRule::lyricRulesToString(const RuleField rules) {
 		return QCoreApplication::translate("LyricIgnoreRule", "艺术家");    // 艺术家
 	case RuleField::ALBUM:
 		return QCoreApplication::translate("LyricIgnoreRule", "专辑");      // 专辑
-	case RuleField::NONE:
-		return "";
-	default:
+	default:    // 含 RuleField::NONE 与非法值
 		return "";
 	}
 }
@@ -106,10 +104,7 @@ void LyricIgnoreRule::setRulesStr() {
 	case RuleType::EXCLUDES:
 		ruleTypeStr = "排除";
 		break;
-	case RuleType::NONE:
-		ruleTypeStr = "";
-		break;
-	default:
+	default:    // 含 RuleType::NONE 与非法值
 		ruleTypeStr = "";
 		break;
 	}
@@ -125,10 +120,7 @@ void LyricIgnoreRule::setRulesStr() {
 	case RuleField::ALBUM:
 		ruleFieldStr = "专辑";
 		break;
-	case RuleField::NONE:
-		ruleFieldStr = "";
-		break;
-	default:
+	default:    // 含 RuleField::NONE 与非法值
 		ruleFieldStr = "";
 		break;
 	}
