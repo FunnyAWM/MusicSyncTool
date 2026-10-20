@@ -88,6 +88,19 @@
     </message>
 </context>
 <context>
+    <name>LoadingPage</name>
+    <message>
+        <location filename="../src/UI/LoadingPage/LoadingPage.cpp" line="59"/>
+        <source>取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/UI/LoadingPage/LoadingPage.cpp" line="66"/>
+        <source>正在结束当前复制…</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LoadingPageClass</name>
     <message>
         <location filename="../src/UI/LoadingPage/LoadingPage.ui" line="14"/>
@@ -97,6 +110,11 @@
     <message>
         <location filename="../src/UI/LoadingPage/LoadingPage.ui" line="58"/>
         <source>少女祈祷中......</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/UI/LoadingPage/LoadingPage.ui" line="80"/>
+        <source>取消</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -260,33 +278,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="279"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="283"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="495"/>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="500"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="513"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="518"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="279"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="283"/>
         <source>无法打开设置文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="495"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="513"/>
         <source>确定要清除所有日志文件吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="500"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="518"/>
         <source>日志文件已清除</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="373"/>
+        <location filename="../src/UI/MusicSyncTool/MSTMainWindow.cpp" line="379"/>
         <source>可用空间：</source>
         <translation type="unfinished"></translation>
     </message>
@@ -509,42 +527,42 @@
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="27"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="29"/>
         <source>明亮</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="28"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="30"/>
         <source>暗色</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="29"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="31"/>
         <source>蓝色</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="30"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="32"/>
         <source>绿色</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="31"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="33"/>
         <source>紫色</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="32"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="34"/>
         <source>深色</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="117"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="119"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/UI/Settings/Settings.cpp" line="117"/>
+        <location filename="../src/UI/Settings/Settings.cpp" line="119"/>
         <source>无法打开语言文件</source>
         <translation type="unfinished"></translation>
     </message>

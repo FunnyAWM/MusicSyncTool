@@ -76,9 +76,10 @@ link     Qt6Test/Qt6Widgets/Qt6Multimedia/Qt6Concurrent/Qt6Sql/Qt6Gui/Qt6Core + 
 
 在本机 Qt 6.8.3 下执行 `lupdate`（`src` → 3 个 `.ts`）与 `lrelease`：
 
-- 三份 `.ts` 均输出 `127 source text(s)`，与源码文案一一对应；XML 结构校验通过（`contexts/messages` 计数一致）；
-- `en_US` 无空译文（补齐主题下拉、递归扫描、日志开关等 14 条）；`zh_Hans`、`Wenyan` 按既有约定保留
-  `type="unfinished"`（源文案即中文，运行时回落源文案）；
+- 三份 `.ts` 均输出 `130 source text(s)`，与源码文案一一对应；XML 结构校验通过（`contexts/messages` 计数一致）；
+- `en_US` 无空译文；**`Wenyan` 已 130 条全部译出**（简体源文案 → 繁体文言，不再有 `type="unfinished"`
+  `lrelease` 报告 `130 finished and 0 unfinished`）；`zh_Hans` 按既有约定保留 `type="unfinished"`
+  （源文案即中文，运行时回落源文案）；
 - `.qm` 为构建产物（`.gitignore` 忽略），随 VS 构建的 `lupdate_lrelease` 目标重新生成。
 
 ### 2.5 编译期发现的真实缺陷（已修）
