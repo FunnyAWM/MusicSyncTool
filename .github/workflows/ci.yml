@@ -8,11 +8,13 @@ name: MusicSyncTool CI
 #   链接阶段报 `ld: framework 'AGL' not found`（见 ACCEPTANCE.md §2.11）。保留一个必然失败且无法
 #   修复的 job 只会长期污染结果， macOS 覆盖改为在原生 arm64/Intel 机器上用 Homebrew Qt 手动执行。
 
+# 仓库主分支是 master（发布分支），日常开发在 develop；
+# 两个分支都要跑，否则合并到 master 后没有任何 CI 结论，README 的 badge 也会失真
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
 
 env:
   QT_VERSION: '6.8.3'
