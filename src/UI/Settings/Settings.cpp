@@ -20,7 +20,9 @@ Settings::Settings(const SettingsData& entity, QWidget* parent) : QWidget(parent
 	ui.setupUi(this);
 	this->ui.rulesWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
-	this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
+	// 只给 hint 位时 Qt 会按 Qt::Widget 处理并 setParent(parentWidget())，
+	// 使设置页变成主窗口的子控件；显式声明 Qt::Window 才是独立顶层窗口（parent 仍保留，便于居中与销毁）
+	this->setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowContextHelpButtonHint);
 	this->setWindowModality(Qt::ApplicationModal);
 
 	// 主题下拉：itemData 直接存 PROPERTIES 编码，避免依赖下拉项顺序
