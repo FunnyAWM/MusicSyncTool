@@ -38,7 +38,7 @@ QString MSTFileManager::getSpaceInfo() const {
 	}
 	// 否则使用GB单位显示
 	return QString::number(static_cast<double>(availableSpace) / 1024.0 / 1024.0 / 1024.0, 10, 2) + " GB / " + QString::number(
-		totalSpace / 1024.0 / 1024.0 / 1024.0, 10, 2) + " GB";
+		static_cast<double>(totalSpace) / 1024.0 / 1024.0 / 1024.0, 10, 2) + " GB";
 }
 
 /**

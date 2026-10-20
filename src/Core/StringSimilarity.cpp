@@ -16,7 +16,7 @@ namespace StringSimilarity {
 	 * @return next数组
 	 */
 	std::vector<int> buildKMPNext(const QString& pattern) {
-		const int m = pattern.length();
+		const int m = static_cast<int>(pattern.length());
 		std::vector<int> next(m, 0);
 		int j = 0;
 
@@ -80,7 +80,7 @@ namespace StringSimilarity {
 		}
 
 		// 计算相似度：匹配字符数 / 较短字符串长度
-		double similarity = static_cast<double>(matchCount) / shorter.length();
+		double similarity = static_cast<double>(matchCount) / static_cast<double>(shorter.length());
 		return similarity >= threshold;
 	}
 
@@ -90,7 +90,7 @@ namespace StringSimilarity {
 	 * @return 如果是CJK字符返回true
 	 */
 	bool isCJKChar(const QChar& ch) {
-		const int32_t unicode = ch.unicode();
+		const int32_t unicode = static_cast<int32_t>(ch.unicode());
 		return (unicode >= 0x4E00 && unicode <= 0x9FFF) || // CJK统一汉字
 			(unicode >= 0x3400 && unicode <= 0x4DBF) || // CJK扩展A
 			(unicode >= 0x20000 && unicode <= 0x2A6DF) || // CJK扩展B
@@ -120,7 +120,7 @@ namespace StringSimilarity {
 	 * @return 转换后的字符
 	 */
 	QChar fullWidthToHalfWidth(const QChar& ch) {
-		const ushort unicode = ch.unicode();
+		const ushort unicode = static_cast<ushort>(ch.unicode());
 
 		// 全角ASCII字符 (FF01-FF5E) 转换为半角 (0021-007E)
 		if (unicode >= 0xFF01 && unicode <= 0xFF5E) {
@@ -179,8 +179,8 @@ namespace StringSimilarity {
 		}
 
 		// 使用动态规划计算编辑距离（Levenshtein距离）
-		const int len1 = str1.length();
-		const int len2 = str2.length();
+		const int len1 = static_cast<int>(str1.length());
+		const int len2 = static_cast<int>(str2.length());
 
 		// 只保留上一行与当前行，空间复杂度由 O(len1*len2) 降到 O(len2)
 		QVector<int> previousRow(len2 + 1);
@@ -207,7 +207,7 @@ namespace StringSimilarity {
 		const int maxLen = qMax(len1, len2);
 
 		// 计算相似度：1 - (编辑距离 / 最大长度)
-		return 1.0 - (static_cast<double>(editDistance) / maxLen);
+		return 1.0 - (static_cast<double>(editDistance) / static_cast<double>(maxLen));
 	}
 
 	/**

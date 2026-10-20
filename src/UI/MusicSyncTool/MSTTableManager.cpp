@@ -48,7 +48,7 @@ MSTDataSource& MSTTableManager::getDataSource(const PathType path) const {
 void MSTTableManager::fillTableWithItems(QTableWidget* table,
                                          const QList<QueryItem>& items,
                                          const int count) {
-	const int visibleRowCount = qMin(count, items.size());
+	const int visibleRowCount = qMin(count, static_cast<int>(items.size()));
 	table->clearContents();
 	table->setRowCount(visibleRowCount);
 	for (int i = 0; i < visibleRowCount; i++) {
