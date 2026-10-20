@@ -1,6 +1,11 @@
 #This CMakeLists.txt is for Linux and Mac OS only
 cmake_minimum_required(VERSION 3.16)
 project(MusicSyncTool VERSION 2.2.3 LANGUAGES CXX)
+
+# TagLib 在部分发行版（Ubuntu 的 libtag1-dev）只装 pkg-config 文件、不装 CMake config，
+# 用本仓库的查找模块兜底，否则 find_package(TagLib) 在 CI 上会直接失败
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Supported system detected. Applying settings.")
     set(CMAKE_AUTOUIC ON)
@@ -12,7 +17,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     #[[ Replace this with your own Qt installation path
         If you are using distros with Qt6 library packages available(like openSUSE),
         Just install the package and ignore this set statement]]
-    set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.3/gcc_64")
+    # 只有调用方没有指定 Qt 路径时才回落到这条默认值，否则 -DCMAKE_PREFIX_PATH 会被顶掉
+    if (NOT DEFINED CMAKE_PREFIX_PATH)
+        set(CMAKE_PREFIX_PATH "/home/funnyawm/Qt/6.8.3/gcc_64")
+    endif ()
 
     find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)
     find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Multimedia Concurrent)

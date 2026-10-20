@@ -151,6 +151,34 @@ MSBuild.exe Test\MusicSyncToolTests.vcxproj -t:Rebuild -p:Configuration=Debug -p
 
 - **未验证**：无交互桌面会话，未在真实曲库上目视确认进度条动画；万首级曲库下 20 个一档的上报密度是否平滑未实测。
 
+### 2.9 CI 全红的三类根因与修复（工作流 run 39346102790）
+
+该 run 的 8 个 job 全部失败，逐个取 job 日志后归为三类：
+
+| 现象（日志原文） | 根因 | 处置 |
+| --- | --- | --- |
+| `CMake Error at CMakeLists.txt:9 (find_package): Could not find a package configuration file provided by "TagLib"` | Ubuntu 的 `libtag1-dev` 只装 `taglib.pc`，不装 `TagLibConfig.cmake` | 新增 `cmake/FindTagLib.cmake`（config → pkg-config → 手动查找三级回退），根工程与 `Test/CMakeLists.txt` 注册 `CMAKE_MODULE_PATH` |
+| `MSTScanController.cpp:11:10: fatal error: 'QtConcurrentRun' file not found`（macOS） | `Test/CMakeLists.txt` 的 `find_package` 与 `target_link_libraries` 都没有 `Concurrent` 组件 | 补 `find_package(Qt6 ... Concurrent ...)` 与 `Qt6::Concurrent` 链接 |
+| `This file is for Linux and MacOS only.`（Windows job） | `windows-build` 用 CMake 在 Windows 上配置，而 `CMakeLists.txt` 明确拒绝 | 删除该 job：Windows 主构建走 VS 解决方案，证据见 §2.6 / §2.7 |
+
+同时修正的工作流问题：
+
+- Qt 矩阵由 `6.5.0 / 6.7.0` 改为 `6.8.3`，与 `AGENTS_CPP.md` §1 的基线和 `CMakeLists.txt` 的默认路径一致；
+- `-DCMAKE_PREFIX_PATH=$Qt6_DIR` 改为 `${{ env.QT_ROOT_DIR }}`（install-qt-action v4 的导出变量）；
+- 根 `CMakeLists.txt` 的硬编码 `set(CMAKE_PREFIX_PATH ...)` 改为仅在调用方未指定时回落，避免覆盖命令行参数；
+- `Test/CMakeLists.txt` 以 `Test/` 为顶层构建时补 `project()` 与 `enable_testing()`（原 `add_test` 不会生成 CTest 配置，`ctest` 实际无测试可跑）；
+- Linux 覆盖率 job 改用已有的 `-DENABLE_COVERAGE=ON`，不再手工拼 `--coverage` 编译选项；
+- 所有跑测试的 job 设 `QT_QPA_PLATFORM=offscreen`（runner 无图形会话），`fail-fast: false` 让矩阵组合都留下日志。
+
+**本地已验证**：
+
+- `FindTagLib.cmake` 用 vcpkg 的 TagLib 2.0 跑最小工程：`Found TagLib: TRUE (found version "2.0")`，`TagLib::tag` 目标可用；
+- 手动查找兜底分支（去掉 config 与 pkg-config）同样解析到 `tag.h` / `tag.lib` 并导出目标；
+- `ci.yml` 经 PyYAML 解析通过，job 为 `linux-test / macos-test / coverage / code-quality`；
+- 本次未改动 C++ 源码，`MusicSyncTool.vcxproj` 的 Debug/Release 构建（§2.7 结论）不受影响，未重复执行。
+
+**未验证**：本机无 Linux/macOS 环境与 Docker，工作流改动只能在推送后由 runner 实际执行验证；`qttools` 模块名与 `ubuntu-24.04` 上的 Qt 6.8.3 依赖完整性同样只有推送后才能确认。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）

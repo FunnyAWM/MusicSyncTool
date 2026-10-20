@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 3.16)
 
+# 以 Test/ 为顶层构建（CI 用法）时补齐 project() 与 CTest；作为 add_subdirectory 子目录时沿用根工程
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    project(MusicSyncToolTests LANGUAGES CXX)
+    enable_testing()
+endif()
+
+# TagLib 在部分发行版只装 pkg-config 文件，复用仓库根目录的查找模块
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_AUTOMOC ON)
 
-    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql Multimedia Test)
+    # MSTScanController 使用 QtConcurrent，缺 Concurrent 组件时 macOS/Linux 会报 QtConcurrentRun not found
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql Multimedia Concurrent Test)
     find_package(TagLib REQUIRED)
 
     # Main project sources (compiled into test binary)
@@ -83,7 +93,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     )
 
     target_link_libraries(MusicSyncToolTests PRIVATE
-        Qt6::Core Qt6::Widgets Qt6::Sql Qt6::Multimedia Qt6::Test
+        Qt6::Core Qt6::Widgets Qt6::Sql Qt6::Multimedia Qt6::Concurrent Qt6::Test
         TagLib::tag
     )
 
