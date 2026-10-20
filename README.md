@@ -1,5 +1,7 @@
 # 音乐同步工具
 
+[![MusicSyncTool CI](https://github.com/FunnyAWM/MusicSyncTool/actions/workflows/ci.yml/badge.svg)](https://github.com/FunnyAWM/MusicSyncTool/actions/workflows/ci.yml)
+
 [English Version](README_en_US.md)
 
 可以实现对音乐和歌词文件的识别和拷贝，可以识别歌词标签并处理，可以筛选喜欢的音乐（需要设置）。
