@@ -156,6 +156,13 @@ public:
 
 	QList<QueryItem> getAll(const QVector<QueryRows>& rows = {QueryRows::ALL});
 
+	/**
+	 * @brief 取出库中全部文件名（只读一列）
+	 * @details 扫描阶段的目录/数据库比对只需要文件名。走 getAll 会为每首多构造
+	 *          5 个空字符串字段并实例化整个 QueryItem，大曲库下这一列足以造成明显内存放大
+	 */
+	[[nodiscard]] QStringList getAllFileNames();
+
 	QStringList addMusic(const QStringList& files);
 
 	[[nodiscard]] bool addMusic(const QString& file);

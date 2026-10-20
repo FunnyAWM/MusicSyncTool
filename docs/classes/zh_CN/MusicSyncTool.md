@@ -141,10 +141,13 @@ schema 与迁移：
 | `getFavorite(...)` / `getRuleHit(...)` | 收藏页 / 规则命中页，另通过 `getLastFavoriteCount()` 暴露真实总数 |
 | `searchMusic(text)` / `searchMusic(text, pageNum)` | 搜索；分页版本在 SQL 层用 `LIMIT/OFFSET` 截断，避免整库命中结果进入内存 |
 | `getSearchCount(text)` | 搜索命中总数，用于分页计算 |
-| `getByFileNames(fileNames)` | 按文件名批量取；占位符按 500 个一块分批，避免 SQLite 变量上限 |
+| `getByFileNames(fileNames)` | 按文件名批量取；按 SQLite 变量上限 500 个一块分批，用位置绑定，不生成 `":fN"` 占位符名 |
+| `getAllFileNames()` | 只取 `fileName` 一列并预留容量；扫描比对文件名时使用，避免为每首多构造 5 个空字段的 `QueryItem` |
 | `getCount()` / `getAll(rows)` | 总条目数 / 全量读取 |
 
 搜索中的 LIKE 通配符（`%`、`_`）由 `escapeLikePattern` 转义并使用 `ESCAPE`，用户输入不会被当作通配符。
+
+- 批量写入 `addMusicBatch` 的 `INSERT` 预编译语句在循环外只 `prepare()` 一次，逐行复用，避免每条记录重新编译 SQL。
 
 ### 4.2 `MSTScanController`
 

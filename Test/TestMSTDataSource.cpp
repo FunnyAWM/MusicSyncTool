@@ -198,3 +198,23 @@ void TestMSTDataSource::getByFileNames_chunked() {
     const auto r = ds->getByFileNames(names);
     QCOMPARE(r.size(), 3);
 }
+
+void TestMSTDataSource::getAllFileNames() {
+    insert("T1","A","B","G",2024,1,"b.mp3");
+    insert("T2","A","B","G",2024,2,"a.mp3");
+    insert("T3","A","B","G",2024,3,"c.flac");
+
+    const QStringList names = ds->getAllFileNames();
+    QCOMPARE(names.size(), ds->getCount());
+
+    // 只读一列，结果应与全量读取的 fileName 集合一致（与插入顺序无关）
+    QStringList fromAll;
+    for (const auto& item : ds->getAll()) {
+        fromAll << item.getFileName();
+    }
+    QStringList sortedNames = names;
+    sortedNames.sort();
+    QStringList sortedFromAll = fromAll;
+    sortedFromAll.sort();
+    QCOMPARE(sortedNames, sortedFromAll);
+}

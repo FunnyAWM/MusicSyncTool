@@ -141,8 +141,11 @@ Query API:
 | `getFavorite(...)` / `getRuleHit(...)` | Favourite page / rule-hit page, with the true total exposed via `getLastFavoriteCount()` |
 | `searchMusic(text)` / `searchMusic(text, pageNum)` | Search; the paged variant truncates with `LIMIT/OFFSET` in SQL to keep whole-library hits out of memory |
 | `getSearchCount(text)` | Total hit count for pagination |
-| `getByFileNames(fileNames)` | Batch fetch by file name; placeholders are chunked by 500 to stay below SQLite's variable limit |
+| `getByFileNames(fileNames)` | Batch fetch by file name; chunked by 500 (SQLite variable limit) using positional binding, so no `":fN"` placeholder names are built |
+| `getAllFileNames()` | Reads only the `fileName` column and reserves capacity; used by the scan comparison so each entry avoids a `QueryItem` with five extra empty fields |
 | `getCount()` / `getAll(rows)` | Total entry count / full read |
+
+- `addMusicBatch` prepares its single `INSERT` once, outside the loop, and reuses it per row instead of recompiling SQL for every record.
 
 LIKE wildcards (`%`, `_`) in search text are escaped by `escapeLikePattern` and used with `ESCAPE`, so user input is never treated as a wildcard.
 

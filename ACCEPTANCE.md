@@ -108,6 +108,17 @@ MSBuild.exe Test\MusicSyncToolTests.vcxproj -t:Rebuild -p:Configuration=Debug -p
   测试工程产出 `MusicSyncToolTests.exe` 并跑通 159 个用例（0 failed）；
 - 因本机 VS 实例占用 `vc145.pdb`，命令行构建改用临时 `IntDir`/`OutDir`，构建产物与临时目录均已清理。
 
+### 2.7 内存与分配优化后的复跑（真实执行）
+
+在 §2.6 的同一条命令上复跑（Release 重建 + 链接、测试工程 Debug 重建）：
+
+- 两个工程仍为 `0 个错误`、`0 个警告`；测试用例 **160 passed / 0 failed**（新增 `TestMSTDataSource::getAllFileNames`）；
+- 优化点（均不改变行为）：扫描比对改用 `MSTDataSource::getAllFileNames()`（只读一列，避免为每首多构造
+  5 个空字段的 `QueryItem`）；`addMusicBatch` 的 `INSERT` 预编译移出循环逐行复用；`fillTableWithItems`
+  每行只取一次元素引用（原每行 6 次 `at()` 值拷贝）；`getByFileNames` 改用位置绑定并去掉 `mid()` 子列表拷贝；
+- 内存量级为构造层面推算，未做 heap profile：`QueryItem` 约 5 个 `QString` + 2 个整型，每首约两百字节量级，
+  只取文件名一列则每首仅一个 `QString`；5000 首曲库的扫描阶段由约 1 MB 降到约 0.3 MB。**未实测，不计入验收结论。**
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）

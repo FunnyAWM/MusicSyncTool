@@ -52,12 +52,14 @@ void MSTTableManager::fillTableWithItems(QTableWidget* table,
 	table->clearContents();
 	table->setRowCount(visibleRowCount);
 	for (int i = 0; i < visibleRowCount; i++) {
-		table->setItem(i, 0, new QTableWidgetItem(items.at(i).getTitle()));
-		table->setItem(i, 1, new QTableWidgetItem(items.at(i).getArtist()));
-		table->setItem(i, 2, new QTableWidgetItem(items.at(i).getAlbum()));
-		table->setItem(i, 3, new QTableWidgetItem(items.at(i).getGenre()));
-		table->setItem(i, 4, new QTableWidgetItem(items.at(i).getYear() != 0 ? QString::number(items.at(i).getYear()) : ""));
-		table->setItem(i, 5, new QTableWidgetItem(QString::number(items.at(i).getTrack())));
+		// 取一次引用：at() 按值返回 QueryItem，每行重复调用会多出 6 次元素拷贝
+		const QueryItem& item = items.at(i);
+		table->setItem(i, 0, new QTableWidgetItem(item.getTitle()));
+		table->setItem(i, 1, new QTableWidgetItem(item.getArtist()));
+		table->setItem(i, 2, new QTableWidgetItem(item.getAlbum()));
+		table->setItem(i, 3, new QTableWidgetItem(item.getGenre()));
+		table->setItem(i, 4, new QTableWidgetItem(item.getYear() != 0 ? QString::number(item.getYear()) : ""));
+		table->setItem(i, 5, new QTableWidgetItem(QString::number(item.getTrack())));
 	}
 }
 

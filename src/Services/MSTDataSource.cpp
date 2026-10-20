@@ -238,20 +238,20 @@ QList<QueryItem> MSTDataSource::getByFileNames(const QStringList& fileNames) {
 	// SQLITE_MAX_VARIABLE_NUMBER 旧版本为 999，按 500 分批留出余量
 	constexpr qsizetype batchSize = 500;
 	QList<QueryItem> items;
+	items.reserve(fileNames.size());
 	for (qsizetype offset = 0; offset < fileNames.size(); offset += batchSize) {
-		const QStringList batch = fileNames.mid(offset, batchSize);
+		const qsizetype batchCount = qMin(batchSize, fileNames.size() - offset);
 
-		// 构建参数化 IN 子句：WHERE fileName IN (:f0, :f1, ...)
-		QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (";
-		QStringList paramNames;
-		for (qsizetype i = 0; i < batch.size(); i++) {
-			paramNames << ":f" + QString::number(i);
+		// 位置绑定替代命名占位符：省去每批 500 个 ":fN" 字符串与子列表拷贝
+		QString sql = "SELECT title, artist, album, genre, year, track, fileName FROM musicInfo WHERE fileName IN (?";
+		for (qsizetype i = 1; i < batchCount; ++i) {
+			sql += ", ?";
 		}
-		sql += paramNames.join(",") + ") ORDER BY title ASC";
+		sql += ") ORDER BY title ASC";
 
 		query.prepare(sql);
-		for (qsizetype i = 0; i < batch.size(); i++) {
-			query.bindValue(":f" + QString::number(i), batch.at(i));
+		for (qsizetype i = 0; i < batchCount; ++i) {
+			query.bindValue(i, fileNames.at(offset + i));
 		}
 		if (!query.exec()) {
 			Logger::Error("Error querying by file names:" + query.lastError().text());
@@ -373,6 +373,25 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 	return items;
 }
 
+QStringList MSTDataSource::getAllFileNames() {
+	QMutexLocker locker(&dbMutex);
+	QSqlQuery& query = threadQuery();
+	if (!query.exec("SELECT fileName FROM musicInfo")) {
+		Logger::Error("Error querying file names:" + query.lastError().text());
+		return {};
+	}
+
+	QStringList fileNames;
+	// 驱动报告行数时一次性预留，避免逐条 append 引发的重复扩容与搬移
+	if (const int rowCount = query.size(); rowCount > 0) {
+		fileNames.reserve(rowCount);
+	}
+	while (query.next()) {
+		fileNames.append(query.value(0).toString());
+	}
+	return fileNames;
+}
+
 /**
  * @details 单文件写入：读取标签并插入一条记录，供低层调用与测试使用
  */
@@ -416,6 +435,10 @@ bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedF
 		return false;
 	}
 
+	// 同一条 INSERT 复用预编译语句：prepare 放在循环内会让每条记录都重新编译一次 SQL
+	query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
+		":artist, :album, :genre, :year, :track, :fileName)");
+
 	for (const QString& file : files) {
 		const TagLib::FileRef fileRef = MSTTagUtils::createFileRef(QDir(path).filePath(file));
 		if (fileRef.isNull() || fileRef.tag() == nullptr) {
@@ -424,8 +447,6 @@ bool MSTDataSource::addMusicBatch(const QStringList& files, QStringList& failedF
 			continue;
 		}
 		const TagLib::Tag* tag = fileRef.tag();
-		query.prepare("INSERT INTO musicInfo (title, artist, album, genre, year, track, fileName) VALUES (:title, "
-			":artist, :album, :genre, :year, :track, :fileName)");
 		query.bindValue(":title", QString::fromUtf8(tag->title().to8Bit(true)));
 		query.bindValue(":artist", QString::fromUtf8(tag->artist().to8Bit(true)));
 		query.bindValue(":album", QString::fromUtf8(tag->album().to8Bit(true)));

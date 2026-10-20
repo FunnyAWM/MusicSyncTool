@@ -106,11 +106,8 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 				newFileList.append(file);
 			}
 		}
-		QList<QueryItem> storedDbItems = dataSource.getAll({PROPERTIES::QueryRows::FILENAME});
-		QStringList oldFileList;
-		for (const QueryItem& item : std::as_const(storedDbItems)) {
-			oldFileList.append(item.getFileName());
-		}
+		// 只取文件名一列：整表加载成 QueryItem 会为每首多分配 5 个空字段
+		const QStringList oldFileList = dataSource.getAllFileNames();
 		QStringList dirFiles = newFileList;
 		QStringList dbFiles = oldFileList;
 		dirFiles.sort();

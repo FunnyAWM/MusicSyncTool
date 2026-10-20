@@ -50,6 +50,7 @@ private Q_SLOTS:
     void schemaMigration_legacyTable();
     void searchMusic_escapesWildcards();
     void getByFileNames_chunked();
+    void getAllFileNames();
 };
 
 #endif
