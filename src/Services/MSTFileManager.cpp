@@ -91,7 +91,8 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
                                    const std::function<void(const QString&, int)>& onError,
                                    const std::function<void()>& onStart,
                                    const std::function<void()>& onFinish,
-                                   const std::function<void(int)>& onTotal) {
+                                   const std::function<void(int)>& onTotal,
+                                   const std::atomic<bool>* shouldCancel) {
     const TagLib::String key = "LYRICS";
     
     if (onStart) onStart();
@@ -121,8 +122,19 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
     };
     
     bool diskFull = false;
+    bool cancelled = false;
+    // 已开始处理的歌曲数：取消时作为最终进度，避免进度条跳到 100% 造成“已全部复制”的错觉
+    qsizetype handled = 0;
     // 用下标遍历：进度回调需要序号，indexOf 在大批量列表上是 O(n²) 且遇到重名会取错位置
     for (qsizetype index = 0; index < fileList.size(); ++index) {
+        // 取消检查放在歌曲开始前：上一首（音频 + 歌词）必然已处理完，不会留下半首歌
+        if (shouldCancel != nullptr && shouldCancel->load(std::memory_order_relaxed)) {
+            cancelled = true;
+            Logger::Info("Copy cancelled by user, kept " + QString::number(handled) + " copied file(s)");
+            break;
+        }
+        handled = index + 1;
+
         const QString& file = fileList.at(index);
         // 文件名以 ":<规则命中标记>" 结尾（见 MSTMainWindow::on_copyTo*_clicked），
         // 用最后一个冒号切分；缺少该后缀时按整体文件名处理，避免 at() 越界抛异常
@@ -196,9 +208,9 @@ void MSTFileManager::copyMusicFiles(const QString& source, const QStringList& fi
         reportProgress(index);
     }
 
-    // 收尾补一次进度，避免节流导致进度条停在中间
+    // 收尾补一次进度，避免节流导致进度条停在中间；取消时停在已处理的歌曲数
     if (onProgress && !fileList.isEmpty()) {
-        onProgress(static_cast<int>(fileList.size()));
+        onProgress(static_cast<int>(cancelled ? handled : fileList.size()));
     }
     
     if (onFinish) onFinish();

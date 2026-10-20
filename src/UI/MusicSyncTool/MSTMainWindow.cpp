@@ -148,8 +148,11 @@ void MSTMainWindow::connectSlots() {
 	connect(this, &MSTMainWindow::fileCopyError, errorReporter,
 	        QOverload<const QString&, FileErrorType>::of(&MSTErrorReporter::addToErrorList));
 	connect(&copyWatcher, &QFutureWatcher<void>::finished, this, [this] { copyOperationInProgress.store(false); });
-	// 扫描控制器加载页面管理
-	connect(scanController, &MSTScanController::scanStart, loading, &LoadingPage::showPage);
+	// 扫描控制器加载页面管理；扫描不可中断，进页面之前先隐藏取消按钮
+	connect(scanController, &MSTScanController::scanStart, this, [this] {
+		loading->setCancelable(false);
+		loading->showPage();
+	});
 	connect(scanController, &MSTScanController::scanFinished, loading, &LoadingPage::stopPage);
 	connect(scanController, &MSTScanController::scanTotal, loading, &LoadingPage::setTotal);
 	connect(scanController, &MSTScanController::scanCurrent, loading, &LoadingPage::setProgress);
@@ -158,6 +161,7 @@ void MSTMainWindow::connectSlots() {
 	connect(this, &MSTMainWindow::total, loading, &LoadingPage::setTotal);
 	connect(this, &MSTMainWindow::current, loading, &LoadingPage::setProgress);
 	connect(this, &MSTMainWindow::finished, loading, &LoadingPage::stopPage);
+	connect(loading, &LoadingPage::cancelRequested, this, &MSTMainWindow::cancelCopy);
 	connect(errorReporter, &MSTErrorReporter::requestRefreshMusic, this, [this](PathType path, unsigned short page) {
 		if (tableManager->isFavoriteOnly(path)) {
 			tableManager->getFavoriteMusic(path, page, entity.favoriteTag, toSortBy(entity.sortBy),
@@ -364,7 +368,9 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 		// 总数回调
 		[this](const int total) {
 			emit this->total(total);
-		}
+		},
+		// 取消标志：每首歌曲开始前读取，取消后不再开始新的歌曲
+		&copyCancelRequested
 	);
 }
 
@@ -453,7 +459,19 @@ void MSTMainWindow::startCopy(const QString& source, const QStringList& fileList
 		Logger::Warn("Copy operation already in progress, request ignored");
 		return;
 	}
+	// 每次复制开始前清掉上一轮可能残留的取消请求，并让加载页显示取消按钮
+	copyCancelRequested.store(false);
+	loading->setCancelable(true);
 	copyWatcher.setFuture(QtConcurrent::run(&MSTMainWindow::copyMusic, this, source, fileList, target));
+}
+
+void MSTMainWindow::cancelCopy() {
+	if (!copyOperationInProgress.load()) {
+		// 任务已结束（例如刚好复制完最后一批），忽略迟到的取消请求
+		return;
+	}
+	copyCancelRequested.store(true);
+	Logger::Info("Copy cancel requested, will stop after the current file");
 }
 
 void MSTMainWindow::on_actionDupeLocal_triggered(bool triggered) { getDuplicatedMusic(PathType::LOCAL); }

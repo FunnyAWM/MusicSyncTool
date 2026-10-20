@@ -162,7 +162,8 @@ schema 与迁移：
 
 - `supportedFormat`：支持的音频格式清单；`isFormatSupported(fileName)` 判定格式；
 - `copyable(filePath)` 结合目标目录空间判断是否可复制；`isFull(source, target)` 判断磁盘是否已满；`rollBackCopy(fileName)` 回滚半成品文件；
-- `copyMusicFiles(source, fileList, target, ignoreLyric, onProgress, onError, onStart, onFinish, onTotal)`：以回调形式上报进度、错误与总数，错误类型用 `int` 编码（`0`=重复、`1`=歌词缺失、`2`=磁盘已满），由调用方（UI 层）翻译为 `FileErrorType` 并发信号回 GUI 线程。
+- `copyMusicFiles(source, fileList, target, ignoreLyric, onProgress, onError, onStart, onFinish, onTotal, shouldCancel)`：以回调形式上报进度、错误与总数，错误类型用 `int` 编码（`0`=重复、`1`=歌词缺失、`2`=磁盘已满），由调用方（UI 层）翻译为 `FileErrorType` 并发信号回 GUI 线程；
+- `shouldCancel` 为可选的 `const std::atomic<bool>*`：每首歌曲开始前以 `relaxed` 序读取一次，置位后不再开始新的歌曲，**当前歌曲与其歌词必然完整复制**后才退出；取消不回滚已完成文件，收尾进度停在已处理的歌曲数而非 100%。
 
 ### 4.4 `MSTSettingsManager`
 
@@ -222,7 +223,7 @@ schema 与迁移：
 | `MSTMediaController` | 播放/暂停、进度条与音量交互、正在播放标题；播放状态经 `PlayState` 回传 |
 | `Settings` | 设置窗口：语言、排序、忽略歌词、递归扫描、日志落盘、主题（明暗 + 强调色）与规则表；`confirmPressed(SettingsData)` 回传设置 |
 | `AddRuleWidget` | 添加歌词忽略规则；`sendRules(LyricIgnoreRule)` 回传 |
-| `LoadingPage` | 扫描/复制期间的加载遮罩与进度显示 |
+| `LoadingPage` | 扫描/复制期间的加载遮罩与进度显示；`setCancelable(true)` 在进度条右下方显示取消按钮并发出 `cancelRequested()`，扫描任务保持隐藏 |
 | `OperationResult` | 操作结果列表弹窗 |
 | `ShowDupe` | 重复项列表弹窗 |
 | `AboutPage` | 关于页 |

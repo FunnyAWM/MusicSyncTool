@@ -8,6 +8,7 @@ Build with [Qt](https://img.shields.io/badge/-Qt-41CD52?style=flat-square&logo=q
 ## 1. Features
 
 - Detects and batch-copies music and lyric files; free space on the target disk is checked first, and failed files are rolled back and collected in the error list;
+- Copying can be cancelled: pressing "Cancel" under the progress bar finishes the song and its lyric file being copied, then stops; already copied files are kept;
 - Lyric tag handling: customisable lyric ignore rules, matching on title/artist/album with includes/excludes mode;
 - Favourite filtering: mark favourite music with a custom tag and list it separately;
 - Duplicate detection: fuzzy comparison on title, artist and album to list duplicated files;

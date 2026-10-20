@@ -15,6 +15,19 @@ public:
     
     void setRandomTitle() const;
 
+    /**
+     * @brief 设置是否显示取消按钮
+     * @details 只有可中断的复制任务才显示；扫描任务不可取消，保持隐藏
+     */
+    void setCancelable(bool cancelable);
+
+signals:
+    /// @brief 用户请求取消：发出时当前文件仍在复制，由复制方决定在哪一步退出
+    void cancelRequested();
+
+private slots:
+    void onCancelButtonClicked();
+
 private:
     Ui::LoadingPageClass ui;
     int total;

@@ -106,6 +106,8 @@ private:
 	// 状态管理
 	/// @brief 复制任务进行中标记：工作线程与 GUI 线程都会访问
 	std::atomic<bool> copyOperationInProgress{false};
+	/// @brief 取消标志：GUI 线程置位，复制线程在每首歌曲开始前读取
+	std::atomic<bool> copyCancelRequested{false};
 	/// @brief 持有复制任务的 QFuture，保证窗口析构前任务已结束
 	QFutureWatcher<void> copyWatcher;
 
@@ -135,6 +137,8 @@ public:
 	void copyMusic(const QString&, const QStringList&, const QString&);
 	/// @brief 启动复制任务并防止并发复制
 	void startCopy(const QString& source, const QStringList& fileList, const QString& target);
+	/// @brief 请求取消复制：当前歌曲与其歌词复制完成后退出，已完成的文件保留
+	void cancelCopy();
 	void setAvailableSpace(PathType) const;
 
 public slots:

@@ -162,7 +162,8 @@ File copying and free-space checks.
 
 - `supportedFormat`: the list of supported audio formats; `isFormatSupported(fileName)` tests a name;
 - `copyable(filePath)` combines the target directory's free space into the decision; `isFull(source, target)` reports a full disk; `rollBackCopy(fileName)` removes a partial file;
-- `copyMusicFiles(source, fileList, target, ignoreLyric, onProgress, onError, onStart, onFinish, onTotal)`: reports progress, errors and totals through callbacks. Error kinds use `int` codes (`0` = duplicate, `1` = missing lyric, `2` = disk full) which the caller (UI layer) translates into `FileErrorType` and emits back to the GUI thread.
+- `copyMusicFiles(source, fileList, target, ignoreLyric, onProgress, onError, onStart, onFinish, onTotal, shouldCancel)`: reports progress, errors and totals through callbacks. Error kinds use `int` codes (`0` = duplicate, `1` = missing lyric, `2` = disk full) which the caller (UI layer) translates into `FileErrorType` and emits back to the GUI thread;
+- `shouldCancel` is an optional `const std::atomic<bool>*`: it is read once (relaxed) before each song starts, so no new song begins after it is set and **the current song and its lyric file are always copied completely**; cancelling never rolls back finished files, and the final progress stops at the number of handled songs instead of 100%.
 
 ### 4.4 `MSTSettingsManager`
 
@@ -222,7 +223,7 @@ Main responsibilities:
 | `MSTMediaController` | Play/pause, progress and volume interaction, now-playing title; playback state is reported as `PlayState` |
 | `Settings` | Settings dialog: language, sorting, ignore lyrics, recursive scan, file logging, theme (mode + accent colour) and the rule table; returns `confirmPressed(SettingsData)` |
 | `AddRuleWidget` | Adds a lyric ignore rule; returns `sendRules(LyricIgnoreRule)` |
-| `LoadingPage` | Loading overlay and progress display for scan/copy |
+| `LoadingPage` | Loading overlay and progress display for scan/copy; `setCancelable(true)` shows a Cancel button under the progress bar and emits `cancelRequested()`, while scan tasks keep it hidden |
 | `OperationResult` | Operation result list dialog |
 | `ShowDupe` | Duplicate list dialog |
 | `AboutPage` | About page |

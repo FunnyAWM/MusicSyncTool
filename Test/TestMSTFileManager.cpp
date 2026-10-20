@@ -77,3 +77,65 @@ void TestMSTFileManager::copyable_smallFile() {
     MSTFileManager mgr(d.path());
     QVERIFY(mgr.copyable(sf));
 }
+
+void TestMSTFileManager::copyMusicFiles_cancelKeepsCompletedFile() {
+    QTemporaryDir d;
+    QVERIFY(d.isValid());
+    const QString srcDir = d.path() + "/src";
+    const QString dstDir = d.path() + "/dst";
+    QVERIFY(QDir().mkpath(srcDir));
+    QVERIFY(QDir().mkpath(dstDir));
+    const QStringList names = {"a.mp3", "b.mp3", "c.mp3"};
+    for (const QString& n : names) {
+        QFile f(srcDir + "/" + n);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write("audio");
+        f.close();
+    }
+    // b.mp3 已存在于目标目录，会触发 onError(DUPLICATE)：借此在第一首处理完之后请求取消
+    { QFile f(dstDir + "/b.mp3"); QVERIFY(f.open(QIODevice::WriteOnly)); f.write("old"); f.close(); }
+
+    std::atomic<bool> cancelRequested{false};
+    QStringList errors;
+    MSTFileManager::copyMusicFiles(srcDir, names, dstDir, true,
+                                   nullptr,
+                                   [&errors, &cancelRequested](const QString& name, int) {
+                                       errors << name;
+                                       cancelRequested.store(true);
+                                   },
+                                   nullptr, nullptr, nullptr,
+                                   &cancelRequested);
+
+    QVERIFY(QFile::exists(dstDir + "/a.mp3"));   // 已完成的文件保留，不回滚
+    QVERIFY(!QFile::exists(dstDir + "/c.mp3"));  // 取消后不再开始新的歌曲
+    QCOMPARE(errors.size(), 1);
+    QCOMPARE(errors.first(), QString("b.mp3"));
+}
+
+void TestMSTFileManager::copyMusicFiles_cancelBeforeStart() {
+    QTemporaryDir d;
+    QVERIFY(d.isValid());
+    const QString srcDir = d.path() + "/src";
+    const QString dstDir = d.path() + "/dst";
+    QVERIFY(QDir().mkpath(srcDir));
+    QVERIFY(QDir().mkpath(dstDir));
+    const QStringList names = {"x.mp3", "y.mp3"};
+    for (const QString& n : names) {
+        QFile f(srcDir + "/" + n);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write("audio");
+        f.close();
+    }
+
+    std::atomic<bool> cancelRequested{true};
+    int lastProgress = -1;
+    MSTFileManager::copyMusicFiles(srcDir, names, dstDir, true,
+                                   [&lastProgress](const int value) { lastProgress = value; },
+                                   nullptr, nullptr, nullptr, nullptr,
+                                   &cancelRequested);
+
+    QVERIFY(!QFile::exists(dstDir + "/x.mp3"));
+    QVERIFY(!QFile::exists(dstDir + "/y.mp3"));
+    // 取消时进度停在已处理的歌曲数（0），不应跳到 100% 造成“已全部复制”的错觉
+    QCOMPARE(lastProgress, 0);
+}

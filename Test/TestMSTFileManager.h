@@ -20,6 +20,8 @@ private Q_SLOTS:
     void isFull_smallFile();
     void getSpaceInfo_format();
     void copyable_smallFile();
+    void copyMusicFiles_cancelKeepsCompletedFile();
+    void copyMusicFiles_cancelBeforeStart();
 };
 
 #endif

@@ -10,6 +10,8 @@ LoadingPage::LoadingPage(QWidget* parent) : QWidget(parent), total(0) {
 	this->setWindowFlags(Qt::FramelessWindowHint);
 	this->setWindowModality(Qt::ApplicationModal);
 	this->setWindowIcon(QIcon(":/MusicSyncTool.ico"));
+	ui.cancelButton->setVisible(false);
+	connect(ui.cancelButton, &QPushButton::clicked, this, &LoadingPage::onCancelButtonClicked);
 	setRandomTitle();
 }
 
@@ -47,7 +49,22 @@ void LoadingPage::showPage() {
 }
 
 void LoadingPage::stopPage() {
+	// 每次收起都复位按钮，下次打开时由调用方按任务类型决定是否可取消
+	setCancelable(false);
 	close();
+}
+
+void LoadingPage::setCancelable(const bool cancelable) {
+	ui.cancelButton->setEnabled(true);
+	ui.cancelButton->setText(tr("取消"));
+	ui.cancelButton->setVisible(cancelable);
+}
+
+void LoadingPage::onCancelButtonClicked() {
+	// 点击后立即失效，避免重复请求；文案说明“当前文件仍会复制完”，与退出时机保持一致
+	ui.cancelButton->setEnabled(false);
+	ui.cancelButton->setText(tr("正在结束当前复制…"));
+	emit cancelRequested();
 }
 
 void LoadingPage::setProgress(const int value) const {
