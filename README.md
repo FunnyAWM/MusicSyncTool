@@ -23,7 +23,7 @@
 
 ## 3. 从源码构建
 
-1. 确保你正确安装了Qt库、Visual Studio和Vcpkg。
+1. 确保你正确安装了Qt库、Visual Studio和Vcpkg。Windows 构建基线为 **Qt 6.8 LTS（`6.8.3_msvc2022_64`）**，工程内已配置该版本；使用其他 6.8.x 版本时需同步修改工程属性或 Qt VS Tools 中的 Qt 版本。
 2. 拉取MusicSyncTool代码到本地，使用如下命令并在VS中打开sln文件：
    
    ```

@@ -9,7 +9,7 @@
 | 项 | 约束 |
 | --- | --- |
 | 编译标准 | C++17；CMake 侧必须 `CMAKE_CXX_STANDARD 17` + `CMAKE_CXX_STANDARD_REQUIRED ON`，MSVC 侧不得提升到更高标准 |
-| Qt | Qt 6 为唯一基线。x64 配置构建用 `6.10.1_msvc2022_64`，Win32 配置用 `6.8.1_msvc2022_64`，CMake 侧按本机 Qt 6.8+ 安装；不得使用高于 Qt 6.8 引入的 API |
+| Qt | Qt 6.8 LTS 为唯一基线：Windows 全部配置（含测试工程）统一用 `6.8.3_msvc2022_64`，CMake 侧按本机 Qt 6.8+ 安装；不得使用高于 Qt 6.8 引入的 API |
 | Qt 模块 | Widgets、Sql、Multimedia、Concurrent；测试追加 Test；翻译用 LinguistTools |
 | 编译器 | MSVC 2022（v143，`ConformanceMode`）；Linux/macOS 侧 GCC/Clang（`-Wall -Wextra`，CMake 已设置） |
 | 第三方依赖 | TagLib、utfcpp，一律经 vcpkg 管理；新增依赖须先评估 vcpkg 可用性与体积 |
@@ -17,7 +17,7 @@
 | 界面文件 | 界面使用 `src/UI/**/*.ui`（AUTOUIC/QtUic），禁止继续把整棵界面树堆进构造函数 |
 | 代码检查 | VS Debug 配置已启用 ClangTidy；构建产物不得入库 |
 
-升级 Qt 基线时必须同步四处：`MusicSyncTool.vcxproj` 的 `QtInstall` 与写死的 include/lib 路径（当前为 `D:\Qt\6.8.1\msvc2022_64`）、`CMakeLists.txt` 的 `CMAKE_PREFIX_PATH` 与 `QT NAMES`、`README.md` 构建说明、`ACCEPTANCE.md`。
+升级 Qt 基线时必须同步五处：`MusicSyncTool.vcxproj` 的 `QtInstall`（四个配置）与写死的 include/lib 路径（当前为 `D:\Qt\6.8.3\msvc2022_64`）、`Test/MusicSyncToolTests.vcxproj` 的 `QtInstall`、`CMakeLists.txt` 的 `CMAKE_PREFIX_PATH` 与 `QT NAMES`、`README.md` / `README_en_US.md` 构建说明、`ACCEPTANCE.md`。
 
 ## 2. C++ 语言规则
 

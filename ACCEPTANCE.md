@@ -11,7 +11,7 @@
 | --- | --- |
 | 操作系统 | Windows 11 (x64) |
 | 编译器 | MSVC 14.51（Visual Studio 2022 Community，`vcvars64`） |
-| Qt | 6.8.3 msvc2022_64（release，含 Test / Sql / Multimedia / Concurrent / Widgets） |
+| Qt | 6.8.3 msvc2022_64（LTS，工程基线，含 Test / Sql / Multimedia / Concurrent / Widgets） |
 | 第三方库 | vcpkg `x64-windows`：`taglib`（`tag.lib`）、`utfcpp`（仅头文件） |
 | 代码基线 | `f6d8643`（分层重构）→ 本次会话 8 个提交，最新 `docs/classes` 与测试批次见 §4 |
 | 图形环境 | 单元测试以 `QT_QPA_PLATFORM=offscreen` 运行（无交互桌面会话） |
@@ -94,29 +94,28 @@ link     Qt6Test/Qt6Widgets/Qt6Multimedia/Qt6Concurrent/Qt6Sql/Qt6Gui/Qt6Core + 
 | `kmpSimilarity` 默认阈值 0.8 与 `fuzzyMatch` 使用的 0.85 不一致 | 直接调用默认阈值时行为与界面判定不一致 | 默认参数对齐 0.85 |
 | `Logger` 落盘开关/消息处理器安装无同步 | 工作线程日志与安装动作存在数据竞争 | 开关与处理器指针改原子量，安装段加锁 |
 
-### 2.6 MSBuild `ClCompile` 全量编译（Visual Studio 工程，Debug|x64，真实执行）
+### 2.6 MSBuild 全量重建 + 链接（Visual Studio 工程，Release|x64 / Test Debug|x64，真实执行）
 
 ```
-MSBuild.exe MusicSyncTool.vcxproj -t:ClCompile -p:Configuration=Debug -p:Platform=x64 \
-  -p:QtInstallDir=D:\Qt\6.8.3\msvc2022_64 -p:QtToolsPath=D:\Qt\6.8.3\msvc2022_64\bin
+MSBuild.exe MusicSyncTool.vcxproj     -t:Rebuild -p:Configuration=Release -p:Platform=x64
+MSBuild.exe Test\MusicSyncToolTests.vcxproj -t:Rebuild -p:Configuration=Debug -p:Platform=x64
 ```
 
-- 结果：`0 个错误`、`0 个警告`（`/W3 /permissive- /sdl`）；`StringSimilarity.cpp`、`MSTFileManager.cpp`、
-  `MSTTableManager.cpp` 等改动文件确认参与重新编译；
-- `-p:QtInstallDir` / `-p:QtToolsPath` 用于覆盖工程内联的 6.8.1 / 6.10.1 路径（本机仅装 6.8.3，见 §3.1）；
-- 仅编译、未链接：工程 `AdditionalLibraryDirectories` 仍指向不存在的 `D:\Qt\6.8.1\msvc2022_64\lib`。
+- **不需要任何 `-p:QtInstall*` 覆盖**：Qt 基线已统一到 `6.8.3_msvc2022_64`，工程自带的 include/lib 路径
+  与 Qt VS Tools 解析一致（构建日志中 `6.8.3` 命中 68 处、`6.10.1` 0 处）；
+- 结果：两个工程均 `0 个错误`、`0 个警告`；Release 产出 `MusicSyncTool.exe` 与 `translations/*.qm` ×3，
+  测试工程产出 `MusicSyncToolTests.exe` 并跑通 159 个用例（0 failed）；
+- 因本机 VS 实例占用 `vc145.pdb`，命令行构建改用临时 `IntDir`/`OutDir`，构建产物与临时目录均已清理。
 
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
 
-### 3.1 Visual Studio 解决方案完整构建（含链接）—— 未执行
+### 3.1 Visual Studio 解决方案构建 —— 已执行（详见 §2.6）
 
-工程内联了 Qt 头/库路径 `D:\Qt\6.8.1\msvc2022_64`（Debug|x64 的 `QtInstall` 另写为 `6.10.1_msvc2022_64`），
-本机仅安装 6.8.3，且 Qt VS Tools 的 Qt 版本属于用户级设置（`.vs`），无法在无人值守环境下替代。
-本次通过 `-p:QtInstallDir` 覆盖完成了 §2.6 的编译阶段验证，但未执行 `MusicSyncTool.sln` 的
-Debug/Release **链接与运行**。**发布前的链接构建与 GUI 逐项人工验收仍建议在具备 Qt 6.8.x + vcpkg 的
-VS 环境中补做。**
+Qt 基线统一到 6.8.3 后，工程自带配置即可完成 Release 重建、链接与测试工程构建，此前“内联路径与
+本机 Qt 版本不符、无法命令行构建”的限制已消除。仍建议在另一台仅安装 Qt + vcpkg 的机器上复跑一次，
+排除本机残留路径（如 vcpkg 根目录 `E:\vcpkg`）带来的偶合。
 
 ### 3.2 Linux / macOS（CMake）—— 未执行
 
@@ -174,8 +173,8 @@ VS 环境中补做。**
 
 ## 5. 剩余边界与建议
 
-1. **VS 解决方案构建**：在装有 Qt 6.8.x 与 vcpkg 的机器上执行 `MusicSyncTool.sln` 的 Debug/Release
-   构建，确认 Qt VS Tools 的 moc/uic/rcc/lupdate 目标全部通过（本次仅完成了等价的手工构建）。
+1. **VS 解决方案构建**：Release 重建 + 链接、测试工程 Debug 构建已在 §2.6 完成（Qt VS Tools 的
+   moc/uic/rcc/lupdate 目标全部通过）；剩余待补为在独立机器上复跑，确认不依赖本机路径。
 2. **GUI 人工验收**：大曲库（≥5000 首）扫描、复制中断与磁盘写满、主题即时切换、旧 `settings.json`
    与旧 `musicInfo.db` 升级路径的实机走查。
 3. **CMake 侧**：Linux/macOS 上执行 `cmake -DBUILD_TESTS=ON` 构建并运行 `ctest`，补齐平台垫片的运行时证据。

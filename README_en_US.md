@@ -23,7 +23,7 @@ This software includes msi package and unpack-and-run version, you can freely ch
 
 ## 3. Building from source
 
-1. Make sure you have Qt library with MSVC compiler, Visual Studio and Vcpkg installed.
+1. Make sure you have Qt library with MSVC compiler, Visual Studio and Vcpkg installed. The Windows build baseline is **Qt 6.8 LTS (`6.8.3_msvc2022_64`)**, which the project is already configured for; for another 6.8.x version change the Qt version in the project properties or in Qt VS Tools.
 2. Clone this repository by the following command and open the .sln file in Visual Studio:
 ```
  git clone https://github.com/FunnyAWM/MusicSyncTool.git

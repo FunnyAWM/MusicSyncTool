@@ -24,7 +24,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.10.1_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;sql;multimedia;concurrent;testlib</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
