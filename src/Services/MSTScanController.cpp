@@ -240,7 +240,11 @@ void MSTScanController::setFavorite(const PathType path,
 		}
 		FavoriteUpdate favResult;
 		favResult.fileName = filesToScan.at(i);
-		favResult.isFavorite = fileRef.properties().contains(favoriteTag.toStdString().c_str());
+		// 走 File::properties() 而不是 FileRef::properties()：后者是 TagLib 2.0 才有的便利接口，
+		// 发行版（如 Ubuntu 24.04 的 libtag1-dev 1.13）只有前者，这样两边都能编译
+		const TagLib::File* tagFile = fileRef.file();
+		favResult.isFavorite = tagFile != nullptr
+			&& tagFile->properties().contains(favoriteTag.toStdString().c_str());
 		results.append(favResult);
 	}
 	dataSource.updateFavoriteBatch(results);

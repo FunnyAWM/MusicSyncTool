@@ -3,7 +3,10 @@ name: MusicSyncTool CI
 # 平台与版本口径（与 AGENTS.md / AGENTS_CPP.md 一致）：
 # - Qt 唯一基线是 6.8 LTS，矩阵不得再用 6.5/6.7，否则会与 CMakeLists.txt 里写死的 6.8.3 路径冲突；
 # - Windows 主构建走 VS 2022 解决方案（AGENTS_CPP.md §10.1），而 CMakeLists.txt 在非 Linux/macOS 上
-#   会 SEND_ERROR 拒绝配置，因此本工作流不覆盖 Windows；其构建证据记录在 ACCEPTANCE.md §2.6 / §2.7。
+#   会 SEND_ERROR 拒绝配置，因此本工作流不覆盖 Windows；其构建证据记录在 ACCEPTANCE.md §2.6 / §2.7；
+# - macOS 未纳入：aqt 只提供 x86_64 的 Qt 6.8 macOS 包，而 GitHub 的 macOS runner 是 arm64，
+#   链接阶段报 `ld: framework 'AGL' not found`（见 ACCEPTANCE.md §2.11）。保留一个必然失败且无法
+#   修复的 job 只会长期污染结果， macOS 覆盖改为在原生 arm64/Intel 机器上用 Homebrew Qt 手动执行。
 
 on:
   push:
@@ -84,48 +87,6 @@ jobs:
           build-linux/Testing/
           build-linux/**/*.log
 
-  # macOS：构建单元测试目标并运行
-  macos-test:
-    name: macos-test
-    runs-on: macos-latest
-    env:
-      QT_QPA_PLATFORM: offscreen
-    steps:
-    - name: Checkout 代码
-      uses: actions/checkout@v5
-
-    - name: 安装系统依赖
-      run: |
-        brew update
-        brew install taglib cmake ninja pkg-config
-
-    - name: 安装 Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        # aqt 的 Linux/macOS 包不含 qttools，CMakeLists 已把 LinguistTools 降为可选
-        modules: 'qtmultimedia'
-        cache: true
-
-    - name: 构建单元测试
-      run: |
-        cmake -S Test -B build-test-macos -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT_DIR }}"
-        cmake --build build-test-macos
-
-    - name: 运行单元测试
-      run: ctest --test-dir build-test-macos --output-on-failure
-
-    - name: 上传测试结果
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: test-results-macos
-        path: |
-          build-test-macos/Testing/
-          build-test-macos/**/*.log
-
   # 测试覆盖率报告（不设门槛，失败不影响主流程结论）
   coverage:
     name: coverage
@@ -163,12 +124,16 @@ jobs:
           -DENABLE_COVERAGE=ON
         cmake --build build-coverage
 
-    - name: 运行测试并生成覆盖率
+    - name: 运行测试
+      run: ctest --test-dir build-coverage --output-on-failure
+
+    # 覆盖率只是参考指标：lcov/gcov 的版本差异不该让整个 job 变红
+    - name: 生成覆盖率报告
+      continue-on-error: true
       run: |
-        ctest --test-dir build-coverage --output-on-failure
-        lcov --capture --directory build-coverage --output-file coverage.info --ignore-errors mismatch
+        lcov --capture --directory build-coverage --output-file coverage.info --ignore-errors mismatch,gcov,source
         lcov --remove coverage.info '/usr/*' '*/build-coverage/*' '*/Test/*' --output-file coverage.info --ignore-errors unused
-        genhtml coverage.info --output-directory coverage-html
+        genhtml coverage.info --output-directory coverage-html --ignore-errors inconsistent,source
 
     - name: 上传覆盖率报告
       if: always()
