@@ -30,19 +30,19 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -61,24 +61,24 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;testlib;widgets;concurrent;multimedia;sql</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="QtSettings">
-    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;concurrent;multimedia;sql</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;concurrent;multimedia;sql</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
     <QtDeploy>true</QtDeploy>
     <QtDeployNoTranslations>true</QtDeployNoTranslations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="QtSettings">
-    <QtInstall>6.8.1_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;concurrent;multimedia;sql</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
     <QtDeploy>true</QtDeploy>
@@ -116,34 +116,45 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Qt\6.8.1\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Qt\6.8.3\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StringPooling>true</StringPooling>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Qt\6.8.1\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Qt\6.8.3\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtTranslation>
       <BuildAction>lupdate_lrelease</BuildAction>
-      <QmOutputDir>$(OutDir)\translations</QmOutputDir>
+      <QmOutputDir>$(OutDir)translations</QmOutputDir>
     </QtTranslation>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Qt\6.8.1\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Qt\6.8.3\msvc2022_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Qt\6.8.1\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Qt\6.8.3\msvc2022_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtTranslation>
+      <BuildAction>lupdate_lrelease</BuildAction>
+    </QtTranslation>
+    <ClCompile>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <CallingConvention>Cdecl</CallingConvention>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>true</VcpkgEnabled>
@@ -205,27 +216,51 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <QtMoc Include="src\AboutPage.h" />
+    <QtMoc Include="src\UI\AboutPage\AboutPage.h" />
+    <QtMoc Include="src\UI\OperationResult\OperationResult.h" />
+    <QtMoc Include="src\UI\Settings\Settings.h" />
+    <QtMoc Include="src\UI\ShowDupe\ShowDupe.h" />
+    <QtMoc Include="src\UI\MusicSyncTool\MSTMainWindow.h" />
+    <QtMoc Include="src\UI\MusicSyncTool\MSTTableManager.h" />
+    <QtMoc Include="src\UI\MusicSyncTool\MSTMediaController.h" />
+    <QtMoc Include="src\UI\MusicSyncTool\MSTErrorReporter.h" />
+    <QtMoc Include="src\UI\LoadingPage\LoadingPage.h" />
+    <QtMoc Include="src\UI\AddRuleWidget\AddRuleWidget.h" />
+    <QtMoc Include="src\Services\MSTDataSource.h" />
+    <QtMoc Include="src\Services\MSTScanController.h" />
+    <ClInclude Include="src\Services\Logger.h" />
+    <ClInclude Include="src\Services\MSTFileManager.h" />
+    <ClInclude Include="src\Services\MSTMediaPlayer.h" />
+    <ClInclude Include="src\Services\MSTSettingsManager.h" />
+    <ClInclude Include="src\Data\QueryItem.h" />
+    <ClInclude Include="src\Core\SingleInstance.h" />
+    <ClInclude Include="src\Core\StringSimilarity.h" />
+    <ClInclude Include="src\Core\MSTTagUtils.h" />
+    <ClInclude Include="src\Data\LyricIgnoreRule.h" />
+    <ClInclude Include="src\Core\MusicProperties.h" />
+    <ClInclude Include="src\Core\SettingEntity.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\LoadingPage.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\MusicProperties.h" />
-    <ClInclude Include="src\SettingEntity.h" />
-    <QtMoc Include="src\ShowDupe.h" />
-    <QtMoc Include="src\Settings.h" />
-    <QtMoc Include="src\OperationResult.h" />
-    <QtMoc Include="src\MusicSyncTool.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\AboutPage.cpp" />
-    <ClCompile Include="src\LoadingPage.cpp" />
+    <ClCompile Include="src\Services\Logger.cpp" />
+    <ClCompile Include="src\Data\LyricIgnoreRule.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MusicSyncTool.cpp" />
-    <ClCompile Include="src\OperationResult.cpp" />
-    <ClCompile Include="src\Settings.cpp" />
-    <ClCompile Include="src\ShowDupe.cpp" />
+    <ClCompile Include="src\Services\MSTDataSource.cpp" />
+    <ClCompile Include="src\Services\MSTFileManager.cpp" />
+    <ClCompile Include="src\Services\MSTMediaPlayer.cpp" />
+    <ClCompile Include="src\Services\MSTScanController.cpp" />
+    <ClCompile Include="src\Services\MSTSettingsManager.cpp" />
+    <ClCompile Include="src\Data\QueryItem.cpp" />
+    <ClCompile Include="src\Core\StringSimilarity.cpp" />
+    <ClCompile Include="src\UI\AboutPage\AboutPage.cpp" />
+    <ClCompile Include="src\UI\AddRuleWidget\AddRuleWidget.cpp" />
+    <ClCompile Include="src\UI\LoadingPage\LoadingPage.cpp" />
+    <ClCompile Include="src\UI\MusicSyncTool\MSTMainWindow.cpp" />
+    <ClCompile Include="src\UI\MusicSyncTool\MSTTableManager.cpp" />
+    <ClCompile Include="src\UI\MusicSyncTool\MSTMediaController.cpp" />
+    <ClCompile Include="src\UI\MusicSyncTool\MSTErrorReporter.cpp" />
+    <ClCompile Include="src\UI\OperationResult\OperationResult.cpp" />
+    <ClCompile Include="src\UI\Settings\Settings.cpp" />
+    <ClCompile Include="src\UI\ShowDupe\ShowDupe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\MusicSyncTool.ico" />
@@ -237,17 +272,34 @@
     <ResourceCompile Include="resources\MusicSyncTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="forms\AboutPage.ui" />
-    <QtUic Include="forms\LoadingPage.ui" />
-    <QtUic Include="forms\MusicSyncTool.ui" />
-    <QtUic Include="forms\OperationResult.ui" />
-    <QtUic Include="forms\Settings.ui" />
-    <QtUic Include="forms\ShowDupe.ui" />
-  </ItemGroup>
-  <ItemGroup>
     <QtTranslation Include="translations\Translation_en_US.ts" />
     <QtTranslation Include="translations\Translation_Wenyan.ts" />
     <QtTranslation Include="translations\Translation_zh_Hans.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\titles.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\base-style.qss" />
+    <None Include="resources\style-light.qss" />
+    <None Include="resources\style-dark-mode.qss" />
+    <None Include="resources\style.qss" />
+    <None Include="resources\style-green.qss" />
+    <None Include="resources\style-purple.qss" />
+    <None Include="resources\style-dark.qss" />
+    <None Include="resources\checkmark.svg" />
+    <None Include="resources\radiodot.svg" />
+    <None Include="resources\downarrow.svg" />
+    <None Include="resources\downarrow-light.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="src\UI\AboutPage\AboutPage.ui" />
+    <QtUic Include="src\UI\AddRuleWidget\AddRuleWidget.ui" />
+    <QtUic Include="src\UI\LoadingPage\LoadingPage.ui" />
+    <QtUic Include="src\UI\MusicSyncTool\MSTMainWindow.ui" />
+    <QtUic Include="src\UI\OperationResult\OperationResult.ui" />
+    <QtUic Include="src\UI\Settings\Settings.ui" />
+    <QtUic Include="src\UI\ShowDupe\ShowDupe.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

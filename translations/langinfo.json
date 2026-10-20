@@ -6,5 +6,9 @@
     {
         "fileName": "Translation_zh_Hans.qm",
         "lang": "中文"
+    },
+    {
+        "fileName": "Translation_Wenyan.qm",
+        "lang": "文言"
     }
 ]

@@ -1,0 +1,280 @@
+#ifndef MUSICPROPERTIES_H
+#define MUSICPROPERTIES_H
+#include <cstdint>
+#include <QMetaType>
+
+/**
+ * @brief 音乐属性命名空间
+ * 包含音乐同步工具中使用的各种枚举类型和工具函数
+ */
+namespace PROPERTIES {
+	/**
+	 * @brief 路径类型枚举
+	 * 用于区分本地路径和远程路径
+	 */
+	enum class PathType : uint8_t { 
+		LOCAL,   ///< 本地路径
+		REMOTE   ///< 远程路径
+	};
+
+	/**
+	 * @brief 播放状态枚举
+	 * 表示媒体播放器的当前状态
+	 */
+	enum class PlayState : uint8_t { 
+		PLAYING,  ///< 正在播放
+		PAUSED,   ///< 已暂停
+		STOPPED   ///< 已停止
+	};
+
+	/**
+	 * @brief 文件错误类型枚举
+	 * 文件复制操作中可能遇到的错误类型
+	 */
+	enum class FileErrorType : uint8_t { 
+		// 注意：不能命名为 DUPLICATE，Windows SDK 的 nb30.h 已把 DUPLICATE 定义成宏 0x06，
+		// 且 SingleInstance.h 会在 main.cpp 中最先引入 <Windows.h>，会导致枚举被宏替换而编译失败
+		DUPLICATE_FILE,   ///< 重复文件
+		LYRIC_NOT_FOUND,  ///< 歌词文件未找到 (Lyric Not Found)
+		DISKFULL          ///< 磁盘空间不足
+	};
+
+	/**
+	 * @brief 加载错误类型枚举
+	 * 音乐文件加载过程中可能遇到的错误类型
+	 */
+	enum class LoadErrorType : uint8_t { 
+		FILE_NOT_SCANNABLE,  ///< 文件无法扫描 (File Not Scannable)
+		TAG_READ_ERROR       ///< 标签读取错误
+	};
+
+	/**
+	 * @brief 排序字段枚举
+	 * 指定音乐列表排序所依据的字段
+	 */
+	enum class SortByEnum : uint8_t { 
+		TITLE,   ///< 按标题排序
+		ARTIST,  ///< 按艺术家排序
+		ALBUM    ///< 按专辑排序
+	};
+
+	/**
+	 * @brief 排序顺序枚举
+	 * 指定排序的升降序方向
+	 */
+	enum class OrderByEnum : uint8_t { 
+		ASC,   ///< 升序
+		DESC   ///< 降序
+	};
+
+	/**
+	 * @brief 程序错误类型枚举 (Program Error Type)
+	 * 应用程序运行时可能遇到的各类错误
+	 */
+	enum class AppErrorType : uint8_t { 
+		NO_AUDIO,          ///< 无音频设备或未选定音频
+		NO_PATH,           ///< 未选择路径 (No Path Selected)
+		NO_DEST_PATH,      ///< 未选择目标路径 (No Destination Path)
+		NO_FAV_TAG,        ///< 无收藏标签 (No Favorite Tag)
+		NO_FILE,           ///< 未选择文件 (No File Selected)
+		FIRST,             ///< 已经是第一页
+		LAST,              ///< 已经是最后一页
+		RUNNING,           ///< 程序已在运行
+		NO_LANGUAGE,       ///< 找不到语言配置文件
+		DB_ERROR,          ///< 数据库操作错误
+		DUPLICATE_FILE     ///< 目录打开失败 (Directory Open Failed)
+	};
+
+	/**
+	 * @brief 操作类型枚举
+	 * 用于区分不同的异步操作类型
+	 */
+	enum class OperationType : uint8_t { 
+		COPY,  ///< 文件复制操作
+		LOAD   ///< 数据加载操作
+	};
+
+	/**
+	 * @brief 规则字段枚举
+	 * 歌词忽略规则所作用的字段
+	 */
+	enum class RuleField : uint8_t { 
+		TITLE,   ///< 标题字段
+		ARTIST,  ///< 艺术家字段
+		ALBUM,    ///< 专辑字段
+		NONE
+	};
+
+	/**
+	 * @brief 规则类型枚举
+	 * 歌词忽略规则的匹配方式
+	 */
+	enum class RuleType : uint8_t { 
+		INCLUDES,  ///< 包含匹配
+		EXCLUDES,   ///< 排除匹配
+		NONE
+	};
+
+	/**
+	 * @brief 查询行枚举
+	 * 指定数据库查询时需要返回的字段
+	 */
+	enum class QueryRows : uint8_t { 
+		TITLE,     ///< 标题行
+		ARTIST,    ///< 艺术家行
+		ALBUM,     ///< 专辑行
+		GENRE,     ///< 流派行
+		YEAR,      ///< 年份行
+		TRACK,     ///< 音轨行
+		FILENAME,  ///< 文件名行
+		ALL        ///< 所有行
+	};
+
+	/**
+	 * @brief 界面明暗模式
+	 * 决定加载哪一份 mode 样式表
+	 */
+	enum class ThemeMode : uint8_t {
+		LIGHT = 0x21,   ///< 明亮模式（style-light.qss）
+		DARK = 0x22     ///< 暗色模式（style-dark-mode.qss）
+	};
+
+	/**
+	 * @brief 界面强调色主题
+	 * 决定加载哪一份 accent 样式表
+	 */
+	enum class AccentColor : uint8_t {
+		BLUE = 0x31,    ///< 蓝色（style.qss）
+		GREEN = 0x32,   ///< 绿色（style-green.qss）
+		PURPLE = 0x33,  ///< 紫色（style-purple.qss）
+		DARK = 0x34     ///< 深色（style-dark.qss）
+	};
+
+	/**
+	 * @brief 将数值转换为排序字段枚举
+	 * @param num 数值（0x01=标题, 0x02=艺术家, 0x03=专辑）
+	 * @return 对应的排序字段枚举值
+	 */
+    inline SortByEnum toSortBy(const short num) {
+        switch (num) {
+            case 0x01: return SortByEnum::TITLE;
+            case 0x02: return SortByEnum::ARTIST;
+            case 0x03: return SortByEnum::ALBUM;
+            default: return SortByEnum::TITLE;
+            }
+    }
+
+    /**
+     * @brief 将排序字段枚举转换为数值
+     * @param sortBy 排序字段枚举值
+     * @return 对应的数值（0x01=标题, 0x02=艺术家, 0x03=专辑）
+     */
+    inline short toShort(const SortByEnum sortBy) {
+        switch (sortBy) {
+            case SortByEnum::TITLE: return 0x01;
+            case SortByEnum::ARTIST: return 0x02;
+            case SortByEnum::ALBUM: return 0x03;
+            default: return 0x01;
+        }
+    }
+
+	/**
+	 * @brief 将数值转换为排序顺序枚举
+	 * @param num 数值（0x11=升序, 0x12=降序）
+	 * @return 对应的排序顺序枚举值
+	 */
+    inline OrderByEnum toOrderBy(const short num) {
+        switch (num) {
+            case 0x11: return OrderByEnum::ASC;
+            case 0x12: return OrderByEnum::DESC;
+        default: return OrderByEnum::ASC;
+        }
+    }
+
+    /**
+     * @brief 将排序顺序枚举转换为数值
+     * @param orderBy 排序顺序枚举值
+     * @return 对应的数值（0x11=升序, 0x12=降序）
+     */
+    inline short toShort(const OrderByEnum orderBy) {
+        switch (orderBy) {
+            case OrderByEnum::ASC: return 0x11;
+            case OrderByEnum::DESC: return 0x12;
+            default: return 0x11;
+        }
+    }
+	/**
+	 * @brief 将数值转换为明暗模式枚举
+	 * @param num 数值（0x21=明亮, 0x22=暗色）
+	 */
+	inline ThemeMode toThemeMode(const short num) {
+		switch (num) {
+		case 0x22: return ThemeMode::DARK;
+		case 0x21:
+		default: return ThemeMode::LIGHT;
+		}
+	}
+
+	/**
+	 * @brief 将明暗模式枚举转换为数值
+	 * @param mode 明暗模式
+	 */
+	inline short toShort(const ThemeMode mode) {
+		switch (mode) {
+		case ThemeMode::DARK: return 0x22;
+		case ThemeMode::LIGHT:
+		default: return 0x21;
+		}
+	}
+
+	/**
+	 * @brief 将数值转换为强调色枚举
+	 * @param num 数值（0x31=蓝, 0x32=绿, 0x33=紫, 0x34=深色）
+	 */
+	inline AccentColor toAccentColor(const short num) {
+		switch (num) {
+		case 0x32: return AccentColor::GREEN;
+		case 0x33: return AccentColor::PURPLE;
+		case 0x34: return AccentColor::DARK;
+		case 0x31:
+		default: return AccentColor::BLUE;
+		}
+	}
+
+	/**
+	 * @brief 将强调色枚举转换为数值
+	 * @param accent 强调色
+	 */
+	inline short toShort(const AccentColor accent) {
+		switch (accent) {
+		case AccentColor::GREEN: return 0x32;
+		case AccentColor::PURPLE: return 0x33;
+		case AccentColor::DARK: return 0x34;
+		case AccentColor::BLUE:
+		default: return 0x31;
+		}
+	}
+
+	/**
+	 * @brief 注册跨线程信号使用的枚举元类型
+	 * @details 后台任务经 QtConcurrent 发射信号到 GUI 线程时走排队连接，
+	 *          参数类型必须已注册到元对象系统，否则连接在运行期静默失效。
+	 *          幂等，可在多个构造函数中重复调用。
+	 */
+	inline void registerMetatypes() {
+		qRegisterMetaType<PathType>("PROPERTIES::PathType");
+		qRegisterMetaType<LoadErrorType>("PROPERTIES::LoadErrorType");
+		qRegisterMetaType<AppErrorType>("PROPERTIES::AppErrorType");
+		qRegisterMetaType<OperationType>("PROPERTIES::OperationType");
+		qRegisterMetaType<FileErrorType>("PROPERTIES::FileErrorType");
+	}
+} // namespace PROPERTIES
+
+// 供 QtConcurrent 工作线程向 GUI 线程排队投递信号参数使用
+Q_DECLARE_METATYPE(PROPERTIES::PathType)
+Q_DECLARE_METATYPE(PROPERTIES::LoadErrorType)
+Q_DECLARE_METATYPE(PROPERTIES::AppErrorType)
+Q_DECLARE_METATYPE(PROPERTIES::OperationType)
+Q_DECLARE_METATYPE(PROPERTIES::FileErrorType)
+
+#endif // MUSICPROPERTIES_H

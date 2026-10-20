@@ -1,0 +1,155 @@
+/* ============================================================
+   OpenTunes - Theme: Purple (Button & Accent Elements Only)
+   Load AFTER base-style.qss + style-light.qss
+   ============================================================ */
+
+/* ── Accent Buttons ──────────────────────────────────────── */
+QPushButton:hover {
+    border-color: #7b1fa2;
+    color: #7b1fa2;
+}
+
+QPushButton:pressed {
+    border-color: #6a1b9a;
+}
+
+QPushButton#copyToRemote,
+QPushButton#copyToLocal {
+    background-color: #7b1fa2;
+    color: #ffffff;
+    border: 1px solid #6a1b9a;
+}
+
+QPushButton#copyToRemote:hover,
+QPushButton#copyToLocal:hover {
+    background-color: #6a1b9a;
+    border-color: #4a148c;
+}
+
+QPushButton#copyToRemote:pressed,
+QPushButton#copyToLocal:pressed {
+    background-color: #4a148c;
+}
+
+QPushButton#confirmButton {
+    background-color: #7b1fa2;
+    color: #ffffff;
+    border: 1px solid #6a1b9a;
+}
+
+QPushButton#confirmButton:hover {
+    background-color: #6a1b9a;
+}
+
+QPushButton#confirmButton:pressed {
+    background-color: #4a148c;
+}
+
+QPushButton#cancel {
+    background-color: #e53935;
+    color: #ffffff;
+    border: 1px solid #c62828;
+}
+
+QPushButton#cancel:hover {
+    background-color: #c62828;
+}
+
+QPushButton#cancel:pressed {
+    background-color: #b71c1c;
+}
+
+QPushButton#playControl {
+    background-color: #7b1fa2;
+    color: #ffffff;
+}
+
+QPushButton#playControl:hover {
+    background-color: #6a1b9a;
+}
+
+QPushButton#playControl:pressed {
+    background-color: #4a148c;
+}
+
+/* ── Accent Interactive Elements ─────────────────────────── */
+QLineEdit:focus {
+    border: 2px solid #7b1fa2;
+    selection-background-color: #7b1fa2;
+    selection-color: #ffffff;
+}
+
+QTableWidget {
+    selection-background-color: #f3e5f5;
+    selection-color: #7b1fa2;
+}
+
+QTableWidget::item:selected {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+QHeaderView::section {
+    border-bottom-color: #7b1fa2;
+}
+
+QListWidget::item:selected {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+QTextEdit {
+    selection-background-color: #7b1fa2;
+    selection-color: #ffffff;
+}
+
+QComboBox:focus {
+    border: 2px solid #7b1fa2;
+}
+
+QComboBox QAbstractItemView {
+    selection-background-color: #f3e5f5;
+    selection-color: #7b1fa2;
+}
+
+QRadioButton::indicator:hover {
+    border-color: #7b1fa2;
+}
+
+QRadioButton::indicator:checked {
+    border: 2px solid #7b1fa2;
+    background-color: #7b1fa2;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #7b1fa2;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid #7b1fa2;
+    background-color: #7b1fa2;
+}
+
+QSlider::handle:horizontal {
+    background: #7b1fa2;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #6a1b9a;
+}
+
+QSlider::handle:horizontal:pressed {
+    background: #4a148c;
+}
+
+QSlider::sub-page:horizontal {
+    background: #7b1fa2;
+}
+
+QProgressBar::chunk {
+    background-color: #7b1fa2;
+}
+
+QGroupBox::title {
+    color: #7b1fa2;
+}

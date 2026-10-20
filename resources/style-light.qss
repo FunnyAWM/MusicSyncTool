@@ -1,0 +1,241 @@
+/* ============================================================
+   OpenTunes - Light Mode Colors
+   Background, text, border colors for all non-button elements.
+   Load AFTER base-style.qss, BEFORE theme accent file.
+   ============================================================ */
+
+QMainWindow {
+    background-color: #f0f2f5;
+}
+
+QWidget {
+    background-color: #f0f2f5;
+    color: #2c3e50;
+}
+
+QDialog {
+    background-color: #f0f2f5;
+    color: #2c3e50;
+}
+
+QMenuBar {
+    background-color: #ffffff;
+    border-bottom-color: #dce1e8;
+    color: #2c3e50;
+}
+
+QMenuBar::item {
+    color: #2c3e50;
+}
+
+QMenuBar::item:selected {
+    background-color: #e8ecf1;
+}
+
+QMenuBar::item:pressed {
+    background-color: #dce1e8;
+}
+
+QMenu {
+    background-color: #ffffff;
+    border-color: #dce1e8;
+    color: #2c3e50;
+}
+
+QMenu::item {
+    color: #2c3e50;
+}
+
+QMenu::item:selected {
+    background-color: #e8ecf1;
+}
+
+QMenu::separator {
+    background: #e8ecf1;
+}
+
+QStatusBar {
+    background-color: #ffffff;
+    border-top-color: #dce1e8;
+    color: #6b7b8d;
+}
+
+QLabel {
+    color: #2c3e50;
+}
+
+QLineEdit {
+    background-color: #ffffff;
+    border-color: #c8cfd8;
+    color: #2c3e50;
+    selection-background-color: #b0bec5;
+    selection-color: #2c3e50;
+}
+
+QLineEdit:hover {
+    border-color: #9ba8b7;
+}
+
+QLineEdit:disabled {
+    background-color: #eef0f4;
+    color: #9ba8b7;
+    border-color: #dce1e8;
+}
+
+QPushButton {
+    background-color: #ffffff;
+    color: #2c3e50;
+    border-color: #c8cfd8;
+}
+
+QPushButton:disabled {
+    background-color: #eef0f4;
+    color: #9ba8b7;
+    border-color: #dce1e8;
+}
+
+QTableWidget {
+    background-color: #ffffff;
+    alternate-background-color: #f8fafc;
+    border-color: #dce1e8;
+    gridline-color: #e8ecf1;
+    selection-background-color: #dce1e8;
+    selection-color: #2c3e50;
+    color: #2c3e50;
+}
+
+QTableWidget::item {
+    border-bottom-color: #f0f2f5;
+}
+
+QTableWidget QTableCornerButton::section {
+    background-color: #f8fafc;
+    border-bottom-color: #e8ecf1;
+    border-right-color: #e8ecf1;
+}
+
+QHeaderView::section {
+    background-color: #f8fafc;
+    color: #4a5568;
+    border-bottom-color: #c8cfd8;
+    border-right-color: #e8ecf1;
+}
+
+QHeaderView::section:hover {
+    background-color: #e8ecf1;
+}
+
+QListWidget {
+    background-color: #ffffff;
+    border-color: #dce1e8;
+    color: #2c3e50;
+}
+
+QListWidget::item:hover {
+    background-color: #f0f2f5;
+}
+
+QListWidget::item:selected {
+    background-color: #e8ecf1;
+    color: #2c3e50;
+}
+
+QTextEdit {
+    background-color: #ffffff;
+    border-color: #dce1e8;
+    color: #2c3e50;
+    selection-background-color: #b0bec5;
+    selection-color: #2c3e50;
+}
+
+QComboBox {
+    background-color: #ffffff;
+    border-color: #c8cfd8;
+    color: #2c3e50;
+}
+
+QComboBox:hover {
+    border-color: #9ba8b7;
+}
+
+QComboBox::drop-down {
+    border-left-color: #dce1e8;
+}
+
+QComboBox::down-arrow {
+    image: url(":/MusicSyncTool/downarrow.svg");
+}
+
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    border-color: #dce1e8;
+    selection-background-color: #e8ecf1;
+    selection-color: #2c3e50;
+    color: #2c3e50;
+}
+
+QRadioButton {
+    color: #2c3e50;
+}
+
+QRadioButton::indicator {
+    border-color: #c8cfd8;
+    background-color: #ffffff;
+}
+
+QCheckBox {
+    color: #2c3e50;
+}
+
+QCheckBox::indicator {
+    border-color: #c8cfd8;
+    background-color: #ffffff;
+}
+
+QSlider::groove:horizontal {
+    background: #dce1e8;
+}
+
+QSlider::add-page:horizontal {
+    background: #dce1e8;
+}
+
+QProgressBar {
+    background-color: #e8ecf1;
+    color: #2c3e50;
+}
+
+QScrollBar:vertical {
+    background: #f0f2f5;
+}
+
+QScrollBar::handle:vertical {
+    background: #c8cfd8;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #9ba8b7;
+}
+
+QScrollBar:horizontal {
+    background: #f0f2f5;
+}
+
+QScrollBar::handle:horizontal {
+    background: #c8cfd8;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #9ba8b7;
+}
+
+QGroupBox {
+    background-color: #f0f2f5;
+    border-color: #dce1e8;
+    color: #2c3e50;
+}
+
+QToolTip {
+    background-color: #2c3e50;
+    color: #ffffff;
+}
