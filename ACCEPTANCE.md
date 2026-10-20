@@ -269,6 +269,25 @@ ld: TestMusicProperties.cpp.o: multiple definition of `TestMusicProperties::toSo
 
 遗留 warning（不影响结论）：`upload-artifact@v4`、`codecov/codecov-action@v4` 仍以 Node.js 20 运行，被 GitHub 强制切到 Node.js 24。
 
+### 2.15 发布分支收口：master 纳入 CI、移除 CodeQL（PR #6 / #7）
+
+master 侧原有的两个阻塞项，均已通过 PR 解决（master 有 ruleset `master-pronly`：`deletion` / `non_fast_forward` / `creation` / `update` / `required_linear_history`，直接 push 会被拒，只能走 PR 且必须 squash 或 rebase；admin 角色可通过 PR 绕过）。
+
+| PR | 内容 | 合并结果 |
+| --- | --- | --- |
+| #6 | 删除 `.github/workflows/codeql.yml` | `e988d52` |
+| #7 | `ci.yml` 触发分支由 `[main, develop]` 改为 `[master, develop]` | `590c564` |
+
+删除 CodeQL 的理由：它用 `WillBrennan/yaqti@2021.07.29` 安装 Qt，历史上 schedule 运行（run 18203870274）8 秒即失败，C++ 侧也没有可用构建步骤；静态检查由 `ci.yml` 的 cppcheck 任务承担。
+
+**结果**：
+
+- master 首次产生 CI 结论并成功：run `39359957687`，2 分 28 秒，4 个 job 全绿；
+- PR #7 自身的 CI（run `39359949073`）1 分 47 秒通过；
+- `git diff origin/master origin/develop` 在本次文档提交前只剩 `ci.yml` 触发分支一处差异，已由 #7 抹平——即 v3.0 的代码内容两边一致（master 的内容来自 PR #5 的 squash 提交 `850320f`，历史与 develop 断开，后续再合并仍会呈现整篇 diff，属仓库既有发布流程，本次未改动）。
+
+**未验证 / 已移除**：GitHub 的 code scanning 不再有新结果（历史告警记录保留），未做清理。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
