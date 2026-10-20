@@ -108,7 +108,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		}
 		QList<QueryItem> storedDbItems = dataSource.getAll({PROPERTIES::QueryRows::FILENAME});
 		QStringList oldFileList;
-		for (const QueryItem& item : storedDbItems) {
+		for (const QueryItem& item : std::as_const(storedDbItems)) {
 			oldFileList.append(item.getFileName());
 		}
 		QStringList dirFiles = newFileList;
@@ -134,7 +134,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		                    dbFiles.begin(), dbFiles.end(),
 		                    std::back_inserter(addedList));
 		newFileList.clear();
-		for (const QString& f : addedList) {
+		for (const QString& f : std::as_const(addedList)) {
 			if (MSTFileManager::isFormatSupported(f)) {
 				newFileList.append(f);
 			}
@@ -152,7 +152,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		emit scanTotal(compareTotal);
 		QStringList filesToScan = newFileList;
 		int compared = 0;
-		for (const auto& file : existingFiles) {
+		for (const auto& file : std::as_const(existingFiles)) {
 			if (QFile(dir.filePath(file)).fileTime(QFileDevice::FileModificationTime) > dateTime) {
 				filesToScan.append(file);
 			}
@@ -176,7 +176,7 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 			emit scanFinished();
 			return;
 		}
-		for (const QString& file : failedFiles) {
+		for (const QString& file : std::as_const(failedFiles)) {
 			Logger::Warn("Error adding music: " + file);
 			emit loadErrorOccurred(file, LoadErrorType::FILE_NOT_SCANNABLE);
 		}
@@ -190,7 +190,6 @@ void MSTScanController::scanConcurrent(const PathType path, const unsigned short
 		endPhase = clock();
 		Logger::Info("Favorite scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		setRuleHit(path, entity.rules, filesToScan, globalProgress);
-		globalProgress += static_cast<int>(filesToScan.size());
 		endPhase = clock();
 		Logger::Info("Rule scanning finished in " + QString::number(static_cast<double>(endPhase - start) / CLOCKS_PER_SEC) + " seconds");
 		dateTime = QDateTime::currentDateTime();

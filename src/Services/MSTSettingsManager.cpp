@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QTextStream>
+#include <utility>
 
 #include "Logger.h"
 #include "../Data/LyricIgnoreRule.h"
@@ -85,7 +86,7 @@ bool MSTSettingsManager::loadSettings(SettingsData& entity) {
 	entity.logToFile = obj["logToFile"].toBool();
 	QList<LyricIgnoreRule> rules;
 	QJsonArray rulesArray = obj["rules"].toArray();
-	for (QJsonValue rule : rulesArray) {
+	for (const QJsonValue& rule : std::as_const(rulesArray)) {
 		QJsonObject ruleObj = rule.toObject();
 		if (ruleObj["ruleType"].isNull() || ruleObj["ruleField"].isNull() || ruleObj["ruleName"].isNull()) {
 			Logger::Warn("Invalid rule found in settings file, skipping");
@@ -179,7 +180,7 @@ QString MSTSettingsManager::buildLogFileName(const QString& path) {
 	if (!pathForLog.isEmpty()) {
 		pathForLog[0].remove(":");
 	}
-	for (const QString& pathSegment : pathForLog) {
+	for (const QString& pathSegment : std::as_const(pathForLog)) {
 		logFileName += " - " + pathSegment;
 	}
 	logFileName += ".log";

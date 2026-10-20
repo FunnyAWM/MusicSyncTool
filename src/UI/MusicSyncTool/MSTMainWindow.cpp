@@ -101,7 +101,7 @@ void MSTMainWindow::loadLanguage() {
 	const QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
 	file.close();
 	QJsonArray langArray = langinfo.array();
-	for (QJsonValue lang : langArray) {
+	for (const QJsonValue& lang : std::as_const(langArray)) {
 		if (entity.language == "") {
 			entity.language = "中文";
 		}
@@ -370,7 +370,6 @@ void MSTMainWindow::copyMusic(const QString& source, const QStringList& fileList
 
 void MSTMainWindow::setAvailableSpace(const PathType path) const {
 	const shared_ptr<MSTFileManager> manager = path == PathType::LOCAL ? localManager : remoteManager;
-	const QStorageInfo storage(path == PathType::LOCAL ? local.getPath() : remote.getPath());
 	const QString spaceInfoText = tr("可用空间：") + manager->getSpaceInfo();
 	(path == PathType::LOCAL ? ui.availableSpaceLocal : ui.availableSpaceRemote)->setText(spaceInfoText);
 }
@@ -565,7 +564,7 @@ void MSTMainWindow::on_copyFinished(OperationType op) {
  * @details 扫描任务在工作线程完成取数后发出 tablePageReady，
  *          由本槽在 GUI 线程更新表格内容、页码标签与滚动位置
  */
-void MSTMainWindow::applyTablePage(const PathType path, const QList<QueryItem> items,
+void MSTMainWindow::applyTablePage(const PathType path, const QList<QueryItem>& items,
                                    const unsigned short page, const unsigned short totalPages) {
 	tableManager->populateTable(path, items, page, totalPages);
 	tableManager->scrollToTop(path);

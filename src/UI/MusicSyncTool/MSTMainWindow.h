@@ -173,7 +173,7 @@ public slots:
 	 * @brief 在 GUI 线程刷新音乐表格
 	 * @details 扫描任务在工作线程完成取数，表格控件只能在 GUI 线程更新
 	 */
-	void applyTablePage(PathType path, QList<QueryItem> items, unsigned short page, unsigned short totalPages);
+	void applyTablePage(PathType path, const QList<QueryItem>& items, unsigned short page, unsigned short totalPages);
 
 signals:
 	void copyFinished(OperationType);

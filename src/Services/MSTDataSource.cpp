@@ -1,6 +1,7 @@
 #include "MSTDataSource.h"
 
 #include <algorithm>
+#include <utility>
 #include <QDir>
 #include <QFile>
 #include <QMap>
@@ -30,7 +31,7 @@ QSqlQuery& MSTDataSource::threadQuery() const {
 
 void MSTDataSource::releaseThreadQueries() {
 	QMutexLocker locker(&threadQueryMutex);
-	for (QSqlQuery* query : threadQueries) {
+	for (QSqlQuery* query : std::as_const(threadQueries)) {
 		delete query;
 	}
 	threadQueries.clear();
@@ -282,7 +283,7 @@ QList<QueryItem> MSTDataSource::getAll(const QVector<QueryRows>& rows) {
 	QString sql = "SELECT ";
 
 	// 根据查询行类型构建SELECT语句
-	for (const auto& row : effectiveRows) {
+	for (const auto& row : std::as_const(effectiveRows)) {
 		switch (row) {
 		case QueryRows::TITLE:
 			sql += "title, ";

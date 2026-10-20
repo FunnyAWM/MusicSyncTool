@@ -2,6 +2,7 @@
 
 #include <QMessageBox>
 #include <QWidget>
+#include <utility>
 
 #include "MSTTableManager.h"
 #include "../../Core/SettingEntity.h"
@@ -87,7 +88,7 @@ void MSTErrorReporter::showOperationResult(const OperationType type) {
 			break;
 		}
 		QString errorString;
-		for (const QString& error : errorList) {
+		for (const QString& error : std::as_const(errorList)) {
 			errorString += error + "\n";
 		}
 		resultDialog.setText(errorString);

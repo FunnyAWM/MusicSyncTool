@@ -2,6 +2,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <utility>
 #include "../../Services/Logger.h"
 
 #include "../AddRuleWidget/AddRuleWidget.h"
@@ -119,7 +120,7 @@ void Settings::setLanguageToUI(QString language) {
 	}
 	const QJsonDocument langinfo = QJsonDocument::fromJson(file.readAll());
 	QJsonArray langArray = langinfo.array();
-	for (QJsonValue lang : langArray) {
+	for (const QJsonValue& lang : std::as_const(langArray)) {
 		QJsonObject langObj = lang.toObject();
 		ui.languageComboBox->addItem(langObj["lang"].toString());
 	}
