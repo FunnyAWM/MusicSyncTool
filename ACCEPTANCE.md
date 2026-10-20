@@ -252,6 +252,23 @@ ld: TestMusicProperties.cpp.o: multiple definition of `TestMusicProperties::toSo
 
 **未验证**：本轮改动同样只能在 runner 上确认。
 
+### 2.14 CI 转绿（run 39358611302，ubuntu-24.04 + Qt 6.8.3）
+
+```
+✓ coverage          1m4s
+✓ linux-test (Debug)   2m15s
+✓ linux-test (Release) 2m8s
+✓ code-quality      14s
+```
+
+关键证据：
+
+- `linux-test` 构建了**整个应用**（含 `src/UI` 全部 10 个界面 TU、moc/uic/rcc、`translations/*.qm`），说明 Linux 侧代码在 TagLib 1.13 与 Qt 6.8.3 下可编译；
+- `运行单元测试` 步骤输出 `100% tests passed, 0 tests failed out of 1`：ctest 只有 1 个测试可执行文件（`MusicSyncToolTests`，内部 9 个测试类），进程退出码 0 即 160 个用例全部通过——此前该步骤是假绿（`Test/CMakeLists.txt` 缺 `enable_testing()`，ctest 根本没有测试可跑）；
+- `coverage` 产出 `coverage-report` artifact；`code-quality` 产出 cppcheck 报告。
+
+遗留 warning（不影响结论）：`upload-artifact@v4`、`codecov/codecov-action@v4` 仍以 Node.js 20 运行，被 GitHub 强制切到 Node.js 24。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）
@@ -262,10 +279,10 @@ Qt 基线统一到 6.8.3 后，工程自带配置即可完成 Release 重建、�
 本机 Qt 版本不符、无法命令行构建”的限制已消除。仍建议在另一台仅安装 Qt + vcpkg 的机器上复跑一次，
 排除本机残留路径（如 vcpkg 根目录 `E:\vcpkg`）带来的偶合。
 
-### 3.2 Linux / macOS（CMake）—— 未执行
+### 3.2 Linux / macOS（CMake）—— Linux 已由 CI 执行，macOS 未执行
 
-本环境为 Windows，`CMakeLists.txt` 明确拒绝在 Windows 上配置；未做交叉验证。平台垫片
-（`SingleInstance.h` 的 `_WIN32` / `__linux__` / `__APPLE__` 分支）只经过代码走查，无运行时证据。
+- **Linux**：GitHub Actions `ubuntu-24.04` + Qt 6.8.3 上完成 Debug/Release 整包构建、单元测试（100% passed）与覆盖率采集，证据见 §2.14；
+- **macOS**：仍未执行。aqt 只提供 x86_64 的 Qt 6.8 macOS 包，GitHub 的 arm64 runner 链接期报 `ld: framework 'AGL' not found`（§2.11），该 job 已从工作流移除；平台垫片中 `__APPLE__` 分支仍只有代码走查，无运行时证据。需要 macOS 证据时，应在原生 arm64/Intel 机器上用 Homebrew Qt 手动执行 `cmake -S . -B build -DBUILD_TESTS=ON`。
 
 ### 3.3 图形界面人工验收 —— 未执行
 
