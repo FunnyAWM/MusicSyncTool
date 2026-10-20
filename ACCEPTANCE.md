@@ -220,6 +220,24 @@ Qt 安装、TagLib 查找、翻译目标都已通过（构建命令行里出现 
 
 **未验证**：Linux 的完整构建与测试运行、覆盖率报告生成仍待 runner 确认。
 
+### 2.12 CI 第四轮（run 39357736440）：测试目标链接不到 UI 层符号
+
+应用目标在 Linux 上已完整编译通过（TagLib 1.13 兼容修复生效），失败点只剩测试可执行文件的链接：
+
+```
+FAILED: [code=1] Test/MusicSyncToolTests
+MSTScanController.cpp:58:(.text+0x2eb): undefined reference to `MSTTableManager::setCurrentPage(PROPERTIES::PathType, unsigned short)'
+MSTScanController.cpp:59:(.text+0x30c): undefined reference to `MSTTableManager::setFavoriteOnly(PROPERTIES::PathType, bool)'
+```
+
+根因：`Test/CMakeLists.txt` 的 `MAIN_SOURCES` 收录了 `MSTScanController.cpp`，而该文件在 GUI 线程调用 `MSTTableManager`；测试目标不链接 UI 层，`Test/MusicSyncToolTests.vcxproj` 本来也不含这个 cpp——两边的源文件清单不一致，CMake 侧多收了文件。
+
+处置：从 `MAIN_SOURCES` / `MAIN_HEADERS` 中移除 `MSTScanController`，与 VS 测试工程对齐；`Qt6::Concurrent` 组件保留，避免将来重新纳入时再踩 `QtConcurrentRun not found`。
+
+**本地已验证**：`ci.yml` 与 `Test/CMakeLists.txt` 改动不改变 VS 侧构建（测试工程源文件清单原本就是这样），§2.11 的 Debug 构建与 160 用例结论仍然有效。
+
+**未验证**：Linux 上测试的运行结果仍待 runner 确认。
+
 ---
 
 ## 3. 未验证 / 未执行（如实记录）

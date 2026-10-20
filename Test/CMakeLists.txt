@@ -14,11 +14,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_AUTOMOC ON)
 
-    # MSTScanController 使用 QtConcurrent，缺 Concurrent 组件时 macOS/Linux 会报 QtConcurrentRun not found
+    # Concurrent 显式声明：测试目标将来纳入 QtConcurrent 源码时不会再报 QtConcurrentRun not found
     find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql Multimedia Concurrent Test)
     find_package(TagLib REQUIRED)
 
     # Main project sources (compiled into test binary)
+    # 不含 MSTScanController：它在 GUI 线程调用 MSTTableManager，测试目标不链接 UI 层，
+    # 与 Test/MusicSyncToolTests.vcxproj 的源文件清单保持一致
     set(MAIN_SOURCES
         ../src/Core/StringSimilarity.cpp
         ../src/Data/QueryItem.cpp
@@ -27,7 +29,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ../src/Services/MSTDataSource.cpp
         ../src/Services/MSTFileManager.cpp
         ../src/Services/MSTMediaPlayer.cpp
-        ../src/Services/MSTScanController.cpp
         ../src/Services/MSTSettingsManager.cpp
     )
 
@@ -43,7 +44,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ../src/Services/MSTDataSource.h
         ../src/Services/MSTFileManager.h
         ../src/Services/MSTMediaPlayer.h
-        ../src/Services/MSTScanController.h
         ../src/Services/MSTSettingsManager.h
     )
 
